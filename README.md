@@ -35,7 +35,7 @@ Other things to replace:
 - **Your photo**: put it in `public/` (for example `public/me.jpg`) and follow the comment in `src/components/SpecSheet.astro`.
 - **Case studies**: the four projects are examples. Replace them in `site.ts` and set `example: false` on real ones.
 - **Logo**: `src/components/Logo.astro` and `src/components/IconMark.astro` redraw the logo set. Swap in the official SVG exports when you have them. `public/favicon.svg` and `public/apple-touch-icon.png` are the app icon.
-- **Domain**: set `site` in `astro.config.mjs` to the live URL so canonical and social links are correct.
+- **Domain**: set `site` in `astro.config.mjs` to the live URL (the `*.pages.dev` address or your own domain) so canonical and social links are correct. While it is unset, those tags are left out.
 
 ## Contact form
 
@@ -68,16 +68,32 @@ src/
                          ContactSection, ContactDialog, Logo, IconMark, Rails
   scripts/contact-bus.ts lets any button open the contact form, pre-filled
   styles/global.css      colour tokens for day and night, shared styles
-public/                  favicon, touch icon, robots.txt
+public/                  favicon, touch icon, robots.txt, _headers (Cloudflare)
 ```
 
 ## Deploy
 
-**Google Cloud Run with Docker:** see **[DEPLOY.md](DEPLOY.md)** for a step-by-step manual guide. The `Dockerfile` builds the site with Node and serves it with nginx on port 8080 (`nginx.conf`).
+### Live site: Cloudflare Pages
 
-Any static host also works. The build command is `npm run build` and the output folder is `dist`.
+The site is hosted on Cloudflare Pages (free plan, commercial use allowed). Cloudflare builds it from GitHub:
 
-- **Vercel** or **Netlify**: import the GitHub repository. Both detect Astro automatically.
-- **Cloudflare Pages**: create a project from the repository with build command `npm run build` and output directory `dist`.
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Framework preset | Astro |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node.js version | read from `.node-version` (no environment variable needed) |
 
-Each push to the main branch then publishes a new version.
+- **Publishing:** every push to `main` goes live in about a minute.
+- **Previews:** a push to any other branch gets its own preview URL and does not touch the live site.
+- **Rollback:** in the Cloudflare dashboard, open the project's **Deployments** and use **Rollback** on an older one.
+- **Headers:** `public/_headers` sets caching for `/_astro/` files and basic security headers. Cloudflare serves `404.html` for unknown pages.
+
+The free plan allows 500 builds a month across all sites in the account, one build at a time.
+
+### Learning option: Google Cloud Run with Docker
+
+See **[DEPLOY.md](DEPLOY.md)** for a step-by-step manual guide. The `Dockerfile` builds the site with Node and serves it with nginx on port 8080 (`nginx.conf`).
+
+Any other static host also works with build command `npm run build` and output folder `dist`.
