@@ -62,6 +62,7 @@ src/
   data/site.ts           all editable content and contact settings
   layouts/BaseLayout.astro  page shell, meta tags, fonts, theme start-up
   pages/index.astro      the page, built from the components below
+  pages/404.astro        "not found" page
   components/            Header, Hero, PatchBay, Rack, CaseFiles, Pricing,
                          SignalPath, SpecSheet, FieldReports, Faq,
                          ContactSection, ContactDialog, Logo, IconMark, Rails
@@ -72,7 +73,9 @@ public/                  favicon, touch icon, robots.txt
 
 ## Deploy
 
-Any static host works. The build command is `npm run build` and the output folder is `dist`.
+**Google Cloud Run with Docker:** see **[DEPLOY.md](DEPLOY.md)** for a step-by-step manual guide. The `Dockerfile` builds the site with Node and serves it with nginx on port 8080 (`nginx.conf`).
+
+Any static host also works. The build command is `npm run build` and the output folder is `dist`.
 
 - **Vercel** or **Netlify**: import the GitHub repository. Both detect Astro automatically.
 - **Cloudflare Pages**: create a project from the repository with build command `npm run build` and output directory `dist`.

@@ -1,0 +1,9 @@
+# Keep the build context small: the image installs and builds its own copies.
+node_modules
+dist
+.astro
+.git
+.env
+.env.*
+npm-debug.log*
+.DS_Store
