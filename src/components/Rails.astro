@@ -1,0 +1,37 @@
+<!-- Rack rails down both page edges on wide screens. Decorative only. -->
+<div class="rail left" aria-hidden="true"></div>
+<div class="rail right" aria-hidden="true"></div>
+
+<style>
+  .rail {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 26px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .left {
+    left: 0;
+    background:
+      radial-gradient(circle at 13px 20px, var(--hole) 3.5px, transparent 4.2px) 0 0 / 26px 40px repeat-y,
+      linear-gradient(90deg, var(--panel-hi), var(--panel));
+    border-right: 1px solid var(--line-soft);
+  }
+
+  .right {
+    right: 0;
+    background:
+      radial-gradient(circle at 13px 20px, var(--hole) 3.5px, transparent 4.2px) 0 0 / 26px 40px repeat-y,
+      linear-gradient(270deg, var(--panel-hi), var(--panel));
+    border-left: 1px solid var(--line-soft);
+  }
+
+  @media (min-width: 1280px) {
+    .rail {
+      display: block;
+    }
+  }
+</style>

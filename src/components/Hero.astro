@@ -1,0 +1,146 @@
+---
+import PatchBay from './PatchBay.astro';
+import { site } from '../data/site';
+---
+
+<section id="top" class="hero" data-torch>
+  <div class="wrap inner">
+    <div class="copy">
+      <div class="badges">
+        <span class="badge copper">no minimum budget</span>
+        {site.availability && <span class="badge">{site.availability}</span>}
+      </div>
+      <h1>Plug in your<br />problem.<br /><span class="accent">I’ll wire<br />the fix.</span></h1>
+      <p class="lede">
+        I’m {site.owner}, a freelance developer and electrical engineer. Pick a problem, patch it to a fix and flip the switch.
+        I’ll reply with the cost. No minimum budget.
+      </p>
+      <p class="list">websites · apps · online stores · whatsapp bots · clinic crms · ai · plc/scada</p>
+    </div>
+    <div class="bay">
+      <PatchBay />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    --mx: -1000px;
+    --my: -1000px;
+  }
+
+  /* Torch: a soft copper light that follows the cursor. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(320px circle at var(--mx) var(--my), var(--spot), transparent 100%);
+  }
+
+  .inner {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 56px;
+    padding-top: clamp(48px, 7vw, 96px);
+    padding-bottom: clamp(64px, 8vw, 110px);
+  }
+
+  .copy {
+    flex: 1 1 440px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .bay {
+    flex: 1 1 540px;
+    min-width: 0;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--body);
+  }
+
+  .badge.copper {
+    border-color: var(--copper-line);
+    background: var(--copper-tint);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(40px, 5.2vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.055em;
+    color: var(--text);
+  }
+
+  .accent {
+    color: var(--copper-head);
+  }
+
+  .lede {
+    margin: 0;
+    font-size: clamp(17px, 1.5vw, 20px);
+    color: var(--body);
+    max-width: 30em;
+  }
+
+  .list {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 480px) {
+    .inner {
+      gap: 40px;
+    }
+  }
+</style>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('[data-torch]');
+  const fine = window.matchMedia('(pointer: fine)').matches;
+
+  if (hero && fine) {
+    let frame = 0;
+    hero.addEventListener('mousemove', (e) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const r = hero.getBoundingClientRect();
+        hero.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        hero.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+    hero.addEventListener('mouseleave', () => {
+      hero.style.setProperty('--mx', '-1000px');
+      hero.style.setProperty('--my', '-1000px');
+    });
+  }
+</script>

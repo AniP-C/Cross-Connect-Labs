@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CaseFiles from '../components/CaseFiles.astro';
+import ContactDialog from '../components/ContactDialog.astro';
+import ContactSection from '../components/ContactSection.astro';
+import Faq from '../components/Faq.astro';
+import FieldReports from '../components/FieldReports.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Pricing from '../components/Pricing.astro';
+import Rack from '../components/Rack.astro';
+import Rails from '../components/Rails.astro';
+import SignalPath from '../components/SignalPath.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+---
+
+<BaseLayout>
+  <div class="page">
+    <Rails />
+    <Header />
+    <main id="main">
+      <Hero />
+      <Rack />
+      <CaseFiles />
+      <Pricing />
+      <SignalPath />
+      <SpecSheet />
+      <FieldReports />
+      <Faq />
+      <ContactSection />
+    </main>
+  </div>
+  <ContactDialog />
+</BaseLayout>
+
+<style>
+  .page {
+    position: relative;
+  }
+</style>

@@ -1,0 +1,98 @@
+---
+import { faqs } from '../data/site';
+---
+
+<section id="faq" class="section">
+  <div class="wrap layout">
+    <h2 class="h2">Troubleshooting.</h2>
+    <div class="list">
+      {
+        faqs.map((f, i) => (
+          <details open={i === 0}>
+            <summary>
+              <span class="code">E0{i + 1}</span>
+              <span class="q">{f.q}</span>
+              <span class="sign" aria-hidden="true" />
+            </summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 64px;
+    align-items: flex-start;
+  }
+
+  .layout > .h2 {
+    flex: 1 1 300px;
+  }
+
+  .list {
+    flex: 2 1 480px;
+    min-width: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  summary {
+    list-style: none;
+    min-height: 62px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  details[open] .code {
+    color: var(--copper-text);
+  }
+
+  .sign::before {
+    content: '+';
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--copper-text);
+  }
+
+  details[open] .sign::before {
+    content: '−';
+  }
+
+  p {
+    margin: 0;
+    padding: 0 0 20px 56px;
+    color: var(--body);
+  }
+
+  @media (max-width: 480px) {
+    p {
+      padding-left: 0;
+    }
+  }
+</style>

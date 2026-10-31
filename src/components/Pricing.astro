@@ -1,0 +1,263 @@
+---
+import { budgets } from '../data/site';
+
+const start = 1; // "Small"
+---
+
+<section id="pricing" class="section" data-knob>
+  <div class="wrap">
+    <div class="box surface">
+      <div class="copy">
+        <h2 class="h2 big">No minimum<br /><span class="accent">budget.</span></h2>
+        <p>Turn the knob. Every setting works. Tell me what you can spend and I’ll tell you honestly what I can build for it.</p>
+        <button type="button" class="cable-link" data-contact data-budget={budgets[start].key} data-knob-cta>
+          tell me your budget <span aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <div class="dial-area">
+        <div class="dial" style={`--deg: ${budgets[start].deg}deg`} data-dial>
+          <svg class="arc" viewBox="0 0 260 260" width="260" height="260" aria-hidden="true">
+            <path class="arc-bg" d="M43.4 180 A100 100 0 1 1 216.6 180"></path>
+            <path class="arc-fg" d="M43.4 180 A100 100 0 1 1 216.6 180" pathLength="240" stroke-dasharray={`${budgets[start].deg + 120} 240`} data-arc></path>
+          </svg>
+          <div class="knob" aria-hidden="true">
+            <div class="needle"></div>
+            <div class="cap"></div>
+          </div>
+          <div role="group" aria-label="Budget size">
+            {
+              budgets.map((b, i) => (
+                <button type="button" class="pos" data-budget-index={i} data-deg={b.deg} aria-pressed={i === start ? 'true' : 'false'} style={`left: ${b.x}px; top: ${b.y}px`}>
+                  {b.key.toLowerCase()}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="readout lcd" aria-live="polite">
+          {
+            budgets.map((b, i) => (
+              <div data-budget-pane={i} hidden={i !== start}>
+                <span class="title">{b.title}</span>
+                <span class="note">{b.note}</span>
+                <ul>
+                  {b.items.map((item) => (
+                    <li>
+                      <span aria-hidden="true">▸</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .box {
+    border-radius: 28px;
+    padding: clamp(28px, 5vw, 64px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 40px 64px;
+  }
+
+  .copy {
+    flex: 1 1 380px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .big {
+    font-size: clamp(40px, 6.4vw, 90px);
+    line-height: 0.96;
+    letter-spacing: -0.06em;
+  }
+
+  .accent {
+    color: var(--copper-head);
+  }
+
+  .copy p {
+    margin: 0;
+    font-size: 18px;
+    color: var(--body);
+    max-width: 28em;
+  }
+
+  .copy .cable-link {
+    font-size: 17px;
+  }
+
+  .dial-area {
+    flex: 1 1 420px;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+  }
+
+  .dial {
+    position: relative;
+    width: 260px;
+    height: 240px;
+    flex: none;
+  }
+
+  .arc {
+    position: absolute;
+    left: 0;
+    top: 0;
+    fill: none;
+  }
+
+  .arc-bg {
+    stroke: var(--line-soft);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+
+  .arc-fg {
+    stroke: var(--copper);
+    stroke-width: 6;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px var(--copper));
+    transition: stroke-dasharray 0.6s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  .knob {
+    position: absolute;
+    left: 60px;
+    top: 60px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--knob-a), var(--knob-b) 70%);
+    border: 1px solid var(--line-soft);
+    box-shadow: 0 16px 30px -10px var(--knob-shadow), inset 0 1px 0 var(--hl);
+  }
+
+  .needle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 58px;
+    margin-left: -2px;
+    margin-top: -58px;
+    border-radius: 2px;
+    background: var(--copper);
+    box-shadow: 0 0 10px var(--copper);
+    transform-origin: 50% 100%;
+    transform: rotate(var(--deg));
+    transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  .cap {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    background: var(--knob-cap);
+  }
+
+  .pos {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    min-height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--chip-line);
+    background: var(--fill);
+    color: var(--body);
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .pos[aria-pressed='true'] {
+    background: var(--copper);
+    border-color: var(--copper);
+    color: var(--on-copper);
+  }
+
+  .readout {
+    flex: 1 1 220px;
+    min-width: 0;
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+
+  .readout > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .title {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .note {
+    font-size: 14px;
+    color: var(--lcd-muted);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  li {
+    display: flex;
+    gap: 8px;
+  }
+
+  li span:first-child {
+    color: var(--lcd-accent);
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-knob]');
+  if (root) {
+    const dial = root.querySelector<HTMLElement>('[data-dial]');
+    const arc = root.querySelector<SVGPathElement>('[data-arc]');
+    const cta = root.querySelector<HTMLElement>('[data-knob-cta]');
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-budget-index]'));
+    const panes = Array.from(root.querySelectorAll<HTMLElement>('[data-budget-pane]'));
+
+    buttons.forEach((button, i) =>
+      button.addEventListener('click', () => {
+        const deg = Number(button.dataset.deg);
+        dial?.style.setProperty('--deg', `${deg}deg`);
+        arc?.setAttribute('stroke-dasharray', `${deg + 120} 240`);
+        buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+        panes.forEach((p, j) => (p.hidden = i !== j));
+        if (cta) cta.dataset.budget = button.textContent?.trim().replace(/^./, (c) => c.toUpperCase()) ?? '';
+      }),
+    );
+  }
+</script>

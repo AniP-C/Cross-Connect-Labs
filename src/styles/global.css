@@ -1,0 +1,356 @@
+/* Cross-Connect Labs: patch bay design, day and night.
+   Day is the default; [data-theme="dark"] on <html> switches to night.
+   Brand copper #C2541F and navy #14202E come from the logo set. */
+
+:root {
+  color-scheme: light;
+  --bg: #eeeff1;
+  --deep: #e5e7eb;
+  --panel: #f7f8fa;
+  --panel-hi: #ffffff;
+  --hole: #c5c9d0;
+
+  --text: #15171c;
+  --body: #3b3f48;
+  --muted: #5f6570;
+  --logo-text: #14202e;
+
+  --copper: #c2541f;
+  --copper-text: #a3401a;
+  --copper-head: #c2541f;
+  --led: #c2541f;
+  --on-copper: #ffffff;
+  --copper-tint: rgba(194, 84, 31, 0.1);
+  --copper-line: rgba(194, 84, 31, 0.4);
+  --copper-glow: rgba(194, 84, 31, 0.45);
+  --spot: rgba(194, 84, 31, 0.14);
+  --sel-bg: rgba(194, 84, 31, 0.08);
+
+  --lcd: #17191e;
+  --lcd-text: #eef0f3;
+  --lcd-muted: #959ca8;
+  --lcd-accent: #ec7a48;
+  --lcd-bubble: rgba(255, 255, 255, 0.08);
+  --lcd-dash: rgba(255, 255, 255, 0.22);
+  --lcd-inset: rgba(0, 0, 0, 0.55);
+
+  --line: rgba(20, 24, 32, 0.11);
+  --line-soft: rgba(20, 24, 32, 0.07);
+  --fill: rgba(20, 24, 32, 0.035);
+  --hl: rgba(255, 255, 255, 1);
+  --shadow: rgba(30, 40, 60, 0.16);
+  --overlay: rgba(20, 24, 32, 0.4);
+  --chip-line: rgba(20, 24, 32, 0.2);
+  --input-bg: #ffffff;
+  --header-bg: rgba(238, 239, 241, 0.85);
+
+  --cable-out: #7c3812;
+  --cable-hi: rgba(255, 255, 255, 0.6);
+  --pulse: #ffffff;
+  --trace: rgba(194, 84, 31, 0.3);
+  --pad: rgba(194, 84, 31, 0.45);
+
+  --screw-a: #ffffff;
+  --screw-b: #c3c7ce;
+  --screw-edge: rgba(20, 24, 32, 0.15);
+  --jack-outer: #d5d8de;
+  --jack-ring: #a8adb6;
+  --knob-a: #ffffff;
+  --knob-b: #dadde2;
+  --knob-cap: #c3c7ce;
+  --knob-shadow: rgba(30, 40, 60, 0.25);
+  --sw-off: #d3d6dc;
+  --sw-knob-off: #ffffff;
+  --track-inset: rgba(20, 30, 50, 0.25);
+  --led-off: rgba(20, 24, 32, 0.14);
+
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --sans: 'IBM Plex Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --gutter: clamp(16px, 4vw, 56px);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #18181b;
+  --deep: #111113;
+  --panel: #202024;
+  --panel-hi: #2a2a2f;
+  --hole: #0a0a0b;
+
+  --text: #f3f3f4;
+  --body: #d2d2d6;
+  --muted: #9c9ca4;
+  --logo-text: #ffffff;
+
+  --copper-text: #ec7a48;
+  --copper-head: #ec7a48;
+  --led: #e46a34;
+  --copper-tint: rgba(194, 84, 31, 0.09);
+  --copper-line: rgba(194, 84, 31, 0.42);
+  --spot: rgba(194, 84, 31, 0.11);
+  --sel-bg: rgba(255, 255, 255, 0.05);
+
+  --lcd: #0c0c0e;
+  --lcd-text: #f3f3f4;
+  --lcd-muted: #9c9ca4;
+  --lcd-bubble: rgba(255, 255, 255, 0.07);
+  --lcd-dash: rgba(255, 255, 255, 0.2);
+  --lcd-inset: rgba(0, 0, 0, 0.6);
+
+  --line: rgba(255, 255, 255, 0.09);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --fill: rgba(255, 255, 255, 0.035);
+  --hl: rgba(255, 255, 255, 0.07);
+  --shadow: rgba(0, 0, 0, 0.75);
+  --overlay: rgba(0, 0, 0, 0.65);
+  --chip-line: rgba(255, 255, 255, 0.15);
+  --input-bg: rgba(0, 0, 0, 0.25);
+  --header-bg: rgba(24, 24, 27, 0.82);
+
+  --cable-out: #0a0a0b;
+  --cable-hi: rgba(255, 255, 255, 0.3);
+  --pulse: #ffc9a6;
+  --trace: rgba(194, 84, 31, 0.38);
+  --pad: rgba(228, 106, 52, 0.5);
+
+  --screw-a: #6e6e75;
+  --screw-b: #2a2a2f;
+  --screw-edge: rgba(0, 0, 0, 0.5);
+  --jack-outer: #3a3a40;
+  --jack-ring: #8e8e96;
+  --knob-a: #4c4c53;
+  --knob-b: #1b1b1f;
+  --knob-cap: #111113;
+  --knob-shadow: rgba(0, 0, 0, 0.8);
+  --sw-off: #0c0c0e;
+  --sw-knob-off: #8e8e96;
+  --track-inset: rgba(0, 0, 0, 0.6);
+  --led-off: rgba(255, 255, 255, 0.13);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: clip;
+  transition: background-color 0.45s, color 0.45s;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--copper);
+  color: var(--on-copper);
+  font-family: var(--mono);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Layout */
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+.section {
+  padding-top: clamp(80px, 10vw, 130px);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 40px;
+  margin-bottom: 40px;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 28em;
+}
+
+@media (max-width: 760px) {
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+}
+
+.h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: clamp(32px, 4.6vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+/* Hardware surfaces */
+.surface {
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 var(--hl), 0 30px 60px -36px var(--shadow);
+}
+
+.lcd {
+  background: var(--lcd);
+  color: var(--lcd-text);
+  box-shadow: inset 0 0 40px var(--lcd-inset);
+}
+
+.screw {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--screw-a), var(--screw-b));
+  box-shadow: inset 0 0 0 1px var(--screw-edge);
+}
+
+.screw.sm {
+  width: 8px;
+  height: 8px;
+}
+
+.led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--led);
+  box-shadow: 0 0 10px var(--led);
+}
+
+/* Text link with a copper underline that shrinks on hover */
+.cable-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 0 6px;
+  border: 0;
+  background: none;
+  color: var(--copper-text);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.cable-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  height: 2px;
+  background: currentColor;
+  transform-origin: left;
+  transition: transform 0.35s var(--ease);
+}
+
+.cable-link:hover::after {
+  transform: scaleX(0.3);
+}
+
+/* Theme-dependent visibility */
+:root[data-theme='dark'] .only-day,
+:root:not([data-theme='dark']) .only-night {
+  display: none !important;
+}
+
+@keyframes cc-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

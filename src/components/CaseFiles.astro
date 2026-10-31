@@ -1,0 +1,440 @@
+---
+import { cases } from '../data/site';
+
+const expected = [20, 38, 55, 68, 76, 78, 72, 60, 42, 22];
+const actual = [19, 37, 54, 66, 31, 32, 70, 58, 41, 21];
+const bars = expected.map((e, i) => ({ e: e * 2, a: actual[i] * 2, bad: actual[i] / e < 0.6 }));
+---
+
+<section id="work" class="section" data-cases>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Case files.</h2>
+      <p>Pick a file to see what was built and what changed.</p>
+    </div>
+    <div class="layout">
+      <div class="list" role="group" aria-label="Case files">
+        {
+          cases.map((c, i) => (
+            <button type="button" class="row" data-case={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-controls={`case-${i}`}>
+              <span class="code">{c.code}</span>
+              <span class="titles">
+                <span class="title">{c.title}</span>
+                <span class="sector">{c.sector}</span>
+              </span>
+              <span class="arrow" aria-hidden="true">
+                →
+              </span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="viewer surface">
+        {
+          cases.map((c, i) => (
+            <div class="pane" id={`case-${i}`} data-pane={i} hidden={i !== 0}>
+              <div class="screen lcd" aria-hidden="true">
+                {c.kind === 'chat' && (
+                  <div class="chat">
+                    <span class="me">Can I see the doctor tomorrow morning?</span>
+                    <span class="them">Yes. 10:30 or 11:15?</span>
+                    <span class="me">10:30 please</span>
+                    <span class="them">Booked ✓ I’ll remind you at 9:00.</span>
+                  </div>
+                )}
+                {c.kind === 'store' && (
+                  <div class="store">
+                    <div class="tiles">
+                      <div><span>Orders today</span><b>18</b></div>
+                      <div><span>Revenue</span><b>₹42.3k</b></div>
+                      <div class="warn"><span>Low stock</span><b>2</b></div>
+                    </div>
+                    <div class="order"><span class="mono">#1042</span><span>Linen shirt · M</span><span class="ok">Paid</span></div>
+                    <div class="order"><span class="mono">#1041</span><span>Kurta · L</span><span class="ok">Shipped</span></div>
+                  </div>
+                )}
+                {c.kind === 'invoice' && (
+                  <div class="flow">
+                    <span>invoice email</span><i>→</i><span class="hot">ai reads it</span><i>→</i><span>you approve</span><i>→</i><span class="hot">bill created ✓</span>
+                  </div>
+                )}
+                {c.kind === 'solar' && (
+                  <div class="solar">
+                    <div class="solar-head"><span>inverter 3 · today</span><span class="alert">alert 12:05</span></div>
+                    <div class="bars">
+                      {bars.map((b) => (
+                        <div class="bar">
+                          <span class="exp" style={`height: ${b.e}px`} />
+                          <span class={b.bad ? 'act bad' : 'act'} style={`height: ${b.a}px`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div class="info">
+                <div class="meta">
+                  {c.example && <span class="ex">EXAMPLE</span>}
+                  <span>{c.code}</span>
+                  <span>{c.stack}</span>
+                </div>
+                <h3>{c.title}</h3>
+                <dl>
+                  <dt>problem</dt>
+                  <dd>{c.problem}</dd>
+                  <dt>built</dt>
+                  <dd>{c.built}</dd>
+                  <dt>result</dt>
+                  <dd class="strong">{c.result}</dd>
+                </dl>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .list {
+    flex: 1 1 380px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--line);
+  }
+
+  .row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 18px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    transition: background 0.25s;
+  }
+
+  .row:hover {
+    background: var(--fill);
+  }
+
+  .row[aria-pressed='true'] {
+    background: var(--sel-bg);
+  }
+
+  .code,
+  .arrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .arrow {
+    font-size: 18px;
+  }
+
+  .row[aria-pressed='true'] .code,
+  .row[aria-pressed='true'] .arrow {
+    color: var(--copper-text);
+  }
+
+  .titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .title {
+    font-weight: 700;
+    font-size: clamp(18px, 1.9vw, 22px);
+    line-height: 1.25;
+  }
+
+  .sector {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .viewer {
+    flex: 1 1 520px;
+    min-width: 0;
+    position: sticky;
+    top: 96px;
+    border-radius: 20px;
+    padding: 14px;
+  }
+
+  .screen {
+    height: 290px;
+    border-radius: 12px;
+    padding: 22px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: inset 0 0 50px var(--lcd-inset);
+  }
+
+  .chat {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 14px;
+  }
+
+  .chat span {
+    max-width: 75%;
+    padding: 9px 13px;
+  }
+
+  .chat .me {
+    align-self: flex-end;
+    border-radius: 14px 14px 3px 14px;
+    background: var(--copper-tint);
+    border: 1px solid var(--copper-line);
+  }
+
+  .chat .them {
+    align-self: flex-start;
+    border-radius: 14px 14px 14px 3px;
+    background: var(--lcd-bubble);
+  }
+
+  .store {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tiles div {
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--lcd-bubble);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tiles span {
+    color: var(--lcd-muted);
+  }
+
+  .tiles b {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 22px;
+  }
+
+  .tiles .warn {
+    background: var(--copper-tint);
+    border: 1px solid var(--copper-line);
+  }
+
+  .tiles .warn span {
+    color: var(--lcd-text);
+  }
+
+  .order {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--lcd-bubble);
+  }
+
+  .order span:nth-child(2) {
+    color: var(--lcd-muted);
+  }
+
+  .ok,
+  .alert {
+    color: var(--lcd-accent);
+  }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .flow span {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--lcd-bubble);
+  }
+
+  .flow .hot {
+    background: var(--copper-tint);
+    border: 1px solid var(--copper);
+  }
+
+  .flow i {
+    font-style: normal;
+    color: var(--lcd-accent);
+  }
+
+  .solar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .solar-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 170px;
+  }
+
+  .bar {
+    flex: 1;
+    height: 100%;
+    position: relative;
+  }
+
+  .exp,
+  .act {
+    position: absolute;
+    bottom: 0;
+  }
+
+  .exp {
+    left: 0;
+    right: 0;
+    border-radius: 4px 4px 0 0;
+    border: 1px dashed var(--lcd-dash);
+    border-bottom: 0;
+  }
+
+  .act {
+    left: 3px;
+    right: 3px;
+    border-radius: 3px 3px 0 0;
+    background: rgba(238, 240, 243, 0.45);
+  }
+
+  .act.bad {
+    background: var(--copper);
+    box-shadow: 0 0 12px var(--copper);
+  }
+
+  .info {
+    padding: 22px 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .ex {
+    color: var(--copper-text);
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 7.5em minmax(0, 1fr);
+    gap: 8px 14px;
+    font-size: 15px;
+  }
+
+  dt {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 3px;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--body);
+  }
+
+  dd.strong {
+    color: var(--text);
+  }
+
+  @media (max-width: 760px) {
+    .viewer {
+      position: static;
+    }
+  }
+
+  @media (max-width: 480px) {
+    dl {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    dd {
+      margin-bottom: 8px;
+    }
+
+    .screen {
+      height: auto;
+      min-height: 240px;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-cases]');
+  if (root) {
+    const rows = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-case]'));
+    const panes = Array.from(root.querySelectorAll<HTMLElement>('[data-pane]'));
+    rows.forEach((row, i) =>
+      row.addEventListener('click', () => {
+        rows.forEach((r, j) => r.setAttribute('aria-pressed', String(i === j)));
+        panes.forEach((p, j) => (p.hidden = i !== j));
+      }),
+    );
+  }
+</script>

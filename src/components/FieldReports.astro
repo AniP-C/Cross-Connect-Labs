@@ -1,0 +1,65 @@
+---
+import { reports } from '../data/site';
+---
+
+<section class="section" aria-labelledby="reports-title">
+  <div class="wrap">
+    <h2 id="reports-title" class="h2 head">Field reports.</h2>
+    <div class="grid">
+      {
+        reports.map((r) => (
+          <figure class="surface">
+            <span class="tag">{r.tag}</span>
+            <blockquote>“{r.quote}”</blockquote>
+            <figcaption>
+              <b>{r.name}</b> · {r.role}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .head {
+    margin-bottom: 32px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 14px;
+  }
+
+  figure {
+    margin: 0;
+    padding: 26px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  blockquote {
+    margin: 0;
+    font-size: 18px;
+    color: var(--body);
+  }
+
+  figcaption {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  b {
+    color: var(--text);
+  }
+</style>

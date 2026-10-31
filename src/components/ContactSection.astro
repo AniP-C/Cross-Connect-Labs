@@ -1,0 +1,240 @@
+---
+import IconMark from './IconMark.astro';
+import { contact, nav } from '../data/site';
+
+const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : undefined;
+const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
+---
+
+<section id="contact" class="contact">
+  <div class="wrap inner">
+    <h2>Let’s <span class="accent">connect.</span></h2>
+    <p class="lede">Send me a few lines. I’ll look at it and tell you the cost. No minimum budget, and the first chat is free.</p>
+
+    <button type="button" class="plugbtn surface" data-contact aria-label="Start a project">
+      <span class="rig" aria-hidden="true">
+        <span class="cord"></span>
+        <span class="plug">
+          <span class="body"></span>
+          <span class="prongs"><span></span><span></span></span>
+        </span>
+        <span class="gap"></span>
+        <span class="socket">
+          <span class="slot"></span>
+          <span class="slot"></span>
+          <span class="sled"></span>
+        </span>
+      </span>
+      <span class="plug-label">plug in to start a project</span>
+    </button>
+
+    <div class="direct">
+      <span class="item"><span class="led"></span>WhatsApp {waHref ? <a href={waHref}>{contact.whatsappDisplay}</a> : contact.whatsappDisplay}</span>
+      <span class="item">Email {mailHref ? <a href={mailHref}>{contact.emailDisplay}</a> : contact.emailDisplay}</span>
+    </div>
+
+    <footer class="foot">
+      <span class="brand"><IconMark app size={40} label="crossconnect labs icon" />© {new Date().getFullYear()} cross-connect labs · [city, country]</span>
+      <nav aria-label="Footer">
+        {nav.slice(0, 3).map((item) => <a href={item.href}>{item.label}</a>)}
+        <a href="#top">back to top ↑</a>
+      </nav>
+    </footer>
+  </div>
+</section>
+
+<style>
+  .contact {
+    margin-top: clamp(80px, 10vw, 130px);
+    border-top: 1px solid var(--line-soft);
+    background: var(--deep);
+    transition: background-color 0.45s;
+  }
+
+  .inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+    padding-top: clamp(80px, 11vw, 150px);
+    padding-bottom: 40px;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(48px, 10vw, 156px);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+  }
+
+  .accent {
+    color: var(--copper-head);
+  }
+
+  .lede {
+    margin: 0;
+    font-size: clamp(17px, 1.6vw, 20px);
+    color: var(--body);
+    max-width: 32em;
+  }
+
+  .plugbtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 26px;
+    border-radius: 20px;
+    color: var(--text);
+  }
+
+  .rig {
+    display: flex;
+    align-items: center;
+  }
+
+  .cord {
+    width: clamp(60px, 14vw, 140px);
+    height: 7px;
+    border-radius: 4px;
+    background: var(--copper);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .plug {
+    display: flex;
+    align-items: center;
+    transition: transform 0.45s var(--ease);
+  }
+
+  .body {
+    width: 40px;
+    height: 30px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #4a4a50, #2a2a2e);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .prongs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prongs span {
+    width: 16px;
+    height: 4px;
+    background: #b9b9be;
+  }
+
+  .gap {
+    width: 26px;
+  }
+
+  .socket {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #1a1a1c;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--line);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding-left: 6px;
+  }
+
+  .slot {
+    width: 18px;
+    height: 5px;
+    background: #000000;
+  }
+
+  .sled {
+    position: absolute;
+    right: 7px;
+    top: 7px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .plugbtn:hover .plug,
+  .plugbtn:focus-visible .plug {
+    transform: translateX(30px);
+  }
+
+  .plugbtn:hover .sled,
+  .plugbtn:focus-visible .sled {
+    background: var(--led);
+    box-shadow: 0 0 16px var(--led);
+  }
+
+  .plug-label {
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+
+  .direct {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 28px;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .direct a {
+    color: var(--text);
+  }
+
+  .foot {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 28px;
+    margin-top: clamp(56px, 8vw, 100px);
+    padding-top: 26px;
+    border-top: 1px solid var(--line-soft);
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .foot nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+
+  .foot nav a {
+    color: var(--text);
+    text-decoration: none;
+    opacity: 0.75;
+  }
+
+  .foot nav a:hover {
+    opacity: 1;
+  }
+</style>
