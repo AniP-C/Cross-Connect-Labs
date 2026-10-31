@@ -2,40 +2,115 @@
 
 The one-page site for Cross-Connect Labs: websites, apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work. It uses the "patch bay" design with a day/night switch.
 
-Built with [Astro](https://astro.build) 7. Pages are pre-built to plain HTML, so the site loads fast and can be hosted on any static host.
+**Live:** https://cross-connect-labs.anipy2000.workers.dev (Cloudflare, deploys from `main`)
 
-## Run it
+Built with [Astro](https://astro.build) 7. Pages are pre-built to plain HTML, so the site loads fast and needs no server.
 
-You need Node.js 22.22 or newer.
+## Docs
+
+| File | What's in it |
+| --- | --- |
+| [docs/plan.md](docs/plan.md) | Decisions so far, launch checklist, next steps, open questions |
+| [docs/design.md](docs/design.md) | Design idea, colours, day/night, sections, interaction rules, what to avoid |
+| [docs/hosting.md](docs/hosting.md) | How the Cloudflare deploy works, own domain, email options and costs |
+| [docs/research.md](docs/research.md) | Summary of the competitor research |
+| [docs/learn-docker.md](docs/learn-docker.md) | Docker course built around this repo |
+| [docs/cloud-run.md](docs/cloud-run.md) | Manual deploy to Google Cloud Run (learning track) |
+| [CLAUDE.md](CLAUDE.md) | Project notes for Claude Code, if you use it |
+
+## Develop on your computer
+
+You need **Node.js 22.22 or newer** and **Git**.
+
+- **Node:** the exact version is in `.node-version`. If you use a version manager (fnm, nvm, Volta), install that version. Otherwise install the current Node 22 LTS from https://nodejs.org.
+- **Editor:** VS Code will suggest the Astro extension when you open the folder.
+
+Get the code (once):
+
+```bash
+git clone https://github.com/AniP-C/Cross-Connect-Labs.git
+```
+
+```bash
+cd Cross-Connect-Labs
+```
 
 ```bash
 npm install
 ```
 
+Start the dev server, then open http://localhost:4321. Changes show up as you save.
+
 ```bash
 npm run dev
 ```
 
-Open http://localhost:4321. Other commands:
-
 | Command | What it does |
 | --- | --- |
+| `npm run dev` | Dev server with live reload on port 4321 |
 | `npm run build` | Builds the site into `dist/` |
-| `npm run preview` | Serves the built site locally |
+| `npm run preview` | Serves the built `dist/` on port 4321 |
 | `npm run check` | Type-checks the project |
+| `npm run test:smoke` | Clicks through the site in a real browser (needs the dev server or preview running) |
+
+The smoke test needs a browser downloaded once:
+
+```bash
+npx playwright install chromium
+```
+
+### Git workflow
+
+`main` is the live site: **every push to `main` goes live in about a minute.**
+
+For small changes, work on `main`:
+
+```bash
+git pull
+```
+
+Make your changes, check them, then commit and push:
+
+```bash
+npm run check
+```
+
+```bash
+git add -A
+```
+
+```bash
+git commit -m "Describe the change"
+```
+
+```bash
+git push
+```
+
+For bigger changes, use a branch. Pushing a branch gives you a **preview link** in Cloudflare (Workers & Pages, then cross-connect-labs, then Deployments) without touching the live site:
+
+```bash
+git switch -c my-change
+```
+
+```bash
+git push -u origin my-change
+```
+
+When it looks right, merge it into `main` with a pull request on GitHub.
+
+The branch `claude/youthful-cerf-x45vpr` is where the site was first built. It matches `main`, so you can delete it on GitHub once you no longer need it.
 
 ## Edit the content
 
 Almost everything you will want to change is in **`src/data/site.ts`**: your name, location, reply time, the availability badge, services, patch bay options, case studies, budget knob text, spec sheet, testimonials and FAQ.
 
-Every placeholder is written in `[square brackets]`. Search the project for `[` to find them all before launch.
+Every placeholder is written in `[square brackets]`. The full launch checklist is in [docs/plan.md](docs/plan.md).
 
-Other things to replace:
-
-- **Your photo**: put it in `public/` (for example `public/me.jpg`) and follow the comment in `src/components/SpecSheet.astro`.
-- **Case studies**: the four projects are examples. Replace them in `site.ts` and set `example: false` on real ones.
-- **Logo**: `src/components/Logo.astro` and `src/components/IconMark.astro` redraw the logo set. Swap in the official SVG exports when you have them. `public/favicon.svg` and `public/apple-touch-icon.png` are the app icon.
-- **Domain**: set `site` in `astro.config.mjs` to the live URL (the `*.pages.dev` address or your own domain) so canonical and social links are correct. While it is unset, those tags are left out.
+- **Your photo:** put it in `public/` (for example `public/me.jpg`) and follow the comment in `src/components/SpecSheet.astro`.
+- **Case studies:** the four projects are examples. Replace them in `site.ts` and set `example: false` on real ones.
+- **Logo:** `src/components/Logo.astro` and `src/components/IconMark.astro` redraw the logo set. Swap in the official SVG exports when you have them. `public/favicon.svg` and `public/apple-touch-icon.png` are the app icon.
+- **Domain:** `site` in `astro.config.mjs` is the live address, used for canonical and social links. Change it when you connect your own domain.
 
 ## Contact form
 
@@ -53,47 +128,30 @@ Also set `whatsappDisplay` and `emailDisplay`, which are shown in the "Let's con
 
 ## Day and night
 
-The site follows the visitor's system setting on the first visit. The DAY/NIGHT switch in the header overrides it, and the choice is remembered. All colours are CSS variables in `src/styles/global.css`: `:root` holds day mode and `:root[data-theme='dark']` holds night mode. Brand copper is `#C2541F` and navy is `#14202E`, taken from the logo set.
+The site follows the visitor's system setting on the first visit. The DAY/NIGHT switch in the header overrides it, and the choice is remembered. All colours are CSS variables in `src/styles/global.css`: `:root` holds day mode and `:root[data-theme='dark']` holds night mode. Brand copper is `#C2541F` and navy is `#14202E`, taken from the logo set. More in [docs/design.md](docs/design.md).
 
 ## Project layout
 
 ```text
 src/
-  data/site.ts           all editable content and contact settings
+  data/site.ts              all editable content and contact settings
   layouts/BaseLayout.astro  page shell, meta tags, fonts, theme start-up
-  pages/index.astro      the page, built from the components below
-  pages/404.astro        "not found" page
-  components/            Header, Hero, PatchBay, Rack, CaseFiles, Pricing,
-                         SignalPath, SpecSheet, FieldReports, Faq,
-                         ContactSection, ContactDialog, Logo, IconMark, Rails
-  scripts/contact-bus.ts lets any button open the contact form, pre-filled
-  styles/global.css      colour tokens for day and night, shared styles
-public/                  favicon, touch icon, robots.txt, _headers (Cloudflare)
+  pages/index.astro         the page, built from the components below
+  pages/404.astro           "not found" page
+  components/               Header, Hero, PatchBay, Rack, CaseFiles, Pricing,
+                            SignalPath, SpecSheet, FieldReports, Faq,
+                            ContactSection, ContactDialog, Logo, IconMark, Rails
+  scripts/contact-bus.ts    lets any button open the contact form, pre-filled
+  styles/global.css         colour tokens for day and night, shared styles
+public/                     favicon, touch icon, robots.txt, _headers (Cloudflare)
+tests/smoke.cjs             browser smoke test (npm run test:smoke)
+docs/                       plan, design, hosting, research, Docker guides
+wrangler.jsonc              Cloudflare Workers settings
+.node-version               Node version for Cloudflare and version managers
+Dockerfile, nginx.conf      container image (learning track, see docs/cloud-run.md)
 ```
 
 ## Deploy
 
-### Live site: Cloudflare Pages
-
-The site is hosted on Cloudflare Pages (free plan, commercial use allowed). Cloudflare builds it from GitHub:
-
-| Setting | Value |
-| --- | --- |
-| Production branch | `main` |
-| Framework preset | Astro |
-| Build command | `npm run build` |
-| Build output directory | `dist` |
-| Node.js version | read from `.node-version` (no environment variable needed) |
-
-- **Publishing:** every push to `main` goes live in about a minute.
-- **Previews:** a push to any other branch gets its own preview URL and does not touch the live site.
-- **Rollback:** in the Cloudflare dashboard, open the project's **Deployments** and use **Rollback** on an older one.
-- **Headers:** `public/_headers` sets caching for `/_astro/` files and basic security headers. Cloudflare serves `404.html` for unknown pages.
-
-The free plan allows 500 builds a month across all sites in the account, one build at a time.
-
-### Learning option: Google Cloud Run with Docker
-
-See **[DEPLOY.md](DEPLOY.md)** for a step-by-step manual guide. The `Dockerfile` builds the site with Node and serves it with nginx on port 8080 (`nginx.conf`).
-
-Any other static host also works with build command `npm run build` and output folder `dist`.
+- **Live site:** Cloudflare Workers builds and deploys every push to `main`. Settings, rollback and custom domain steps are in [docs/hosting.md](docs/hosting.md).
+- **Learning track:** the `Dockerfile` builds the site with Node and serves it with nginx on port 8080. [docs/cloud-run.md](docs/cloud-run.md) deploys it to Google Cloud Run by hand.

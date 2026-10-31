@@ -2,6 +2,8 @@
 
 This guide takes the site from your computer to a live URL on Google Cloud Run, by hand, one step at a time.
 
+> **This is the learning track.** The live site runs on Cloudflare (see [hosting.md](hosting.md)). A Cloud Run deploy is a separate copy and doesn't affect it. New to Docker? Start with [learn-docker.md](learn-docker.md).
+
 ## How it works
 
 The `Dockerfile` has two stages:

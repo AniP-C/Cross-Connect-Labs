@@ -1,0 +1,19 @@
+// Cloudflare Workers settings for the live site.
+// The Worker only serves the built files in dist/ as static assets; there is no server code.
+// Docs: https://developers.cloudflare.com/workers/static-assets/
+{
+  // Must match the Worker's name in the Cloudflare dashboard.
+  "name": "cross-connect-labs",
+  "compatibility_date": "2026-10-01",
+
+  // Wrangler runs this before `wrangler deploy` and `wrangler dev`.
+  "build": {
+    "command": "npm run build"
+  },
+
+  "assets": {
+    "directory": "./dist",
+    // Unknown URLs get dist/404.html with a 404 status.
+    "not_found_handling": "404-page"
+  }
+}
