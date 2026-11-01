@@ -1,9 +1,5 @@
 ---
 import { cases } from '../data/site';
-
-const expected = [20, 38, 55, 68, 76, 78, 72, 60, 42, 22];
-const actual = [19, 37, 54, 66, 31, 32, 70, 58, 41, 21];
-const bars = expected.map((e, i) => ({ e: e * 2, a: actual[i] * 2, bad: actual[i] / e < 0.6 }));
 ---
 
 <section id="work" class="section" data-cases>
@@ -43,33 +39,26 @@ const bars = expected.map((e, i) => ({ e: e * 2, a: actual[i] * 2, bad: actual[i
                     <span class="them">Booked ✓ I’ll remind you at 9:00.</span>
                   </div>
                 )}
-                {c.kind === 'store' && (
+                {c.kind === 'store' && c.screen && (
                   <div class="store">
                     <div class="tiles">
-                      <div><span>Orders today</span><b>18</b></div>
-                      <div><span>Revenue</span><b>₹42.3k</b></div>
-                      <div class="warn"><span>Low stock</span><b>2</b></div>
-                    </div>
-                    <div class="order"><span class="mono">#1042</span><span>Linen shirt · M</span><span class="ok">Paid</span></div>
-                    <div class="order"><span class="mono">#1041</span><span>Kurta · L</span><span class="ok">Shipped</span></div>
-                  </div>
-                )}
-                {c.kind === 'invoice' && (
-                  <div class="flow">
-                    <span>invoice email</span><i>→</i><span class="hot">ai reads it</span><i>→</i><span>you approve</span><i>→</i><span class="hot">bill created ✓</span>
-                  </div>
-                )}
-                {c.kind === 'solar' && (
-                  <div class="solar">
-                    <div class="solar-head"><span>inverter 3 · today</span><span class="alert">alert 12:05</span></div>
-                    <div class="bars">
-                      {bars.map((b) => (
-                        <div class="bar">
-                          <span class="exp" style={`height: ${b.e}px`} />
-                          <span class={b.bad ? 'act bad' : 'act'} style={`height: ${b.a}px`} />
-                        </div>
+                      {c.screen.tiles.map((t) => (
+                        <div class={t.warn ? 'warn' : undefined}><span>{t.label}</span><b>{t.value}</b></div>
                       ))}
                     </div>
+                    {c.screen.orders.map((o) => (
+                      <div class="order"><span class="mono">{o.no}</span><span>{o.item}</span><span class="ok">{o.status}</span></div>
+                    ))}
+                  </div>
+                )}
+                {c.kind === 'flow' && c.flow && (
+                  <div class="flow">
+                    {c.flow.map((s, j) => (
+                      <>
+                        {j > 0 && <i>→</i>}
+                        <span class={s.hot ? 'hot' : undefined}>{s.t}</span>
+                      </>
+                    ))}
                   </div>
                 )}
               </div>
@@ -268,8 +257,7 @@ const bars = expected.map((e, i) => ({ e: e * 2, a: actual[i] * 2, bad: actual[i
     color: var(--lcd-muted);
   }
 
-  .ok,
-  .alert {
+  .ok {
     color: var(--lcd-accent);
   }
 
@@ -297,58 +285,6 @@ const bars = expected.map((e, i) => ({ e: e * 2, a: actual[i] * 2, bad: actual[i
   .flow i {
     font-style: normal;
     color: var(--lcd-accent);
-  }
-
-  .solar {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .solar-head {
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  .bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    height: 170px;
-  }
-
-  .bar {
-    flex: 1;
-    height: 100%;
-    position: relative;
-  }
-
-  .exp,
-  .act {
-    position: absolute;
-    bottom: 0;
-  }
-
-  .exp {
-    left: 0;
-    right: 0;
-    border-radius: 4px 4px 0 0;
-    border: 1px dashed var(--lcd-dash);
-    border-bottom: 0;
-  }
-
-  .act {
-    left: 3px;
-    right: 3px;
-    border-radius: 3px 3px 0 0;
-    background: rgba(238, 240, 243, 0.45);
-  }
-
-  .act.bad {
-    background: var(--copper);
-    box-shadow: 0 0 12px var(--copper);
   }
 
   .info {
