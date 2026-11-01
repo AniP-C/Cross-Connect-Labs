@@ -15,8 +15,8 @@ import { budgetChoices, contact, site, topics } from '../data/site';
   <div class="sheet surface">
     <div class="head">
       <div>
-        <h2 id="dlg-title">Tell me your idea</h2>
-        <p>I’ll look at it and reply with the cost. No minimum budget.</p>
+        <h2 id="dlg-title">Tell us your idea</h2>
+        <p>We’ll look at it and reply with the cost. No minimum budget.</p>
       </div>
       <button type="button" class="close" data-close aria-label="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -73,7 +73,7 @@ import { budgetChoices, contact, site, topics } from '../data/site';
       <input type="checkbox" name="botcheck" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
       <div class="actions">
-        <span class="note" data-note aria-live="polite">I reply within {site.replyTime} with the cost.</span>
+        <span class="note" data-note aria-live="polite">We reply within {site.replyTime} with the cost.</span>
         <button type="submit" class="send" data-send>send →</button>
       </div>
     </form>
@@ -432,19 +432,19 @@ import { budgetChoices, contact, site, topics } from '../data/site';
             }),
           });
           if (!res.ok) throw new Error(String(res.status));
-          finish(`Thanks, ${name}. I’ll look at your idea and reply on ${reach} within ${reply} with the cost.`);
+          finish(`Thanks, ${name}. We’ll look at your idea and reply on ${reach} within ${reply} with the cost.`);
           form.reset();
         } catch {
-          fail('That did not send. Please try again, or message me on WhatsApp.');
+          fail('That did not send. Please try again, or message us on WhatsApp.');
         } finally {
           send.disabled = false;
         }
       } else if (cfg.whatsapp) {
         window.open(`https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-        finish('WhatsApp should open with your message ready. Press send there and I’ll reply with the cost.');
+        finish('WhatsApp should open with your message ready. Press send there and we’ll reply with the cost.');
       } else if (cfg.email) {
         window.location.href = `mailto:${cfg.email}?subject=${encodeURIComponent(`New enquiry: ${topic}`)}&body=${encodeURIComponent(text)}`;
-        finish('Your email app should open with the message ready. Press send there and I’ll reply with the cost.');
+        finish('Your email app should open with the message ready. Press send there and we’ll reply with the cost.');
       } else {
         finish('Contact details are not set up on this site yet, so nothing was sent. Here is your message, ready to copy:', text);
       }

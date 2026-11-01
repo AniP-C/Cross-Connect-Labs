@@ -2,7 +2,7 @@
 
 The one-page site for Cross-Connect Labs: websites, apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work. It uses the "patch bay" design with a day/night switch.
 
-**Live:** https://cross-connect-labs.anipy2000.workers.dev (Cloudflare, deploys from `main`)
+**Live:** https://crossconnectlabs.com (Cloudflare, deploys from `main`)
 
 Built with [Astro](https://astro.build) 7. Pages are pre-built to plain HTML, so the site loads fast and needs no server.
 

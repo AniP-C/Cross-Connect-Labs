@@ -42,7 +42,7 @@ A one-person freelance studio. Services:
 - [x] Astro site built: header, hero patch bay, rack (8 services), case files, budget knob, signal path, spec sheet, field reports, FAQ, contact section, contact form, 404 page
 - [x] Day/night switch that follows the visitor's system and remembers their choice
 - [x] Docker image and Cloud Run guide (for learning)
-- [x] Live on Cloudflare: https://cross-connect-labs.anipy2000.workers.dev
+- [x] Live on Cloudflare: https://crossconnectlabs.com
 - [x] Smoke test (`npm run test:smoke`), 30 checks
 
 ## Launch checklist: before you share the link
@@ -53,7 +53,6 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [ ] Availability badge text (`site.availability`; it says "booking projects for december")
 - [ ] Contact form: add a Web3Forms key, or your WhatsApp number, or your email (`contact` block)
 - [ ] Contact details shown on the page: `whatsappDisplay`, `emailDisplay`
-- [ ] Your photo (see the comment in `src/components/SpecSheet.astro`)
 - [ ] Case studies: replace the four examples with real projects and set `example: false`, including real results in place of `[Your measured result]`
 - [ ] Field reports (testimonials): real quotes, or remove the section until you have them
 - [ ] FAQ: data protection answer and the area you can work on site
@@ -70,6 +69,7 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [ ] **Analytics.** Cloudflare Web Analytics is free and needs no cookie banner.
 - [ ] **Search.** Add a sitemap (`@astrojs/sitemap`), then submit the site to Google Search Console.
 - [ ] **Google Business Profile**, if you want local clients to find you.
+- [ ] **Custom booking dialog.** Build an on-brand (copper and navy) "book a call" dialog on the site, with Google Calendar behind it (free/busy via the Google Calendar API, bookings created as events with a Meet link). Chosen over Cal.com because Cal.com's brand colours and branding removal are paid (Teams) features. Until then, `contact.bookingUrl` in `src/data/site.ts` is empty and the button is hidden.
 
 ### Later
 

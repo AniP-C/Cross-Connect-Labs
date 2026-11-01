@@ -54,7 +54,7 @@ const top = (i: number) => `${JACK_Y[i] / 4}%`;
     </div>
 
     <span class="col-title left" aria-hidden="true">YOUR PROBLEM</span>
-    <span class="col-title right" aria-hidden="true">WHAT I BUILD</span>
+    <span class="col-title right" aria-hidden="true">WHAT WE BUILD</span>
 
     <svg class="cables" viewBox="0 0 640 400" aria-hidden="true">
       <path class="cable outline" data-cable d={d}></path>
@@ -75,7 +75,7 @@ const top = (i: number) => `${JACK_Y[i] / 4}%`;
         ))
       }
     </div>
-    <div role="group" aria-label="What I build">
+    <div role="group" aria-label="What we build">
       {
         builds.map((b, i) => (
           <button type="button" class="jack right" data-side="to" data-index={i} data-topic={b.topic} data-time={b.time} aria-pressed={i === 0 ? 'true' : 'false'} style={`--y: ${top(i)}`}>
@@ -98,7 +98,7 @@ const top = (i: number) => `${JACK_Y[i] / 4}%`;
       <div><span class="k">fix ··· </span><span data-readout="build">{builds[0].label.toLowerCase()}</span></div>
       <div><span class="k">time ·· </span><span data-readout="time">{builds[0].time}</span> · any budget<span class="cursor" aria-hidden="true">▍</span></div>
     </div>
-    <button type="button" class="flip surface" data-flip aria-pressed="false" aria-label="Send this connection to me">
+    <button type="button" class="flip surface" data-flip aria-pressed="false" aria-label="Send this connection to us">
       <span class="flip-track" aria-hidden="true"><span class="flip-knob"></span></span>
       <span class="flip-label" data-flip-label>FLIP TO SEND</span>
     </button>

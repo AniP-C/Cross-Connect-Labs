@@ -2,8 +2,6 @@
 
 export const site = {
   name: 'Cross-Connect Labs',
-  owner: '[Your name]',
-  role: 'Freelance developer and electrical engineer',
   location: '[City, Country]',
   languages: '[English, …]',
   replyTime: '[24 hours]',
@@ -11,13 +9,15 @@ export const site = {
   availability: 'booking projects for december',
   title: 'Cross-Connect Labs · Websites, apps, WhatsApp bots and automation',
   description:
-    'Freelance developer and electrical engineer. Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work. No minimum budget.',
+    'A small studio of developers and electrical engineers. Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work. No minimum budget.',
 };
 
 export const contact = {
   // Digits only, with country code, e.g. '919876543210'. Used for wa.me links.
   whatsapp: '',
   whatsappDisplay: '[+00 00000 00000]',
+  // Booking page link (Cal.com, Microsoft Bookings, Calendly…). Leave '' to hide the button.
+  bookingUrl: '',
   email: '',
   emailDisplay: '[hello@yourdomain.com]',
   // Optional form service. Web3Forms: endpoint 'https://api.web3forms.com/submit' plus accessKey.
@@ -30,7 +30,6 @@ export const nav = [
   { href: '#services', label: 'services' },
   { href: '#work', label: 'work' },
   { href: '#pricing', label: 'pricing' },
-  { href: '#about', label: 'about' },
   { href: '#faq', label: 'faq' },
 ];
 
@@ -103,20 +102,10 @@ export const budgets = [
 ];
 
 export const steps = [
-  { title: 'Tell me the idea', text: 'WhatsApp, email or the patch bay above. A few lines is enough.' },
-  { title: 'We talk, I look at it', text: 'A free chat or call. I ask anything that is unclear.' },
+  { title: 'Tell us the idea', text: 'WhatsApp, email or the patch bay above. A few lines is enough.' },
+  { title: 'We talk, we look at it', text: 'A free chat or call. We ask anything that is unclear.' },
   { title: 'You get the cost', text: 'One clear price that fits your budget. No hidden costs.' },
   { title: 'It goes live', text: 'Weekly updates, then launch and 30 days of free fixes.' },
-];
-
-export const spec = [
-  { key: 'model', value: site.owner, strong: true },
-  { key: 'type', value: site.role },
-  { key: 'input', value: 'Your idea, any budget' },
-  { key: 'output', value: 'Websites, apps, online stores, WhatsApp bots, CRMs, AI automation, PLC and SCADA work' },
-  { key: 'response time', value: `Within ${site.replyTime}` },
-  { key: 'location', value: `${site.location} · works remotely` },
-  { key: 'interfaces', value: `WhatsApp, email, calls · ${site.languages}` },
 ];
 
 export const reports = [
@@ -126,13 +115,13 @@ export const reports = [
 ];
 
 export const faqs = [
-  { q: 'Is there a minimum budget?', a: 'No. Small jobs are welcome. Tell me what you can spend and I will tell you honestly what I can do for it.' },
-  { q: 'How do you decide the price?', a: 'I look at what you need, how long it will take and your budget. Then you get one clear price before I start, with no hidden costs.' },
+  { q: 'Is there a minimum budget?', a: 'No. Small jobs are welcome. Tell us what you can spend and we will tell you honestly what we can do for it.' },
+  { q: 'How do you decide the price?', a: 'We look at what you need, how long it will take and your budget. Then you get one clear price before we start, with no hidden costs.' },
   { q: 'How long does it take?', a: 'Small jobs take a few days. Websites take 1–3 weeks. Apps, online stores and bots usually take 2–10 weeks, depending on features.' },
-  { q: 'Can I manage the store or app myself?', a: 'Yes. Online stores and apps come with an admin panel where you change products, orders, prices and content without needing me.' },
+  { q: 'Can I manage the store or app myself?', a: 'Yes. Online stores and apps come with an admin panel where you change products, orders, prices and content without needing us.' },
   { q: 'Is the clinic bot safe for patient data?', a: 'The bot books appointments, sends reminders and answers common questions. It gives no medical advice and sends urgent messages to your staff. Patient data stays in your accounts. [Add how you handle data protection.]' },
   { q: 'Who owns the work?', a: 'You do. At hand-over you get the code, the logins and a short walkthrough video.' },
-  { q: 'Do you do electrical work on site?', a: '[Say where you can work on site.] Most PLC, SCADA and monitoring work can be done remotely once I have access to the system.' },
+  { q: 'Do you do electrical work on site?', a: '[Say where you can work on site.] Most PLC, SCADA and monitoring work can be done remotely once we have access to the system.' },
 ];
 
 export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'Electrical work', 'Small job / fix', 'Not sure yet'];

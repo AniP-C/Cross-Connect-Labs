@@ -1,6 +1,6 @@
 # Cross-Connect Labs website
 
-One-page Astro 7 site for a one-person freelance studio. Static output only, no server code and no UI framework.
+One-page Astro 7 site for a small studio (the site speaks as "we"). Static output only, no server code and no UI framework.
 
 ## Commands
 
