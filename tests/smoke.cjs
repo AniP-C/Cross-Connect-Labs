@@ -3,7 +3,7 @@
 // One-time setup:  npx playwright install chromium
 // Start the site:  npm run dev        (or: npm run build && npm run preview)
 // Then run:        npm run test:smoke
-// Other address:   npm run test:smoke -- https://cross-connect-labs.anipy2000.workers.dev/
+// Other address:   npm run test:smoke -- https://crossconnectlabs.com/
 // Screenshots:     set SHOTS=some-folder to save them there.
 //
 // It never sends a real enquiry. If the contact form is set up (form service,

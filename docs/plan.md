@@ -42,7 +42,7 @@ A one-person freelance studio. Services:
 - [x] Astro site built: header, hero patch bay, rack (8 services), case files, budget knob, signal path, spec sheet, field reports, FAQ, contact section, contact form, 404 page
 - [x] Day/night switch that follows the visitor's system and remembers their choice
 - [x] Docker image and Cloud Run guide (for learning)
-- [x] Live on Cloudflare: https://cross-connect-labs.anipy2000.workers.dev
+- [x] Live on Cloudflare: https://crossconnectlabs.com
 - [x] Smoke test (`npm run test:smoke`), 30 checks
 
 ## Launch checklist: before you share the link
