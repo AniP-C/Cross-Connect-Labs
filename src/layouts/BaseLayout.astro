@@ -8,6 +8,7 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-sans/700.css';
 import '../styles/global.css';
+import Cursor from '../components/Cursor.astro';
 import { site } from '../data/site';
 
 interface Props {
@@ -68,5 +69,6 @@ const image = new URL('/og-image.png', Astro.site ?? Astro.url).href;
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
+    <Cursor />
   </body>
 </html>

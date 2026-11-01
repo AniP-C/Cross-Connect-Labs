@@ -1,0 +1,418 @@
+<!-- Network-cable cursor: an RJ45 plug with a short cable trailing behind it.
+     The plug turns to follow the cable and data packets run down it while
+     it moves. Over anything clickable a port ring with link lights shows and
+     the contacts light up; a click pushes the plug in with a flash. Mouse only; touch keeps the system
+     pointer, and text fields keep the I-beam. -->
+<div class="cc-cursor" aria-hidden="true" data-cursor>
+  <svg class="cord" data-cursor-cord>
+    <path class="cord-out"></path>
+    <path class="cord-core"></path>
+    <path class="cord-pulse"></path>
+  </svg>
+  <span class="port"></span>
+  <span class="leds"><span class="link"></span><span class="act"></span></span>
+  <span class="flash" data-cursor-flash></span>
+  <svg class="plug" viewBox="0 0 14 24" width="14" height="24">
+    <rect class="boot" x="3.5" y="14" width="7" height="9.5" rx="1.5"></rect>
+    <rect class="body" x="0.75" y="0.75" width="12.5" height="15" rx="1.5"></rect>
+    <path class="pins" d="M3.6 2.6v3.6M5.9 2.6v3.6M8.1 2.6v3.6M10.4 2.6v3.6"></path>
+    <path class="latch" d="M4 10.5h6"></path>
+  </svg>
+</div>
+
+<style>
+  .cc-cursor {
+    display: none;
+  }
+
+  :global(html.has-cursor) .cc-cursor {
+    display: block;
+  }
+
+  /* Native dialogs sit in the top layer, above anything we draw, so the
+     system pointer comes back while one is open. */
+  :global(html.has-cursor:has(dialog[open])) .cc-cursor {
+    display: none;
+  }
+
+  :global(html.has-cursor:not(:has(dialog[open]))),
+  :global(html.has-cursor:not(:has(dialog[open])) *) {
+    cursor: none !important;
+  }
+
+  :global(html.has-cursor:not(:has(dialog[open])) :is(textarea, [contenteditable], input:not([type='checkbox'], [type='radio'], [type='range'], [type='button'], [type='submit']))) {
+    cursor: text !important;
+  }
+
+  .cord {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 200;
+    pointer-events: none;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+
+  .cord.live {
+    opacity: 1;
+    transition-duration: 0.15s;
+  }
+
+  .cord-out {
+    stroke: var(--cable-out);
+    stroke-width: 5;
+  }
+
+  .cord-core {
+    stroke: var(--copper);
+    stroke-width: 2.6;
+  }
+
+  /* Data packets running down the cable into the plug while it moves:
+     pairs of square bits with a gap between bursts. */
+  .cord-pulse {
+    stroke: var(--pulse);
+    stroke-width: 2.6;
+    stroke-linecap: butt;
+    stroke-dasharray: 2.6 2.4 2.6 21.4;
+    animation: cc-packets 0.5s linear infinite paused;
+  }
+
+  .cord.live .cord-pulse {
+    animation-play-state: running;
+  }
+
+  @keyframes cc-packets {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: 29;
+    }
+  }
+
+  /* Registered so it can ease on its own while the plug follows the mouse. */
+  @property --push {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+
+  /* The tip of the plug (top centre) is the hotspot. */
+  .plug {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 202;
+    overflow: visible;
+    pointer-events: none;
+    transform-origin: 7px 0;
+    transform: translate3d(calc(var(--x, -100px) - 7px), var(--y, -100px), 0) rotate(var(--a, 0deg)) translateY(var(--push));
+    transition:
+      opacity 0.2s,
+      --push 0.22s var(--ease);
+  }
+
+  .body {
+    fill: var(--copper);
+    stroke: var(--cable-out);
+    stroke-width: 1.5;
+  }
+
+  .boot {
+    fill: var(--cable-out);
+  }
+
+  .pins {
+    fill: none;
+    stroke: var(--on-copper);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    transition: stroke 0.16s var(--ease), filter 0.16s var(--ease);
+  }
+
+  .latch {
+    stroke: var(--cable-out);
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  /* Over a button or link: a faint port ring, and the contacts light up. */
+  .port {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 201;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border-radius: 50%;
+    border: 1px solid var(--copper-line);
+    background: var(--copper-tint);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(var(--x, -100px), var(--y, -100px), 0) scale(0.5);
+    transition:
+      opacity 0.16s var(--ease),
+      transform 0.16s var(--ease);
+  }
+
+  .cc-cursor.over .port {
+    opacity: 1;
+    transform: translate3d(var(--x, -100px), var(--y, -100px), 0) scale(1);
+  }
+
+  /* Port lights above the ring, like an ethernet jack: link holds steady,
+     activity flickers. */
+  .leds {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 201;
+    display: flex;
+    gap: 10px;
+    margin: -18px 0 0 -9px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(var(--x, -100px), var(--y, -100px), 0);
+    transition: opacity 0.16s var(--ease);
+  }
+
+  .leds span {
+    width: 4px;
+    height: 3px;
+    border-radius: 1px;
+    background: var(--led);
+    box-shadow: 0 0 4px var(--copper-glow);
+  }
+
+  .cc-cursor.over .leds {
+    opacity: 1;
+  }
+
+  .cc-cursor.over .act {
+    animation: cc-activity 0.7s steps(1) infinite;
+  }
+
+  @keyframes cc-activity {
+    0%,
+    30%,
+    55% {
+      opacity: 1;
+    }
+    15%,
+    45%,
+    80% {
+      opacity: 0.15;
+    }
+  }
+
+  .cc-cursor.over .pins {
+    stroke: var(--pulse);
+    filter: drop-shadow(0 0 2px var(--led));
+  }
+
+  /* Click: the plug pushes into the port and the contacts flash. */
+  .cc-cursor.down .plug {
+    --push: -4px;
+    transition:
+      opacity 0.2s,
+      --push 0.06s ease-out;
+  }
+
+  .cc-cursor.down .pins {
+    stroke: var(--pulse);
+    filter: drop-shadow(0 0 3px var(--led));
+  }
+
+  .flash {
+    position: fixed;
+    z-index: 201;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--copper);
+    box-shadow: 0 0 10px var(--copper-glow);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .cc-cursor.text .plug,
+  .cc-cursor.text .port,
+  .cc-cursor.text .leds,
+  .cc-cursor.gone .plug,
+  .cc-cursor.gone .port,
+  .cc-cursor.gone .leds {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-cursor]');
+  const mouse = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (root && mouse.matches) {
+    const html = document.documentElement;
+    const cord = root.querySelector<SVGSVGElement>('[data-cursor-cord]')!;
+    const paths = cord.querySelectorAll('path');
+
+    const CLICKABLE = 'a[href], button, summary, label, select, [role="button"], input[type="checkbox"], input[type="radio"], input[type="range"], input[type="submit"], input[type="button"]';
+    const TEXT = 'textarea, [contenteditable], input';
+
+    // The cable is a short chain of points that follows the pointer and sags.
+    // The first link is the plug itself, so the cable leaves from its boot.
+    const LINKS = 11;
+    const PLUG = 23;
+    const GAP = 6.5;
+    const len = (i: number) => (i === 1 ? PLUG : GAP);
+    const pts = Array.from({ length: LINKS }, () => ({ x: -100, y: -100, px: -100, py: -100 }));
+    let x = -100;
+    let y = -100;
+    let frame = 0;
+    let lastMove = 0;
+    let placed = false;
+
+    const draw = (t: number) => {
+      frame = 0;
+      const moving = t - lastMove < 900;
+      cord.classList.toggle('live', moving && !still.matches);
+
+      if (!still.matches) {
+        pts[0].x = x;
+        pts[0].y = y;
+        for (let i = 1; i < LINKS; i++) {
+          const p = pts[i];
+          const vx = (p.x - p.px) * 0.86;
+          const vy = (p.y - p.py) * 0.86;
+          p.px = p.x;
+          p.py = p.y;
+          p.x += vx;
+          p.y += vy + 0.6;
+        }
+        for (let pass = 0; pass < 4; pass++) {
+          for (let i = 1; i < LINKS; i++) {
+            const a = pts[i - 1];
+            const b = pts[i];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const d = Math.hypot(dx, dy) || 1;
+            const k = (d - len(i)) / d;
+            if (i === 1) {
+              b.x -= dx * k;
+              b.y -= dy * k;
+            } else {
+              a.x += dx * k * 0.5;
+              a.y += dy * k * 0.5;
+              b.x -= dx * k * 0.5;
+              b.y -= dy * k * 0.5;
+            }
+          }
+          pts[0].x = x;
+          pts[0].y = y;
+        }
+        // A fast flick can outrun the solver; never let a link stretch far.
+        for (let i = 1; i < LINKS; i++) {
+          const a = pts[i - 1];
+          const b = pts[i];
+          const max = len(i) * (i === 1 ? 1 : 1.3);
+          const d = Math.hypot(b.x - a.x, b.y - a.y);
+          if (d > max) {
+            const k = max / d;
+            const nx = a.x + (b.x - a.x) * k;
+            const ny = a.y + (b.y - a.y) * k;
+            // Move the previous position too, so the jump adds no speed.
+            b.px += nx - b.x;
+            b.py += ny - b.y;
+            b.x = nx;
+            b.y = ny;
+          }
+        }
+
+        let d = `M${pts[1].x.toFixed(1)} ${pts[1].y.toFixed(1)}`;
+        for (let i = 2; i < LINKS - 1; i++) {
+          const mx = (pts[i].x + pts[i + 1].x) / 2;
+          const my = (pts[i].y + pts[i + 1].y) / 2;
+          d += ` Q${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+        }
+        paths.forEach((p) => p.setAttribute('d', d));
+
+        // Point the plug away from the cable.
+        const a = Math.atan2(pts[1].y - y, pts[1].x - x) - Math.PI / 2;
+        root.style.setProperty('--a', `${a.toFixed(3)}rad`);
+      }
+
+      root.style.setProperty('--x', `${x}px`);
+      root.style.setProperty('--y', `${y}px`);
+
+      // Keep simulating while the cable is still swinging.
+      if (moving && !still.matches) frame = requestAnimationFrame(draw);
+    };
+
+    const wake = () => {
+      if (!frame) frame = requestAnimationFrame(draw);
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        if (e.pointerType !== 'mouse') {
+          html.classList.remove('has-cursor');
+          return;
+        }
+        x = e.clientX;
+        y = e.clientY;
+        if (!placed) {
+          placed = true;
+          pts.forEach((p, i) => {
+            const py = y + (i ? PLUG + (i - 1) * GAP : 0);
+            Object.assign(p, { x, y: py, px: x, py });
+          });
+        }
+        html.classList.add('has-cursor');
+        root.classList.remove('gone');
+        lastMove = performance.now();
+
+        const el = e.target instanceof Element ? e.target : null;
+        const over = !!el?.closest(CLICKABLE);
+        root.classList.toggle('over', over);
+        root.classList.toggle('text', !over && !!el?.closest(TEXT));
+        wake();
+      },
+      { passive: true },
+    );
+
+    const flash = root.querySelector<HTMLElement>('[data-cursor-flash]')!;
+    window.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      x = e.clientX;
+      y = e.clientY;
+      lastMove = performance.now();
+      wake();
+      root.classList.add('down');
+      if (still.matches) return;
+      // A ring of light where the plug lands.
+      flash.style.left = `${e.clientX}px`;
+      flash.style.top = `${e.clientY}px`;
+      flash.animate(
+        [
+          { transform: 'scale(0.5)', opacity: 0.9 },
+          { transform: 'scale(1.9)', opacity: 0 },
+        ],
+        { duration: 420, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+      );
+    });
+    window.addEventListener('pointerup', () => root.classList.remove('down'));
+    html.addEventListener('mouseleave', () => {
+      root.classList.add('gone');
+      cord.classList.remove('live');
+    });
+    window.addEventListener('blur', () => root.classList.add('gone'));
+  }
+</script>
