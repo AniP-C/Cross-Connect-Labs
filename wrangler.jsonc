@@ -1,10 +1,11 @@
 // Cloudflare Workers settings for the live site.
-// The Worker only serves the built files in dist/ as static assets; there is no server code.
+// dist/ is served as static assets. worker/index.ts only answers /api/* (call booking).
 // Docs: https://developers.cloudflare.com/workers/static-assets/
 {
   // Must match the Worker's name in the Cloudflare dashboard.
   "name": "cross-connect-labs",
   "compatibility_date": "2026-10-01",
+  "main": "worker/index.ts",
 
   // Wrangler runs this before `wrangler deploy` and `wrangler dev`.
   "build": {
@@ -13,7 +14,13 @@
 
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    // Only the booking API runs code; everything else is a plain file.
+    "run_worker_first": ["/api/*"],
     // Unknown URLs get dist/404.html with a 404 status.
     "not_found_handling": "404-page"
   }
+
+  // Secrets for booking (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN) are set in
+  // the dashboard, never here. See docs/booking.md.
 }

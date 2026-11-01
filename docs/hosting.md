@@ -8,6 +8,7 @@
 | Address | https://cross-connect-labs.anipy2000.workers.dev |
 | Worker name | `cross-connect-labs` |
 | Config | `wrangler.jsonc` in the repo |
+| Code | `worker/index.ts`, only for `/api/*` (call booking, see [booking.md](booking.md)) |
 | Production branch | `main` |
 
 ### How a deploy works
@@ -63,16 +64,58 @@ Check Cloudflare's current limits page if the site grows.
 
 ## Email
 
-You need two things:
+The site shows **hello@crossconnectlabs.com** (`contact.email` in `src/data/site.ts`).
 
-- **An inbox** for `you@yourdomain`.
-- **The contact form**, which doesn't need an inbox on your domain. Web3Forms or Formspree send enquiries to any address, including Gmail. Set it up in `src/data/site.ts`.
+The address only works once mail for the domain is routed somewhere. The free way is **Cloudflare Email Routing**: mail sent to `hello@crossconnectlabs.com` lands in your Gmail.
+
+### Receive mail: Cloudflare Email Routing
+
+The domain's DNS is on Cloudflare. It was registered at Porkbun, and its MX records still point to Porkbun's forwarding servers (`fwd1.porkbun.com`, `fwd2.porkbun.com`), with a Porkbun SPF record. Cloudflare replaces these in step 2.
+
+1. In the Cloudflare dashboard, open **crossconnectlabs.com**, then **Email → Email Routing**, and click **Get started** or **Enable Email Routing**.
+2. Cloudflare lists the DNS records it needs and the old ones that conflict. Let it **delete the Porkbun MX and SPF records** and **add its own**: three `route*.mx.cloudflare.net` MX records and an SPF TXT record.
+3. Go to **Destination addresses → Add destination address**, enter your Gmail, and click the link in the email Cloudflare sends you.
+4. Go to **Routing rules → Create address**:
+   - **Custom address:** `hello`
+   - **Action:** Send to an email
+   - **Destination:** your Gmail
+5. Optional: turn on **Catch-all** and send it to the same Gmail, so `anything@crossconnectlabs.com` also arrives.
+6. Test it: from a different email account, send a message to `hello@crossconnectlabs.com`. It should arrive in Gmail within a minute.
+
+### Reply as hello@: Gmail "Send mail as"
+
+1. Turn on 2-Step Verification on your Google account. Then go to https://myaccount.google.com/apppasswords and create an app password called `crossconnect smtp`.
+2. In Gmail, go to **Settings → See all settings → Accounts and Import → Send mail as → Add another email address**.
+   - **Name:** Cross-Connect Labs
+   - **Email:** `hello@crossconnectlabs.com`
+   - Untick **Treat as an alias**.
+3. Enter these SMTP settings:
+   - **Server:** `smtp.gmail.com`
+   - **Port:** `587`
+   - **Username:** your Gmail address
+   - **Password:** the app password from step 1
+   - **TLS:** on
+4. Gmail sends a code to `hello@crossconnectlabs.com`, which now forwards to you. Enter the code.
+5. In Cloudflare, go to **DNS → Records** and edit the SPF TXT record on `crossconnectlabs.com` to include Google:
+   ```
+   v=spf1 include:_spf.mx.cloudflare.net include:_spf.google.com ~all
+   ```
+6. Add a DMARC record so mail providers trust the domain:
+   - **Type:** TXT
+   - **Name:** `_dmarc`
+   - **Content:** `v=DMARC1; p=none; rua=mailto:hello@crossconnectlabs.com`
+
+Now choose "From: hello@crossconnectlabs.com" when you reply in Gmail.
+
+### Contact form
+
+The contact form doesn't need an inbox on your domain. It opens WhatsApp with the message typed in. For a form that delivers by email instead, set up Web3Forms or Formspree in `src/data/site.ts`.
 
 ### Inbox options
 
 | Option | Cost (USD) | Notes |
 | --- | --- | --- |
-| **Cloudflare Email Routing** | Free | Forwards `hello@yourdomain` to your Gmail. To reply *as* that address, add it in Gmail under **Settings → Accounts → Send mail as**, using an SMTP relay such as Brevo's free plan. Set up the SPF and DKIM records or replies land in spam. |
+| **Cloudflare Email Routing** (set up above) | Free | Forwards `hello@crossconnectlabs.com` to your Gmail. Replies go out through Gmail's "Send mail as". |
 | **Zoho Mail Forever Free** | Free | Up to 5 users, 5 GB each, one domain. Web and Zoho apps only; no IMAP, so Outlook and other mail apps can't connect. |
 | **Google Workspace Business Starter** | $7 per user a month (yearly), $8.40 (monthly) | Gmail on your domain, plus Drive and Meet. The closest to what you use now. |
 | **Microsoft 365 Business Basic** | $7 per user a month (yearly), $8.40 (monthly) | Outlook on your domain, plus Teams and OneDrive. |

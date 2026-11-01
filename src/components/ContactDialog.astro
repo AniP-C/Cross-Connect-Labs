@@ -1,5 +1,9 @@
 ---
-import { budgetChoices, contact, site, topics } from '../data/site';
+import { booking, budgetChoices, contact, site, topics } from '../data/site';
+
+// Used by the call dialog when online booking isn't available.
+const callWhatsapp = contact.whatsapp ? `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.callMessage)}` : '';
+const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURIComponent('Call request')}&body=${encodeURIComponent(contact.callMessage)}` : '';
 ---
 
 <dialog
@@ -83,6 +87,72 @@ import { budgetChoices, contact, site, topics } from '../data/site';
       <h3>Connected.</h3>
       <p data-done-text></p>
       <pre class="copy lcd" data-done-copy hidden></pre>
+      <button type="button" class="back" data-close>back to the site</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="dialog" aria-labelledby="book-title" data-book-dialog>
+  <div class="sheet surface">
+    <div class="head">
+      <div>
+        <h2 id="book-title">{booking.cta}</h2>
+        <p>A free {booking.minutes}-minute call on Google Meet. Tell us roughly what’s going on and we’ll work out the rest together.</p>
+      </div>
+      <button type="button" class="close" data-close aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+
+    <p class="status" data-book-status aria-live="polite">checking the line…</p>
+
+    <div class="picker" data-book-picker hidden>
+      <fieldset>
+        <legend>Pick a day</legend>
+        <div class="chips" data-book-days></div>
+      </fieldset>
+      <fieldset>
+        <legend>Pick a time <span class="soft" data-book-zone></span></legend>
+        <div class="chips" data-book-times></div>
+      </fieldset>
+
+      <form data-book-form novalidate>
+        <div class="fields">
+          <label>
+            Your name
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+          <label>
+            <span>Email <span class="soft">for the invite</span></span>
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+        </div>
+        <label>
+          <span>Anything we should know? <span class="soft">Optional</span></span>
+          <textarea name="note" rows="2"></textarea>
+        </label>
+        <input type="checkbox" name="botcheck" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="actions">
+          <span class="note" data-book-note aria-live="polite">Pick a time first.</span>
+          <button type="submit" class="send" data-book-send>book the call →</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="fallback" data-book-fallback hidden>
+      <p data-book-fallback-text>Online booking isn’t patched in yet. Message us and we’ll set up a time that suits you.</p>
+      <div class="links">
+        {callWhatsapp && <a class="cable-link" href={callWhatsapp} target="_blank" rel="noopener">WhatsApp {contact.whatsappDisplay} <span aria-hidden="true">→</span></a>}
+        {callEmail && <a class="cable-link" href={callEmail}>Email {contact.emailDisplay} <span aria-hidden="true">→</span></a>}
+      </div>
+    </div>
+
+    <div class="done" data-book-done hidden>
+      <span class="led big" aria-hidden="true"></span>
+      <h3>Booked.</h3>
+      <p data-book-done-text></p>
       <button type="button" class="back" data-close>back to the site</button>
     </div>
   </div>
@@ -323,6 +393,67 @@ import { budgetChoices, contact, site, topics } from '../data/site';
     user-select: all;
   }
 
+  /* Call booking. Day and time buttons are made by src/scripts/booking.ts, hence :global. */
+  .status {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .picker,
+  .fallback {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chips :global(.pick) {
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--chip-line);
+    background: var(--fill);
+    color: var(--body);
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .chips :global(.pick[aria-pressed='true']) {
+    background: var(--copper);
+    border-color: var(--copper);
+    color: var(--on-copper);
+  }
+
+  .chips :global(.pick:focus-visible) {
+    outline: 2px solid var(--copper);
+    outline-offset: 2px;
+  }
+
+  input[type='email'] {
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--chip-line);
+    background: var(--input-bg);
+    color: var(--text);
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .fallback p {
+    margin: 0;
+    color: var(--body);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+  }
+
   .back {
     min-height: 48px;
     padding: 0 20px;
@@ -337,6 +468,7 @@ import { budgetChoices, contact, site, topics } from '../data/site';
 </style>
 
 <script>
+  import '../scripts/booking';
   import { CONTACT_EVENT, bindContactButtons, type ContactPrefill } from '../scripts/contact-bus';
 
   bindContactButtons();

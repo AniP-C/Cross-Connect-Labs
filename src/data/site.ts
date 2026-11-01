@@ -8,22 +8,45 @@ export const site = {
   // Shown as a badge in the hero. Set to '' to hide it.
   availability: 'booking projects for december',
   title: 'Cross-Connect Labs · Websites, apps, WhatsApp bots and automation',
+  // About 155 characters, so search results show all of it.
   description:
-    'A small studio of developers and electrical engineers. Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work. No minimum budget.',
+    'Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work from a small studio of engineers. No minimum budget.',
+  // Describes public/og-image.png for screen readers when the link is shared.
+  imageAlt: 'Cross-Connect Labs: Plug in your problem. We’ll wire the fix. No minimum budget.',
 };
 
 export const contact = {
   // Digits only, with country code, e.g. '919876543210'. Used for wa.me links.
-  whatsapp: '',
-  whatsappDisplay: '[+00 00000 00000]',
-  // Booking page link (Cal.com, Microsoft Bookings, Calendly…). Leave '' to hide the button.
-  bookingUrl: '',
-  email: '',
-  emailDisplay: '[hello@yourdomain.com]',
+  whatsapp: '917900842047',
+  whatsappDisplay: '+91 79008 42047',
+  // Typed into WhatsApp for the visitor when they tap the number.
+  whatsappMessage: 'Hi Cross-Connect Labs, I have an idea I’d like to talk about.',
+  // Typed into WhatsApp when online booking isn't set up and the visitor asks for a call.
+  callMessage: 'Hi Cross-Connect Labs, I’m not sure yet what I need. Can we hop on a call?',
+  email: 'hello@crossconnectlabs.com',
+  emailDisplay: 'hello@crossconnectlabs.com',
+  emailSubject: 'Project enquiry',
   // Optional form service. Web3Forms: endpoint 'https://api.web3forms.com/submit' plus accessKey.
   // Formspree: endpoint 'https://formspree.io/f/xxxxxxx' and leave accessKey empty.
   formEndpoint: '',
   formAccessKey: '',
+};
+
+// "Hop on a call" booking. The Worker (worker/index.ts) reads this too: it offers these slots
+// from your Google Calendar and books them with a Meet link. Setup: docs/booking.md.
+export const booking = {
+  heading: 'No idea what you’re looking for?',
+  cta: 'Let’s hop on a call',
+  timeZone: 'Asia/Kolkata',
+  // 0 = Sunday … 6 = Saturday.
+  days: [1, 2, 3, 4, 5, 6],
+  dayStart: '10:00',
+  dayEnd: '18:00',
+  minutes: 30,
+  // How far ahead visitors can book, and the shortest notice you accept.
+  daysAhead: 14,
+  noticeHours: 3,
+  eventTitle: 'Intro call · Cross-Connect Labs',
 };
 
 export const nav = [

@@ -13,10 +13,14 @@ import { site } from '../data/site';
 interface Props {
   title?: string;
   description?: string;
+  // Keep a page out of search results (the 404 page).
+  noindex?: boolean;
 }
 
-const { title = site.title, description = site.description } = Astro.props;
-const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const { title = site.title, description = site.description, noindex = false } = Astro.props;
+const canonical = Astro.site && !noindex ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// Shown when the link is shared. Made by `npm run og-image`.
+const image = new URL('/og-image.png', Astro.site ?? Astro.url).href;
 ---
 
 <!doctype html>
@@ -26,11 +30,21 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="sitemap" href="/sitemap.xml" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_IN" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={site.imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content={site.imageAlt} />
     <meta name="theme-color" content="#EEEFF1" data-theme-color />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -49,6 +63,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
         if (m) m.setAttribute('content', t === 'dark' ? '#18181B' : '#EEEFF1');
       })();
     </script>
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

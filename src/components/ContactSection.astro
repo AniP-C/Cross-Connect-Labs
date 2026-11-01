@@ -1,10 +1,9 @@
 ---
 import IconMark from './IconMark.astro';
-import { contact, nav } from '../data/site';
+import { booking, contact, nav } from '../data/site';
 
-const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : undefined;
-const bookHref = contact.bookingUrl || undefined;
-const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
+const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.whatsappMessage)}` : undefined;
+const mailHref = contact.email ? `mailto:${contact.email}?subject=${encodeURIComponent(contact.emailSubject)}` : undefined;
 ---
 
 <section id="contact" class="contact">
@@ -29,10 +28,13 @@ const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
       <span class="plug-label">plug in to start a project</span>
     </button>
 
-    {bookHref && <a class="book" href={bookHref} target="_blank" rel="noopener">or book a call with us →</a>}
+    <p class="call">
+      {booking.heading}
+      <button type="button" class="cable-link" data-book>{booking.cta} <span aria-hidden="true">→</span></button>
+    </p>
 
     <div class="direct">
-      <span class="item"><span class="led"></span>WhatsApp {waHref ? <a href={waHref}>{contact.whatsappDisplay}</a> : contact.whatsappDisplay}</span>
+      <span class="item"><span class="led"></span>WhatsApp {waHref ? <a href={waHref} target="_blank" rel="noopener">{contact.whatsappDisplay}</a> : contact.whatsappDisplay}</span>
       <span class="item">Email {mailHref ? <a href={mailHref}>{contact.emailDisplay}</a> : contact.emailDisplay}</span>
     </div>
 
@@ -184,11 +186,15 @@ const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
     font-size: 14px;
   }
 
-  .book {
-    font-family: var(--mono);
-    font-size: 15px;
-    color: var(--text);
-    text-underline-offset: 4px;
+  .call {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 12px;
+    font-size: 17px;
+    color: var(--body);
   }
 
   .direct {

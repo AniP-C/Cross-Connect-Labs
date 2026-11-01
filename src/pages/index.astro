@@ -11,9 +11,42 @@ import Pricing from '../components/Pricing.astro';
 import Rack from '../components/Rack.astro';
 import Rails from '../components/Rails.astro';
 import SignalPath from '../components/SignalPath.astro';
+import { contact, faqs, modules, site } from '../data/site';
+
+// Structured data for search engines: who we are, what we offer, and the FAQ.
+// Anything still a [placeholder] is left out.
+const real = (text: string) => !text.includes('[');
+const home = Astro.site?.href ?? Astro.url.href;
+const structured = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: site.name,
+    url: home,
+    description: site.description,
+    logo: new URL('/apple-touch-icon.png', home).href,
+    image: new URL('/og-image.png', home).href,
+    email: contact.email || undefined,
+    telephone: contact.whatsapp ? `+${contact.whatsapp}` : undefined,
+    priceRange: 'No minimum budget',
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Services',
+      itemListElement: modules.map((m) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: m.name, description: m.desc } })),
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs
+      .filter((f) => real(f.q) && real(f.a))
+      .map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
 ---
 
 <BaseLayout>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(structured)} />
   <div class="page">
     <Rails />
     <Header />

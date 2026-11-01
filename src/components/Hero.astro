@@ -1,6 +1,6 @@
 ---
 import PatchBay from './PatchBay.astro';
-import { site } from '../data/site';
+import { booking, site } from '../data/site';
 ---
 
 <section id="top" class="hero" data-torch>
@@ -16,6 +16,10 @@ import { site } from '../data/site';
         We’ll reply with the cost. No minimum budget.
       </p>
       <p class="list">websites · apps · online stores · whatsapp bots · clinic crms · ai · plc/scada</p>
+      <p class="call">
+        {booking.heading}
+        <button type="button" class="cable-link" data-book>{booking.cta} <span aria-hidden="true">→</span></button>
+      </p>
     </div>
     <div class="bay">
       <PatchBay />
@@ -115,6 +119,15 @@ import { site } from '../data/site';
     font-family: var(--mono);
     font-size: 13px;
     color: var(--muted);
+  }
+
+  .call {
+    margin: -10px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 12px;
+    color: var(--body);
   }
 
   @media (max-width: 480px) {

@@ -6,8 +6,9 @@
 // Other address:   npm run test:smoke -- https://crossconnectlabs.com/
 // Screenshots:     set SHOTS=some-folder to save them there.
 //
-// It never sends a real enquiry. If the contact form is set up (form service,
-// WhatsApp or email in src/data/site.ts), the send step is skipped.
+// It never sends a real enquiry or books a real call. If the contact form is set up (form service,
+// WhatsApp or email in src/data/site.ts), the send step is skipped. Booking is tested
+// against a stand-in API inside the browser.
 
 const { chromium } = require('playwright');
 const fs = require('node:fs');
@@ -97,13 +98,14 @@ const shot = async (target, name, options = {}) => {
   });
   if (configured) {
     skip('form: send', 'contact form is set up, so no real enquiry is sent');
+    await page.click('[data-contact-dialog] .close');
   } else {
     await page.fill('input[name="name"]', 'Smoke Test');
     await page.fill('input[name="contact"]', 'test@example.com');
     await page.click('[data-send]');
     ok('form: not set up, so it shows the message to copy', await page.isVisible('[data-done-copy]'));
+    await page.click('[data-contact-dialog] .back');
   }
-  await page.click('.back');
   ok('form: closes', !(await dialogOpen()));
 
   // Rack: a "patch in" button opens the form with its topic.
@@ -112,6 +114,37 @@ const shot = async (target, name, options = {}) => {
   await patchIn.click();
   ok('rack: "patch in" opens the form with its topic', (await dialogOpen()) && (await checkedTopic()) === rackTopic, rackTopic);
   await page.keyboard.press('Escape');
+
+  // Call booking. The browser answers /api/* itself here, so nothing is ever booked.
+  const bookOpen = () => page.evaluate(() => document.querySelector('[data-book-dialog]').open);
+  await page.route('**/api/slots', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html>' }));
+  await page.click('#top [data-book]');
+  await page.waitForSelector('[data-book-fallback]:not([hidden])');
+  ok('booking: "hop on a call" opens the call dialog', await bookOpen());
+  const waLink = await page.locator('[data-book-fallback] a[href*="wa.me"]').count();
+  ok('booking: without the booking API it offers WhatsApp or email', waLink + (await page.locator('[data-book-fallback] a[href^="mailto:"]').count()) > 0);
+  await page.keyboard.press('Escape');
+
+  const hour = 3600e3;
+  const slot = (h) => new Date(Math.ceil((Date.now() + h * hour) / hour) * hour).toISOString();
+  await page.unroute('**/api/slots');
+  await page.route('**/api/slots', (r) => r.fulfill({ json: { minutes: 30, slots: [slot(26), slot(27), slot(50)] } }));
+  await page.route('**/api/book', (r) => r.fulfill({ json: { ok: true } }));
+  await page.click('#contact [data-book]');
+  await page.waitForSelector('[data-book-picker]:not([hidden])');
+  ok('booking: shows days and times', (await page.locator('[data-book-days] .pick').count()) >= 2 && (await page.locator('[data-book-times] .pick').count()) >= 1);
+  const time = page.locator('[data-book-times] .pick').first();
+  await time.click();
+  ok('booking: chosen time is pressed', (await time.getAttribute('aria-pressed')) === 'true');
+  await shot(page, 'booking');
+  await page.fill('[data-book-form] input[name="name"]', 'Smoke Test');
+  await page.fill('[data-book-form] input[name="email"]', 'test@example.com');
+  await page.click('[data-book-send]');
+  await page.waitForSelector('[data-book-done]:not([hidden])');
+  ok('booking: confirms the call', ((await page.textContent('[data-book-done-text]')) || '').includes('test@example.com'));
+  await page.click('[data-book-done] .back');
+  ok('booking: closes', !(await bookOpen()));
+  await page.unroute('**/api/*');
 
   // Case files.
   await page.click('[data-case="2"]');

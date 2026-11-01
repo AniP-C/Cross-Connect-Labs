@@ -59,6 +59,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 | FAQ | `Faq.astro` | Native `<details>` items. |
 | Contact | `ContactSection.astro` | "Let's connect." with a plug button. |
 | Form | `ContactDialog.astro` | Native `<dialog>`. Any button with `data-contact` opens it (see `src/scripts/contact-bus.ts`). |
+| Call booking | `ContactDialog.astro` + `src/scripts/booking.ts` | Second `<dialog>`, sharing the form's styles. Any button with `data-book` opens it: "No idea what you're looking for? Let's hop on a call". Day and time buttons use `aria-pressed`. See [booking.md](booking.md). |
 | Rails | `Rails.astro` | Rack rails at the page edges on screens 1280px and wider. |
 
 ## Interaction rules
