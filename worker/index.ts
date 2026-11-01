@@ -23,6 +23,11 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
+    // Google Search Console checks its verification file at the exact .html address, but the
+    // asset server redirects *.html to the address without it. Serve it in place instead.
+    if (/^\/google[0-9a-f]+\.html$/.test(pathname)) {
+      return env.ASSETS.fetch(new Request(new URL(pathname.slice(0, -'.html'.length), request.url), request));
+    }
     if (!pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
     if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REFRESH_TOKEN) {
       return json({ error: 'booking is not set up' }, 503);
