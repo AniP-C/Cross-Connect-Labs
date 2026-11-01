@@ -37,6 +37,12 @@ export const contact = {
 export const booking = {
   heading: 'No idea what you’re looking for?',
   cta: 'Let’s hop on a call',
+  // Under the enquiry form, for people who'd rather talk first.
+  unsure: 'Still not sure what you need?',
+  talk: 'Talk it through on a free call',
+  // At the top of the enquiry form, so a call is one tap away from the start.
+  quick: 'Rather talk than type?',
+  quickCta: 'Patch into a free call',
   timeZone: 'Asia/Kolkata',
   // 0 = Sunday … 6 = Saturday.
   days: [1, 2, 3, 4, 5, 6],
@@ -47,6 +53,33 @@ export const booking = {
   daysAhead: 14,
   noticeHours: 3,
   eventTitle: 'Intro call · Cross-Connect Labs',
+};
+
+// The scrolling strip under the hero: where the team has worked, then clients we're live for.
+// `live: true` lights the LED on that group's cards.
+export const patchedIn = {
+  label: 'Our team’s experience includes',
+  caption: 'Three engineers from TCS, AtkinsRéalis and Salesforce, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
+  groups: [
+    {
+      tag: 'worked at',
+      live: false,
+      items: [
+        { name: 'TCS', note: 'Tata Consultancy Services' },
+        { name: 'AtkinsRéalis', note: 'engineering' },
+        { name: 'Salesforce', note: 'CRM software' },
+      ],
+    },
+    {
+      tag: 'live for',
+      live: true,
+      items: [
+        { name: 'Atul Dairy', note: 'store + Android app' },
+        { name: 'Aura Stitch', note: 'fashion storefront' },
+        { name: 'Aditya Dresses', note: 'counter billing' },
+      ],
+    },
+  ],
 };
 
 export const nav = [
@@ -66,7 +99,7 @@ export const builds = [
   { label: 'Online store', topic: 'Online store', time: '3–6 weeks' },
   { label: 'Website', topic: 'Website', time: '1–3 weeks' },
   { label: 'AI automation', topic: 'AI automation', time: '1–3 weeks' },
-  { label: 'PLC · SCADA', topic: 'Electrical work', time: 'per project' },
+  { label: 'PLC · SCADA', topic: 'PLC & automation', time: 'per project' },
 ];
 
 export const modules = [
@@ -77,7 +110,7 @@ export const modules = [
   { code: 'MOD-05 · WA', name: 'WhatsApp bots', time: '1–3 wks', topic: 'WhatsApp bot', desc: 'Answers, bookings and order updates on WhatsApp, with hand-over to you.' },
   { code: 'MOD-06 · CRM', name: 'Clinic bot & CRM', time: '3–6 wks', topic: 'Clinic bot & CRM', desc: 'Appointments, reminders and patient records. No medical advice, urgent messages go to staff.' },
   { code: 'MOD-07 · AI', name: 'AI automation', time: '1–3 wks', topic: 'AI automation', desc: 'AI that reads emails and documents, fills sheets and drafts replies, with you approving.' },
-  { code: 'MOD-08 · PLC', name: 'Electrical automation', time: 'per project', topic: 'Electrical work', desc: 'PLC and SCADA work, energy and solar monitoring, plant data over Modbus.' },
+  { code: 'MOD-08 · PLC', name: 'Electrical automation', time: 'per project', topic: 'PLC & automation', desc: 'PLC and SCADA work, energy and solar monitoring, plant data over Modbus.' },
 ];
 
 // Case files. `kind` picks the readout screen: a `store` case fills it from `screen`, a `flow` case
@@ -168,7 +201,7 @@ export const faqs = [
   { q: 'Do you do electrical work on site?', a: '[Say where you can work on site.] Most PLC, SCADA and monitoring work can be done remotely once we have access to the system.' },
 ];
 
-export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'Electrical work', 'Small job / fix', 'Not sure yet'];
+export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'PLC & automation', 'Small job / fix', 'Not sure yet'];
 export const budgetChoices = ['Not sure', 'Tiny', 'Small', 'Medium', 'Large'];
 
 // Privacy policy at /privacy. Google needs this link to publish the booking app.

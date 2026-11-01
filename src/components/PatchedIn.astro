@@ -1,0 +1,288 @@
+---
+import { patchedIn } from '../data/site';
+
+// The strip is drawn twice so the loop has no seam; screen readers only get the first copy.
+const { groups } = patchedIn;
+---
+
+<section class="patched" aria-labelledby="patched-title" data-patched>
+  <div class="wrap">
+    <div class="frame">
+      <div class="row">
+        <div class="lead">
+          <h2 id="patched-title"><span class="led" aria-hidden="true"></span>{patchedIn.label}</h2>
+          <button type="button" class="pause" aria-pressed="false" aria-label="Pause the scrolling list" data-pause>
+            <svg class="i-pause" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <rect x="1.5" y="1" width="3" height="10" rx="1"></rect>
+              <rect x="7.5" y="1" width="3" height="10" rx="1"></rect>
+            </svg>
+            <svg class="i-play" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3 1.5v9l7.5-4.5z"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="window">
+          <div class="track">
+            {
+              [0, 1].map((copy) => (
+                <ul class="run" aria-hidden={copy === 1 ? 'true' : undefined}>
+                  {groups.map((g) => (
+                    <>
+                      <li class="tag">{g.tag}</li>
+                      {g.items.map((item) => (
+                        <li class="plate surface">
+                          <span class="screw sm tl" aria-hidden="true" />
+                          <span class="screw sm br" aria-hidden="true" />
+                          <span class={g.live ? 'led' : 'led off'} aria-hidden="true" />
+                          <span class="name">{item.name}</span>
+                          <span class="note">{item.note}</span>
+                        </li>
+                      ))}
+                    </>
+                  ))}
+                </ul>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+      <p class="caption">{patchedIn.caption}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .frame {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 26px 0 24px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .lead {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .pause {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--chip-line);
+    background: var(--fill);
+    color: var(--text);
+  }
+
+  .pause svg {
+    fill: currentColor;
+  }
+
+  .i-play,
+  .pause[aria-pressed='true'] .i-pause {
+    display: none;
+  }
+
+  .pause[aria-pressed='true'] .i-play {
+    display: block;
+  }
+
+  .window {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    /* Room for the plates' shadow; the fade masks the ends. The mask only uses alpha, so its colour is never drawn. */
+    padding: 6px 0 14px;
+    margin: -6px 0 -14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    animation: slide 52s linear infinite;
+  }
+
+  .patched:hover .track,
+  .patched:focus-within .track,
+  .patched.paused .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes slide {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .run {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+    padding: 0 14px 0 0;
+    list-style: none;
+  }
+
+  /* Like a strip of label tape on the rack: copper text with a cable running into it. */
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--copper-text);
+    white-space: nowrap;
+  }
+
+  .tag::after {
+    content: '';
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--copper-line);
+  }
+
+  .plate {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 176px;
+    height: 84px;
+    padding: 0 30px;
+    border-radius: 14px;
+    white-space: nowrap;
+  }
+
+  .tl {
+    top: 8px;
+    left: 8px;
+  }
+
+  .br {
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .plate .led {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 7px;
+    height: 7px;
+  }
+
+  .led.off {
+    background: var(--led-off);
+    box-shadow: none;
+  }
+
+  .name {
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .note {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .caption {
+    margin: 0;
+    max-width: 52em;
+    color: var(--body);
+    font-size: 15px;
+  }
+
+  /* Phones: the label and pause button sit above the strip. */
+  @media (max-width: 760px) {
+    .row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .lead {
+      justify-content: space-between;
+    }
+
+    .plate {
+      min-width: 150px;
+      height: 76px;
+      padding: 0 24px;
+    }
+
+    .name {
+      font-size: 18px;
+    }
+  }
+
+  /* No motion: show every plate, wrapped, with no copy and no pause button. */
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      width: auto;
+      animation: none;
+    }
+
+    .run {
+      flex-wrap: wrap;
+      padding: 0;
+    }
+
+    .run[aria-hidden],
+    .pause {
+      display: none;
+    }
+
+    .window {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+</style>
+
+<script>
+  const strip = document.querySelector<HTMLElement>('[data-patched]');
+  const pause = strip?.querySelector<HTMLButtonElement>('[data-pause]');
+  if (strip && pause) {
+    pause.addEventListener('click', () => {
+      const paused = pause.getAttribute('aria-pressed') !== 'true';
+      pause.setAttribute('aria-pressed', String(paused));
+      pause.setAttribute('aria-label', paused ? 'Play the scrolling list' : 'Pause the scrolling list');
+      strip.classList.toggle('paused', paused);
+    });
+  }
+</script>

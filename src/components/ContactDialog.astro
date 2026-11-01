@@ -29,6 +29,12 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       </button>
     </div>
 
+    <p class="quick" data-quick>
+      <span class="led" aria-hidden="true"></span>
+      <span>{booking.quick}</span>
+      <button type="button" class="cable-link" data-book>{booking.quickCta} <span aria-hidden="true">→</span></button>
+    </p>
+
     <form data-form novalidate>
       <fieldset>
         <legend>What do you need?</legend>
@@ -80,6 +86,11 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
         <span class="note" data-note aria-live="polite">We reply within {site.replyTime} with the cost.</span>
         <button type="submit" class="send" data-send>send →</button>
       </div>
+
+      <p class="talk">
+        {booking.unsure}
+        <button type="button" class="cable-link" data-book>{booking.talk} <span aria-hidden="true">→</span></button>
+      </p>
     </form>
 
     <div class="done" data-done hidden>
@@ -162,6 +173,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
   .dialog {
     width: min(640px, calc(100% - 32px));
     max-height: calc(100% - 32px);
+    max-height: calc(100dvh - 32px);
     padding: 0;
     border: 0;
     background: transparent;
@@ -182,7 +194,10 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
     flex-direction: column;
     gap: 22px;
     max-height: calc(100vh - 32px);
+    /* Phone browsers count the hidden address bar in 100vh, which cut off the send button. */
+    max-height: calc(100dvh - 32px);
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .head {
@@ -352,6 +367,35 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
     font-size: 15px;
   }
 
+  .quick {
+    margin: -6px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 12px;
+    padding: 6px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--copper-line);
+    background: var(--copper-tint);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .quick .cable-link {
+    min-height: 40px;
+  }
+
+  .talk {
+    margin: -6px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 12px;
+    color: var(--body);
+    font-size: 15px;
+  }
+
   .send:disabled {
     opacity: 0.6;
     cursor: progress;
@@ -504,7 +548,9 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       if (prefill.budget) setRadio('budget', prefill.budget);
       if (prefill.message !== undefined) messageInput.value = prefill.message;
       if (!dialog!.open) dialog!.showModal();
-      nameInput.focus();
+      // Keep the sheet at the top so the heading and the call line show first, even on a phone.
+      nameInput.focus({ preventScroll: true });
+      dialog!.querySelector('.sheet')!.scrollTop = 0;
     }
 
     function finish(text: string, copy?: string) {
@@ -519,6 +565,15 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       note.textContent = text;
       note.classList.add('error');
     }
+
+    // The call buttons at the top and bottom: swap to the booking dialog, carrying what they've typed into its note.
+    const toCall = () => {
+      const note = document.querySelector<HTMLTextAreaElement>('[data-book-form] textarea[name="note"]');
+      const said = [radioValue('topic'), messageInput.value.trim()].filter((t) => t && t !== 'Not sure yet').join('. ');
+      if (note && !note.value.trim() && said) note.value = said;
+      dialog.close();
+    };
+    dialog.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', toCall));
 
     window.addEventListener(CONTACT_EVENT, (event) => open((event as CustomEvent<ContactPrefill>).detail ?? {}));
 
