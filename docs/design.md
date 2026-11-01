@@ -54,7 +54,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 | Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. The four current ones are examples. |
 | Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." |
 | Process | `SignalPath.astro` | How a project runs, step by step. |
-| About | `SpecSheet.astro` | You, as a spec sheet. Photo placeholder. |
+| ~~About~~ | removed | Site speaks as "we"; no photo or about section. |
 | Testimonials | `FieldReports.astro` | Client quotes (placeholders). |
 | FAQ | `Faq.astro` | Native `<details>` items. |
 | Contact | `ContactSection.astro` | "Let's connect." with a plug button. |

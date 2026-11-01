@@ -3,13 +3,14 @@ import IconMark from './IconMark.astro';
 import { contact, nav } from '../data/site';
 
 const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : undefined;
+const bookHref = contact.bookingUrl || undefined;
 const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
 ---
 
 <section id="contact" class="contact">
   <div class="wrap inner">
     <h2>Let’s <span class="accent">connect.</span></h2>
-    <p class="lede">Send me a few lines. I’ll look at it and tell you the cost. No minimum budget, and the first chat is free.</p>
+    <p class="lede">Send us a few lines. We’ll look at it and tell you the cost. No minimum budget, and the first chat is free.</p>
 
     <button type="button" class="plugbtn surface" data-contact aria-label="Start a project">
       <span class="rig" aria-hidden="true">
@@ -27,6 +28,8 @@ const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
       </span>
       <span class="plug-label">plug in to start a project</span>
     </button>
+
+    {bookHref && <a class="book" href={bookHref} target="_blank" rel="noopener">or book a call with us →</a>}
 
     <div class="direct">
       <span class="item"><span class="led"></span>WhatsApp {waHref ? <a href={waHref}>{contact.whatsappDisplay}</a> : contact.whatsappDisplay}</span>
@@ -179,6 +182,13 @@ const mailHref = contact.email ? `mailto:${contact.email}` : undefined;
   .plug-label {
     font-family: var(--mono);
     font-size: 14px;
+  }
+
+  .book {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--text);
+    text-underline-offset: 4px;
   }
 
   .direct {

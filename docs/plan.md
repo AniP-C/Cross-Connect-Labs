@@ -53,7 +53,6 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [ ] Availability badge text (`site.availability`; it says "booking projects for december")
 - [ ] Contact form: add a Web3Forms key, or your WhatsApp number, or your email (`contact` block)
 - [ ] Contact details shown on the page: `whatsappDisplay`, `emailDisplay`
-- [ ] Your photo (see the comment in `src/components/SpecSheet.astro`)
 - [ ] Case studies: replace the four examples with real projects and set `example: false`, including real results in place of `[Your measured result]`
 - [ ] Field reports (testimonials): real quotes, or remove the section until you have them
 - [ ] FAQ: data protection answer and the area you can work on site
@@ -70,6 +69,7 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [ ] **Analytics.** Cloudflare Web Analytics is free and needs no cookie banner.
 - [ ] **Search.** Add a sitemap (`@astrojs/sitemap`), then submit the site to Google Search Console.
 - [ ] **Google Business Profile**, if you want local clients to find you.
+- [ ] **Custom booking dialog.** Build an on-brand (copper and navy) "book a call" dialog on the site, with Google Calendar behind it (free/busy via the Google Calendar API, bookings created as events with a Meet link). Chosen over Cal.com because Cal.com's brand colours and branding removal are paid (Teams) features. Until then, `contact.bookingUrl` in `src/data/site.ts` is empty and the button is hidden.
 
 ### Later
 
