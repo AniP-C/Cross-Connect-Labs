@@ -51,7 +51,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 | Header | `Header.astro` | Logo, menu, "online" light, DAY/NIGHT switch. On phones the menu becomes a second row that scrolls sideways. |
 | Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Pick a problem and a build: the cable moves and the readout updates. "Flip to send" opens the contact form already filled in. A copper torch glow follows the mouse. The panel has a faint circuit-trace pattern. |
 | Services | `Rack.astro` | Eight rack modules, each with a "patch in" button that opens the form with that topic. |
-| Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. The four current ones are examples. |
+| Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. Five real projects; mark any placeholder with `example: true`. |
 | Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." |
 | Process | `SignalPath.astro` | How a project runs, step by step. |
 | ~~About~~ | removed | Site speaks as "we"; no photo or about section. |

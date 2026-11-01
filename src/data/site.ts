@@ -80,35 +80,56 @@ export const modules = [
   { code: 'MOD-08 · PLC', name: 'Electrical automation', time: 'per project', topic: 'Electrical work', desc: 'PLC and SCADA work, energy and solar monitoring, plant data over Modbus.' },
 ];
 
-// Example projects. Replace with real work, and set `example: false` once they are real.
+// Case files. `kind` picks the readout screen: a `store` case fills it from `screen`, a `flow` case
+// lists its steps (`hot` ones glow copper). `link` adds a visit link under the result.
+// Set `example: true` on anything that isn't real work yet.
 export const cases = [
   {
-    code: 'CF-01', kind: 'chat', example: true,
-    title: 'Clinic booking bot and patient CRM', sector: 'Clinic · WhatsApp bot + CRM', stack: 'WhatsApp API · Node.js · PostgreSQL',
-    problem: 'Reception spent most mornings on the phone taking bookings.',
-    built: 'A WhatsApp bot that offers free slots from the doctor’s calendar, books them and sends reminders, plus a simple patient CRM.',
-    result: '[Your measured result]',
+    code: 'CF-01', kind: 'store', example: false,
+    title: 'Dairy shop online store and Android app', sector: 'Dairy shop, Aligarh · Store + app', stack: 'React · Cloudflare D1 · Razorpay',
+    problem: 'Milk, paneer and ghee orders came in by phone and WhatsApp, with no way to pay online or sign up for daily milk.',
+    built: 'A store and Android app with Google or OTP sign-in, Cash on Delivery and Razorpay, monthly milk plans and order tracking with push alerts. The owner runs prices, stock, offers and delivery times from an admin panel.',
+    result: 'Live at atuldairy.com and taking real payments. Checkout was up in ten days, and the Android app is in closed testing on Google Play.',
+    link: { label: 'atuldairy.com', href: 'https://atuldairy.com' },
+    screen: {
+      tiles: [{ label: 'Orders today', value: '18' }, { label: 'Milk plans', value: '42' }, { label: 'Low stock', value: '2', warn: true }],
+      orders: [{ no: '#1042', item: 'Paneer · 500 g', status: 'Paid' }, { no: '#1041', item: 'Milk plan · 30 days', status: 'Active' }],
+    },
   },
   {
-    code: 'CF-02', kind: 'store', example: true,
-    title: 'Online store with admin panel', sector: 'Clothing brand · E-commerce', stack: 'Next.js · Razorpay · PostgreSQL',
-    problem: 'Orders came in as Instagram messages and lived in a spreadsheet.',
-    built: 'A store with payments and stock by size, an admin panel the owner runs, and WhatsApp order updates.',
-    result: '[Your measured result]',
+    code: 'CF-02', kind: 'store', example: false,
+    title: 'Storefront for a handwoven fashion label', sector: 'Sarees and suit sets · Online store', stack: 'Next.js · Cloudflare D1 + R2 · Razorpay',
+    problem: 'A label selling handloom sarees and suit sets needed a shop as careful as the cloth, one the owner could run without a developer.',
+    built: 'A storefront with collections, occasions, sizes and colours, Google or email sign-in, Cash on Delivery, Razorpay and coupons. The owner’s panel covers orders and couriers, stock by size, sales, page drafts with preview and new-order alerts on the owner’s phone.',
+    result: 'Live at anniethreads.com, built in about five weeks. A new piece is on sale at its own address the moment it is saved.',
+    link: { label: 'anniethreads.com', href: 'https://anniethreads.com' },
+    screen: {
+      tiles: [{ label: 'Orders today', value: '9' }, { label: 'To ship', value: '4' }, { label: 'Low stock', value: '3', warn: true }],
+      orders: [{ no: '#2087', item: 'Dhakai saree · free size', status: 'Paid' }, { no: '#2086', item: 'Co-ord set · M', status: 'Shipped' }],
+    },
   },
   {
-    code: 'CF-03', kind: 'invoice', example: true,
-    title: 'Invoices that file themselves', sector: 'Accounting practice · AI automation', stack: 'n8n · OpenAI · Xero',
-    problem: 'Two people typed every supplier invoice by hand.',
-    built: 'A flow where AI reads each invoice email, checks the budget and creates the bill after one-click approval.',
-    result: '[Your measured result]',
+    code: 'CF-03', kind: 'flow', example: false,
+    title: 'Counter billing for a uniform shop', sector: 'Uniform shop · Billing app', stack: 'React · Google Sheets · Apps Script',
+    problem: 'Bills were written by hand at a crowded counter, and prices lived in someone’s head.',
+    built: 'A billing app for iPad and phone. Prices come from a Google Sheet the family edits, and each bill goes to WhatsApp or the printer.',
+    flow: [{ t: 'tap item + size' }, { t: 'bill adds up', hot: true }, { t: 'save, even offline' }, { t: 'WhatsApp or print ✓', hot: true }],
+    result: 'A bill saves the moment you tap, even with no signal, and is never saved twice. Past bills are there by day, week or month.',
   },
   {
-    code: 'CF-04', kind: 'solar', example: true,
-    title: 'Solar monitoring with fault alerts', sector: 'Solar sites · Electrical + monitoring', stack: 'Modbus TCP · Node-RED · Grafana',
-    problem: 'Inverter faults went unnoticed until the monthly report.',
-    built: 'Modbus polling of each inverter, an expected-output check, and alerts with a ticket for the site engineer.',
-    result: '[Your measured result]',
+    code: 'CF-04', kind: 'chat', example: false,
+    title: 'WhatsApp assistant for clinics', sector: 'Small clinics · WhatsApp bot + dashboard', stack: 'Python · FastAPI · Twilio · SQLite',
+    problem: 'Reception spent the day answering the same calls about timings, bookings and reports.',
+    built: 'A WhatsApp assistant where patients book or move visits, ask about timings, get reminders and receive report files. Staff run it from a simple dashboard.',
+    result: 'One small server runs many clinics. Moving from Twilio to Meta’s own WhatsApp API is a settings change, not a rebuild.',
+  },
+  {
+    code: 'CF-05', kind: 'flow', example: false,
+    title: 'Incident triage agent', sector: 'Grocery e-commerce · AI automation', stack: 'Python · LangGraph · FastAPI · RAG',
+    problem: 'Engineers spent hours reading logs to work out why an order flow had broken.',
+    built: 'An AI agent that reads each alert, finds similar past incidents, works out the cause and suggests the fix. When an alert is noise, it says so and does nothing.',
+    flow: [{ t: 'alert fires' }, { t: 'past incidents found', hot: true }, { t: 'cause + fix' }, { t: 'engineer approves ✓', hot: true }],
+    result: 'Manual log triage dropped from about two hours to fifteen minutes.',
   },
 ];
 
