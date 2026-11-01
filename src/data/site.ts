@@ -81,7 +81,7 @@ export const modules = [
 ];
 
 // Case files. `kind` picks the readout screen: a `store` case fills it from `screen`, a `flow` case
-// lists its steps (`hot` ones glow copper).
+// lists its steps (`hot` ones glow copper). `link` adds a visit link under the result.
 // Set `example: true` on anything that isn't real work yet.
 export const cases = [
   {
@@ -89,7 +89,8 @@ export const cases = [
     title: 'Dairy shop online store and Android app', sector: 'Dairy shop, Aligarh · Store + app', stack: 'React · Cloudflare D1 · Razorpay',
     problem: 'Milk, paneer and ghee orders came in by phone and WhatsApp, with no way to pay online or sign up for daily milk.',
     built: 'A store and Android app with Google or OTP sign-in, Cash on Delivery and Razorpay, monthly milk plans and order tracking with push alerts. The owner runs prices, stock, offers and delivery times from an admin panel.',
-    result: 'Live at atuldairy.com and taking real payments. Checkout was up in ten days and the full app in seven weeks.',
+    result: 'Live at atuldairy.com and taking real payments. Checkout was up in ten days, and the Android app is in closed testing on Google Play.',
+    link: { label: 'atuldairy.com', href: 'https://atuldairy.com' },
     screen: {
       tiles: [{ label: 'Orders today', value: '18' }, { label: 'Milk plans', value: '42' }, { label: 'Low stock', value: '2', warn: true }],
       orders: [{ no: '#1042', item: 'Paneer · 500 g', status: 'Paid' }, { no: '#1041', item: 'Milk plan · 30 days', status: 'Active' }],
@@ -101,6 +102,7 @@ export const cases = [
     problem: 'A label selling handloom sarees and suit sets needed a shop as careful as the cloth, one the owner could run without a developer.',
     built: 'A storefront with collections, occasions, sizes and colours, Google or email sign-in, Cash on Delivery, Razorpay and coupons. The owner’s panel covers orders and couriers, stock by size, sales, page drafts with preview and new-order alerts on the owner’s phone.',
     result: 'Live at anniethreads.com, built in about five weeks. A new piece is on sale at its own address the moment it is saved.',
+    link: { label: 'anniethreads.com', href: 'https://anniethreads.com' },
     screen: {
       tiles: [{ label: 'Orders today', value: '9' }, { label: 'To ship', value: '4' }, { label: 'Low stock', value: '3', warn: true }],
       orders: [{ no: '#2087', item: 'Dhakai saree · free size', status: 'Paid' }, { no: '#2086', item: 'Co-ord set · M', status: 'Shipped' }],
