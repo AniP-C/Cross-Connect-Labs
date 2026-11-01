@@ -53,8 +53,12 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [ ] Your name, city, languages and reply time (`site` block)
 - [ ] Availability badge text (`site.availability`; it says "booking projects for december")
 - [x] Contact form: WhatsApp +91 79008 42047 with a message typed in, and hello@crossconnectlabs.com (`contact` block)
-- [ ] Email: route hello@crossconnectlabs.com to your Gmail ([hosting.md](hosting.md#email))
-- [ ] Call booking: add the Google secrets ([booking.md](booking.md))
+- [x] Email: hello@crossconnectlabs.com forwards to Gmail through Cloudflare Email Routing (1 Nov 2026)
+- [x] Call booking: Google project `cross-connect-labs` published, secrets set with `wrangler secret put`, live (1 Nov 2026)
+- [ ] Reply as hello@: Gmail "Send mail as" with `smtp.gmail.com:587` and an app password ([hosting.md](hosting.md#reply-as-hello-gmail-send-mail-as))
+- [ ] DNS for sending: edit the SPF TXT record to `v=spf1 include:_spf.mx.cloudflare.net include:_spf.google.com ~all` (keep one SPF record only), and add TXT `_dmarc` = `v=DMARC1; p=none; rua=mailto:hello@crossconnectlabs.com`
+- [ ] Rotate the Google keys that were pasted in chat: new client secret (Clients → Add secret, delete the old one), revoke and re-create the refresh token, then `npx wrangler secret put` both ([booking.md](booking.md))
+- [ ] Make one test booking from another email address and check the Meet invite arrives, then delete the event
 - [ ] Case studies: replace the four examples with real projects and set `example: false`, including real results in place of `[Your measured result]`
 - [ ] Field reports (testimonials): real quotes, or remove the section until you have them
 - [ ] FAQ: data protection answer and the area you can work on site
@@ -66,13 +70,13 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 ### Soon after launch
 
 - [x] **Own domain.** Buy one (Cloudflare Registrar sells at cost), connect it to the Worker, then update `site` in `astro.config.mjs`. Steps in [hosting.md](hosting.md).
-- [ ] **Email on your domain.** The site shows hello@crossconnectlabs.com. Route it to your Gmail with Cloudflare Email Routing (free). Steps in [hosting.md](hosting.md#email).
+- [x] **Email on your domain.** hello@crossconnectlabs.com is routed to Gmail with Cloudflare Email Routing. Replying as hello@ is still in the launch checklist.
 - [x] **Social preview image.** `public/og-image.png` (1200 × 630), made by `npm run og-image`.
 - [ ] **Analytics.** Cloudflare Web Analytics is free and needs no cookie banner.
 - [x] **Search basics.** `sitemap.xml`, `robots.txt` pointing to it, structured data (ProfessionalService, FAQ), Open Graph and Twitter tags, `noindex` on the 404 page.
-- [ ] **Google Search Console.** Add `crossconnectlabs.com` as a Domain property (verify with the TXT record in Cloudflare DNS), then submit `https://crossconnectlabs.com/sitemap.xml`. Do the same in Bing Webmaster Tools (it can import from Search Console).
+- [ ] **Google Search Console.** Verification file `public/google3db46dd8c61fef25.html` is live; finish verifying, then submit `https://crossconnectlabs.com/sitemap.xml`. Do the same in Bing Webmaster Tools (it can import from Search Console).
 - [ ] **Google Business Profile**, if you want local clients to find you.
-- [x] **Custom booking dialog.** "No idea what you're looking for? Let's hop on a call" in the hero and contact section. On-brand dialog with Google Calendar behind it (free/busy, events with a Meet link) through `worker/index.ts`. Chosen over Cal.com because Cal.com's brand colours and branding removal are paid. Needs the Google secrets: [booking.md](booking.md).
+- [x] **Custom booking dialog.** "No idea what you're looking for? Let's hop on a call" in the hero and contact section. On-brand dialog with Google Calendar behind it (free/busy, events with a Meet link) through `worker/index.ts`. Chosen over Cal.com because Cal.com's brand colours and branding removal are paid. Live; setup in [booking.md](booking.md).
 
 ### Later
 
