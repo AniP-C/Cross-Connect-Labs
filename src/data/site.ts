@@ -149,3 +149,48 @@ export const faqs = [
 
 export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'Electrical work', 'Small job / fix', 'Not sure yet'];
 export const budgetChoices = ['Not sure', 'Tiny', 'Small', 'Medium', 'Large'];
+
+// Privacy policy at /privacy. Google needs this link to publish the booking app.
+export const privacy = {
+  updated: '1 November 2026',
+  intro: 'This page explains what Cross-Connect Labs collects when you use crossconnectlabs.com and what we do with it. In short: only what you send us, and only to reply to you.',
+  sections: [
+    {
+      title: 'What we collect',
+      text: [
+        'Contact form. The form stores nothing on this site. It opens WhatsApp or your email app with your message typed in, and you decide whether to send it. What you send then sits in our WhatsApp or email.',
+        'Call booking. When you book a call we receive your name, your email address, the time you picked and any note you add. They are saved as an event in our Google Calendar, and Google emails you an invite with a Google Meet link.',
+        'Hosting. The site runs on Cloudflare. Like any web host, Cloudflare processes technical data such as your IP address and browser type to deliver pages and protect the site.',
+        'Your browser. We remember your day or night choice in your browser’s local storage. There are no cookies, no analytics and no advertising trackers.',
+      ],
+    },
+    {
+      title: 'How we use it',
+      text: ['Only to reply to you, to arrange and hold the call, and to work on your project. We don’t sell it, share it for marketing or add you to mailing lists.'],
+    },
+    {
+      title: 'Who else handles it',
+      text: ['Google (Calendar and Meet) for booked calls, Meta (WhatsApp) if you message us there, and Cloudflare for hosting and email forwarding. Each follows its own privacy policy.'],
+    },
+    {
+      title: 'Google user data',
+      text: [
+        'The booking system uses the Google Calendar API on our own Google account only, to see when we are free and to add the calls you book. It never signs in to or reads your Google account.',
+        'Our use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.',
+      ],
+      link: { label: 'Google API Services User Data Policy', href: 'https://developers.google.com/terms/api-services-user-data-policy' },
+    },
+    {
+      title: 'How long we keep it',
+      text: ['Calendar events and messages stay with us for as long as we need them to work with you. Ask, and we’ll delete them.'],
+    },
+    {
+      title: 'Your choices',
+      text: ['You can ask what we hold about you, and ask us to correct or delete it. Email us at the address below.'],
+    },
+    {
+      title: 'Changes',
+      text: ['If this policy changes, we’ll update this page and the date at the top.'],
+    },
+  ],
+};

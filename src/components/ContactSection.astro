@@ -42,6 +42,7 @@ const mailHref = contact.email ? `mailto:${contact.email}?subject=${encodeURICom
       <span class="brand"><IconMark app size={40} label="crossconnect labs icon" />© {new Date().getFullYear()} cross-connect labs · [city, country]</span>
       <nav aria-label="Footer">
         {nav.slice(0, 3).map((item) => <a href={item.href}>{item.label}</a>)}
+        <a href="/privacy">privacy</a>
         <a href="#top">back to top ↑</a>
       </nav>
     </footer>

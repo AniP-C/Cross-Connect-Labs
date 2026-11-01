@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import { contact, privacy } from '../data/site';
+---
+
+<BaseLayout title="Privacy policy · Cross-Connect Labs" description="What Cross-Connect Labs collects through crossconnectlabs.com, including call bookings, and how we use it.">
+  <main id="main" class="wrap legal">
+    <a href="/" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
+    <p class="code">PRIVACY · UPDATED {privacy.updated.toUpperCase()}</p>
+    <h1>Privacy policy</h1>
+    <p class="intro">{privacy.intro}</p>
+    {
+      privacy.sections.map((s) => (
+        <section>
+          <h2>{s.title}</h2>
+          {s.text.map((t) => <p>{t}</p>)}
+          {s.link && <p><a href={s.link.href} target="_blank" rel="noopener">{s.link.label}</a></p>}
+        </section>
+      ))
+    }
+    <section>
+      <h2>Contact</h2>
+      <p>Cross-Connect Labs · <a href={`mailto:${contact.email}`}>{contact.emailDisplay}</a> · WhatsApp {contact.whatsappDisplay}</p>
+    </section>
+    <a class="cable-link" href="/">back to the home page <span aria-hidden="true">→</span></a>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: calc(46em + 2 * var(--gutter));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding-top: 48px;
+    padding-bottom: 72px;
+  }
+
+  .code {
+    margin: 24px 0 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--copper-text);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line-soft);
+    width: 100%;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--body);
+  }
+
+  .intro {
+    font-size: clamp(17px, 1.6vw, 19px);
+  }
+
+  section a {
+    color: var(--copper-text);
+    text-underline-offset: 3px;
+  }
+</style>
