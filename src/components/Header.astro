@@ -1,6 +1,6 @@
 ---
 import Logo from './Logo.astro';
-import { nav, site } from '../data/site';
+import { booking, nav, site } from '../data/site';
 ---
 
 <header class="site-header">
@@ -11,6 +11,10 @@ import { nav, site } from '../data/site';
     </nav>
     <div class="right">
       <span class="status"><span class="led"></span>online · replies within {site.replyTime}</span>
+      <button type="button" class="hurry" data-book>
+        <span class="ask">{booking.hurry}</span>
+        <span class="go">{booking.hurryCta} <span aria-hidden="true">→</span></span>
+      </button>
       <button class="mode" type="button" data-theme-toggle aria-pressed="false" aria-label="Night mode">
         <span class="track" aria-hidden="true">
           <span class="knob">
@@ -92,6 +96,41 @@ import { nav, site } from '../data/site';
     color: var(--muted);
   }
 
+  .hurry {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--copper-line);
+    background: var(--copper-tint);
+    font-family: var(--mono);
+    font-size: 12px;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .hurry:hover {
+    border-color: var(--copper);
+  }
+
+  .ask {
+    color: var(--body);
+  }
+
+  .go {
+    color: var(--copper-text);
+    font-weight: 700;
+  }
+
+  /* Make room for the call button before the header wraps. */
+  @media (max-width: 1180px) {
+    .status {
+      display: none;
+    }
+  }
+
   .mode {
     display: inline-flex;
     align-items: center;
@@ -162,6 +201,23 @@ import { nav, site } from '../data/site';
 
     .status {
       display: none;
+    }
+
+    .right {
+      gap: 8px;
+    }
+
+    .ask,
+    .mode .label {
+      display: none;
+    }
+
+    .hurry {
+      padding: 0 12px;
+    }
+
+    .mode {
+      padding: 0 6px;
     }
   }
 </style>

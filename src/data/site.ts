@@ -43,6 +43,11 @@ export const booking = {
   // At the top of the enquiry form, so a call is one tap away from the start.
   quick: 'Rather talk than type?',
   quickCta: 'Patch into a free call',
+  // The call button in the sticky header. Phones show only `hurryCta`.
+  hurry: 'In a hurry?',
+  hurryCta: 'Book a call',
+  // Opens the call dialog's description.
+  covered: 'Whatever the rush, we’ve got you covered.',
   timeZone: 'Asia/Kolkata',
   // 0 = Sunday … 6 = Saturday.
   days: [1, 2, 3, 4, 5, 6],
@@ -55,11 +60,12 @@ export const booking = {
   eventTitle: 'Intro call · Cross-Connect Labs',
 };
 
-// The scrolling strip under the hero: where the team has worked, then clients we're live for.
-// `live: true` lights the LED on that group's cards.
+// The scrolling strip under the hero: where the team has worked. Each group gets its own
+// label-tape tag when there's more than one; `live: true` lights the LED on that group's cards.
+// Clients can come back as a second group, e.g. { tag: 'live for', live: true, items: [...] }.
 export const patchedIn = {
   label: 'Our team’s experience includes',
-  caption: 'Three engineers from TCS, AtkinsRéalis and Salesforce, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
+  caption: 'Engineers from TCS, AtkinsRéalis, Salesforce and KPMG, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
   groups: [
     {
       tag: 'worked at',
@@ -68,15 +74,7 @@ export const patchedIn = {
         { name: 'TCS', note: 'Tata Consultancy Services' },
         { name: 'AtkinsRéalis', note: 'engineering' },
         { name: 'Salesforce', note: 'CRM software' },
-      ],
-    },
-    {
-      tag: 'live for',
-      live: true,
-      items: [
-        { name: 'Atul Dairy', note: 'store + Android app' },
-        { name: 'Aura Stitch', note: 'fashion storefront' },
-        { name: 'Aditya Dresses', note: 'counter billing' },
+        { name: 'KPMG', note: 'data engineering' },
       ],
     },
   ],
