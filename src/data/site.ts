@@ -43,6 +43,11 @@ export const booking = {
   // At the top of the enquiry form, so a call is one tap away from the start.
   quick: 'Rather talk than type?',
   quickCta: 'Patch into a free call',
+  // The call button in the sticky header. Phones show only `hurryCta`.
+  hurry: 'In a hurry?',
+  hurryCta: 'Book a call',
+  // Opens the call dialog's description.
+  covered: 'Whatever the rush, we’ve got you covered.',
   timeZone: 'Asia/Kolkata',
   // 0 = Sunday … 6 = Saturday.
   days: [1, 2, 3, 4, 5, 6],

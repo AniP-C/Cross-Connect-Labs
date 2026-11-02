@@ -48,7 +48,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 
 | Section | Component | What it does |
 | --- | --- | --- |
-| Header | `Header.astro` | Logo, menu, "online" light, DAY/NIGHT switch. On phones the menu becomes a second row that scrolls sideways. |
+| Header | `Header.astro` | Logo, menu, "online" light (hidden under 1180px), an "In a hurry? Book a call" button (`data-book`), DAY/NIGHT switch. On phones the button shows only "Book a call", the switch drops its DAY/NIGHT word, and the menu becomes a second row that scrolls sideways. |
 | Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Pick a problem and a build: the cable moves and the readout updates. "Flip to send" opens the contact form already filled in. A copper torch glow follows the mouse. The panel has a faint circuit-trace pattern. |
 | Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws for the companies the team has worked at, with a caption line below. Groups come from `patchedIn.groups`; a short list repeats so the loop never shows a gap. Pauses on hover, on focus and with its own `aria-pressed` button. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
 | Services | `Rack.astro` | Eight rack modules, each with a "patch in" button that opens the form with that topic. |
