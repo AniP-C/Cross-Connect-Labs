@@ -69,6 +69,11 @@ import { cases } from '../data/site';
                   <span>{c.stack}</span>
                 </div>
                 <h3>{c.title}</h3>
+                {c.link && (
+                  <a class="visit" href={c.link.href} target="_blank" rel="noopener">
+                    visit {c.link.label} ↗
+                  </a>
+                )}
                 <dl>
                   <dt>problem</dt>
                   <dd>{c.problem}</dd>
@@ -77,11 +82,6 @@ import { cases } from '../data/site';
                   <dt>result</dt>
                   <dd class="strong">{c.result}</dd>
                 </dl>
-                {c.link && (
-                  <a class="visit" href={c.link.href} target="_blank" rel="noopener">
-                    visit {c.link.label} ↗
-                  </a>
-                )}
               </div>
             </div>
           ))
@@ -345,6 +345,7 @@ import { cases } from '../data/site';
 
   .visit {
     align-self: flex-start;
+    margin: -4px 0 4px;
     font-family: var(--mono);
     font-size: 13px;
     color: var(--copper-text);

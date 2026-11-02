@@ -2,18 +2,16 @@
 
 export const site = {
   name: 'Cross-Connect Labs',
-  location: '[City, Country]',
-  languages: '[English, …]',
   // Read inside sentences: "We reply within 12 hours with the cost."
   replyTime: '12 hours',
   // The short form in the header's "online" light.
   replyShort: '<12 hrs',
   // Shown as a badge in the hero. Set to '' to hide it.
-  availability: 'booking projects for december',
+  availability: '',
   title: 'Cross-Connect Labs · Websites, apps, WhatsApp bots and automation',
   // About 155 characters, so search results show all of it.
   description:
-    'Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI automation and PLC/SCADA work from a small studio of engineers. No minimum budget.',
+    'Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI and workflow automation from a small studio of engineers. No minimum budget.',
   // Describes public/og-image.png for screen readers when the link is shared.
   imageAlt: 'Cross-Connect Labs: Plug in your problem. We’ll wire the fix. No minimum budget.',
 };
@@ -63,12 +61,19 @@ export const booking = {
   eventTitle: 'Intro call · Cross-Connect Labs',
 };
 
+// Services section heading. The modules themselves are in `modules` below.
+export const rack = {
+  label: 'Our services · what we build',
+  heading: 'The Rack.',
+  intro: 'Everything we build, racked up as eight modules and run by one team. Each one plugs into the others, so your website, bot and automations share one signal path. Pick a module and patch in.',
+};
+
 // The scrolling strip under the hero: where the team has worked. Each group gets its own
 // label-tape tag when there's more than one; `live: true` lights the LED on that group's cards.
 // Clients can come back as a second group, e.g. { tag: 'live for', live: true, items: [...] }.
 export const patchedIn = {
   label: 'Our team’s experience includes',
-  caption: 'Engineers from TCS, AtkinsRéalis, Salesforce and KPMG, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
+  caption: 'Engineers from TCS, AtkinsRéalis, Salesforce, KPMG and PwC, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
   groups: [
     {
       tag: 'worked at',
@@ -78,6 +83,7 @@ export const patchedIn = {
         { name: 'AtkinsRéalis', note: 'engineering' },
         { name: 'Salesforce', note: 'CRM software' },
         { name: 'KPMG', note: 'data engineering' },
+        { name: 'PwC', note: 'AI engineering' },
       ],
     },
   ],
@@ -90,17 +96,16 @@ export const nav = [
   { href: '#faq', label: 'faq' },
 ];
 
-// Patch bay. JACK_Y are positions in the 640 × 400 panel drawing.
-export const JACK_Y = [110, 165, 220, 275, 330];
+// Hero patch bay: pick a problem on the left and the card on the right shows the fix we'd build.
+// `does` is the card's one-line description.
+export const patchHeads = { problem: 'What’s going wrong?', fix: 'We’d build', send: 'Flip to send' };
 
-export const problems = ['Too many calls', 'Orders on paper', 'No website yet', 'Typing invoices', 'Machines unwatched'];
-
-export const builds = [
-  { label: 'WhatsApp bot', topic: 'WhatsApp bot', time: '1–3 weeks' },
-  { label: 'Online store', topic: 'Online store', time: '3–6 weeks' },
-  { label: 'Website', topic: 'Website', time: '1–3 weeks' },
-  { label: 'AI automation', topic: 'AI automation', time: '1–3 weeks' },
-  { label: 'PLC · SCADA', topic: 'PLC & automation', time: 'per project' },
+export const patches = [
+  { problem: 'Too many calls', fix: 'WhatsApp bot', topic: 'WhatsApp bot', time: '1–3 weeks', does: 'Answers questions and takes bookings for you, day and night.' },
+  { problem: 'Orders on paper', fix: 'Online store', topic: 'Online store', time: '3–6 weeks', does: 'Customers order and pay online, and every order lands in one place.' },
+  { problem: 'No website yet', fix: 'Website', topic: 'Website', time: '1–3 weeks', does: 'Customers find you on Google and get in touch.' },
+  { problem: 'Typing invoices', fix: 'AI automation', topic: 'AI automation', time: '1–3 weeks', does: 'Reads your bills and fills in the invoices for you to check.' },
+  { problem: 'Same tasks every day', fix: 'Workflow automation', topic: 'Workflow automation', time: '1–2 weeks', does: 'Your apps and sheets talk to each other, so reports, reminders and follow-ups run on their own.' },
 ];
 
 export const modules = [
@@ -111,7 +116,7 @@ export const modules = [
   { code: 'MOD-05 · WA', name: 'WhatsApp bots', time: '1–3 wks', topic: 'WhatsApp bot', desc: 'Answers, bookings and order updates on WhatsApp, with hand-over to you.' },
   { code: 'MOD-06 · CRM', name: 'Clinic bot & CRM', time: '3–6 wks', topic: 'Clinic bot & CRM', desc: 'Appointments, reminders and patient records. No medical advice, urgent messages go to staff.' },
   { code: 'MOD-07 · AI', name: 'AI automation', time: '1–3 wks', topic: 'AI automation', desc: 'AI that reads emails and documents, fills sheets and drafts replies, with you approving.' },
-  { code: 'MOD-08 · PLC', name: 'Electrical automation', time: 'per project', topic: 'PLC & automation', desc: 'PLC and SCADA work, energy and solar monitoring, plant data over Modbus.' },
+  { code: 'MOD-08 · FLOW', name: 'Workflow automation', time: '1–2 wks', topic: 'Workflow automation', desc: 'Connect Sheets, CRM, WhatsApp and email so reports, reminders and follow-ups run on their own.' },
 ];
 
 // Case files. `kind` picks the readout screen: a `store` case fills it from `screen`, a `flow` case
@@ -186,10 +191,14 @@ export const steps = [
   { title: 'It goes live', text: 'Weekly updates, then launch and 30 days of free fixes.' },
 ];
 
+// Field reports: short notes on what our builds have done, taken from real projects. No client quotes.
 export const reports = [
-  { tag: 'REPORT · WEBSITE', quote: '[A short quote from a website or app client.]', name: '[Client name]', role: '[Role, Company]' },
-  { tag: 'REPORT · CLINIC BOT', quote: '[A short quote from a clinic or WhatsApp bot client.]', name: '[Client name]', role: '[Role, Company]' },
-  { tag: 'REPORT · AUTOMATION', quote: '[A short quote from an automation or electrical client.]', name: '[Client name]', role: '[Role, Company]' },
+  { tag: 'REPORT · ONLINE STORE', title: 'Checkout live in ten days', text: 'A local shop moved from phone orders to online payments and monthly plans, and runs prices and stock from its own admin panel.' },
+  { tag: 'REPORT · AI AUTOMATION', title: 'Two hours of digging, now fifteen minutes', text: 'An AI agent reads each alert, finds similar past cases and suggests the fix. Engineers approve instead of searching logs.' },
+  { tag: 'REPORT · WHATSAPP BOT', title: 'The same questions, answered on WhatsApp', text: 'Bookings, timings, reminders and report files go through WhatsApp, and staff step in from a simple dashboard when needed.' },
+  { tag: 'REPORT · BILLING APP', title: 'Hand-written bills, gone', text: 'A busy counter bills on a phone or iPad. Each bill saves the moment it is tapped, even with no signal, and goes to WhatsApp or print.' },
+  { tag: 'REPORT · STOREFRONT', title: 'Run by the owner, not a developer', text: 'Collections, stock by size, couriers and new-order alerts on the owner’s phone. A new piece is on sale the moment it is saved.' },
+  { tag: 'REPORT · HAND-OVER', title: 'Everything is yours at the end', text: 'Code, logins and a short walkthrough video at hand-over, then 30 days of free fixes. No lock-in.' },
 ];
 
 export const faqs = [
@@ -199,10 +208,11 @@ export const faqs = [
   { q: 'Can I manage the store or app myself?', a: 'Yes. Online stores and apps come with an admin panel where you change products, orders, prices and content without needing us.' },
   { q: 'Is the clinic bot safe for patient data?', a: 'The bot books appointments, sends reminders and answers common questions. It gives no medical advice and sends urgent messages to your staff. Patient data stays in your accounts. [Add how you handle data protection.]' },
   { q: 'Who owns the work?', a: 'You do. At hand-over you get the code, the logins and a short walkthrough video.' },
-  { q: 'Do you do electrical work on site?', a: '[Say where you can work on site.] Most PLC, SCADA and monitoring work can be done remotely once we have access to the system.' },
+  { q: 'What can you automate?', a: 'Most work you repeat on a computer: copying data between sheets and apps, sending reminders and follow-ups, building reports, reading documents and drafting replies. We start with the task that eats the most time.' },
+  { q: 'Do you work with machines and factory systems too?', a: 'Yes. Our team includes electrical engineers, so we can take on PLC, SCADA and monitoring work as well, mostly remotely. Ask us about it.' },
 ];
 
-export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'PLC & automation', 'Small job / fix', 'Not sure yet'];
+export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'Workflow automation', 'PLC & automation', 'Small job / fix', 'Not sure yet'];
 export const budgetChoices = ['Not sure', 'Tiny', 'Small', 'Medium', 'Large'];
 
 // Privacy policy at /privacy. Google needs this link to publish the booking app.

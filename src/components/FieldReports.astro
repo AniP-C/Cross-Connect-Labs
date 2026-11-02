@@ -8,13 +8,11 @@ import { reports } from '../data/site';
     <div class="grid">
       {
         reports.map((r) => (
-          <figure class="surface">
-            <span class="tag">{r.tag}</span>
-            <blockquote>“{r.quote}”</blockquote>
-            <figcaption>
-              <b>{r.name}</b> · {r.role}
-            </figcaption>
-          </figure>
+          <article class="surface">
+            <span class="tag"><span class="led" aria-hidden="true" />{r.tag}</span>
+            <h3>{r.title}</h3>
+            <p>{r.text}</p>
+          </article>
         ))
       }
     </div>
@@ -32,34 +30,41 @@ import { reports } from '../data/site';
     gap: 14px;
   }
 
-  figure {
-    margin: 0;
-    padding: 26px;
+  article {
+    padding: 24px 26px 26px;
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.12em;
     color: var(--muted);
   }
 
-  blockquote {
+  .tag .led {
+    width: 6px;
+    height: 6px;
+  }
+
+  h3 {
     margin: 0;
-    font-size: 18px;
-    color: var(--body);
-  }
-
-  figcaption {
-    font-size: 14px;
-    color: var(--muted);
-  }
-
-  b {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     color: var(--text);
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--body);
   }
 </style>

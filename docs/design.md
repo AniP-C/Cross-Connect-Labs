@@ -36,7 +36,7 @@ All colours are CSS variables in `src/styles/global.css`:
 | `--led` | `#c2541f` | `#e46a34` | Status lights |
 | `--lcd` | `#17191e` | `#0c0c0e` | Dark readout screens (dark in both modes) |
 
-There are more tokens for hardware details: screws, jacks, knobs, switches, cables, traces.
+There are more tokens for hardware details: screws, jacks, sockets, knobs, switches, cables.
 
 ## How day/night works
 
@@ -49,14 +49,14 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 | Section | Component | What it does |
 | --- | --- | --- |
 | Header | `Header.astro` | Logo, menu, "online" light (hidden under 1180px), an "In a hurry? Book a call" button (`data-book`), DAY/NIGHT switch. On phones the button shows only "Book a call", the switch drops its DAY/NIGHT word, and the menu becomes a second row that scrolls sideways. |
-| Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Pick a problem and a build: the cable moves and the readout updates. "Flip to send" opens the contact form already filled in. A copper torch glow follows the mouse. The panel has a faint circuit-trace pattern. |
-| Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws for the companies the team has worked at, with a caption line below. Groups come from `patchedIn.groups`; a short list repeats so the loop never shows a gap. Pauses on hover, on focus and with its own `aria-pressed` button. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
-| Services | `Rack.astro` | Eight rack modules, each with a "patch in" button that opens the form with that topic. |
+| Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Fault finder on a faint circuit-trace background: "What's going wrong?" lists five problems as keys with status lights; picking one runs a short copper cable into the "We'd build" card, which shows the fix, what it does and the time (`patches` and `patchHeads` in `site.ts`). "Flip to send" in the card opens the contact form already filled in. A copper torch glow follows the mouse. |
+| Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws for the companies the team has worked at, with a caption line below. Groups come from `patchedIn.groups`; a short list repeats so the loop never shows a gap. Each plate lights up (LED on, copper edge) as it passes the middle of the strip. Pauses on hover and on focus. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
+| Services | `Rack.astro` | "The Rack.", with a plain "our services" label above it (`rack` in `site.ts`). Eight rack modules, each with a "patch in" button that opens the form with that topic. |
 | Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. Five real projects; mark any placeholder with `example: true`. |
 | Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." |
 | Process | `SignalPath.astro` | How a project runs, step by step. |
 | ~~About~~ | removed | Site speaks as "we"; no photo or about section. |
-| Testimonials | `FieldReports.astro` | Client quotes (placeholders). |
+| Field reports | `FieldReports.astro` | Six short notes on what our builds have done, taken from the real projects (`reports` in `site.ts`). Generic on purpose: no client names or quotes. |
 | FAQ | `Faq.astro` | Native `<details>` items. |
 | Contact | `ContactSection.astro` | "Let's connect." with a plug button. |
 | Form | `ContactDialog.astro` | Native `<dialog>`. Any button with `data-contact` opens it (see `src/scripts/contact-bus.ts`). |
@@ -67,7 +67,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 
 - **Opening the contact form:** any button can open it with `data-contact`. Pre-fill it with `data-topic`, `data-budget` or `data-message`, or call `openContact({...})` from a script.
 - **Small scripts:** each interactive part has its own `<script>` in its component. There is no UI framework.
-- **Mouse effects:** the torch only runs on devices with a mouse (`pointer: fine`).
+- **Mouse effects:** the torch and the cursor ring (`Cursor.astro`, a thin copper ring that trails the normal pointer and widens over anything clickable) only run on devices with a mouse. The ring is off for reduced motion.
 - **Reduced motion:** animations stop when the visitor asks for reduced motion.
 - **Keyboard and screen readers:** every control is a real `<button>` with `aria-pressed` where it toggles. There is a skip link, and focus rings stay visible.
 
