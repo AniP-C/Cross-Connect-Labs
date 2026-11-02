@@ -10,7 +10,7 @@ import { booking, nav, site } from '../data/site';
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
     </nav>
     <div class="right">
-      <span class="status"><span class="led"></span>online · replies within {site.replyTime}</span>
+      <span class="status"><span class="led"></span>online · replies in {site.replyShort}</span>
       <button type="button" class="hurry" data-book>
         <span class="ask">{booking.hurry}</span>
         <span class="go">{booking.hurryCta} <span aria-hidden="true">→</span></span>
