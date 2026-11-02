@@ -2,7 +2,11 @@
 import { patchedIn } from '../data/site';
 
 // The strip is drawn twice so the loop has no seam; screen readers only get the first copy.
+// A short list repeats inside each copy so one copy is always wider than the window.
 const { groups } = patchedIn;
+const count = groups.reduce((n, g) => n + g.items.length, 0);
+const repeats = Array.from({ length: Math.max(1, Math.ceil(8 / count)) }, (_, i) => i);
+const tagged = groups.length > 1;
 ---
 
 <section class="patched" aria-labelledby="patched-title" data-patched>
@@ -26,20 +30,26 @@ const { groups } = patchedIn;
             {
               [0, 1].map((copy) => (
                 <ul class="run" aria-hidden={copy === 1 ? 'true' : undefined}>
-                  {groups.map((g) => (
-                    <>
-                      <li class="tag">{g.tag}</li>
-                      {g.items.map((item) => (
-                        <li class="plate surface">
-                          <span class="screw sm tl" aria-hidden="true" />
-                          <span class="screw sm br" aria-hidden="true" />
-                          <span class={g.live ? 'led' : 'led off'} aria-hidden="true" />
-                          <span class="name">{item.name}</span>
-                          <span class="note">{item.note}</span>
-                        </li>
-                      ))}
-                    </>
-                  ))}
+                  {repeats.flatMap((r) =>
+                    groups.map((g) => (
+                      <>
+                        {tagged && (
+                          <li class:list={['tag', { echo: r > 0 }]} aria-hidden={r > 0 ? 'true' : undefined}>
+                            {g.tag}
+                          </li>
+                        )}
+                        {g.items.map((item) => (
+                          <li class:list={['plate surface', { echo: r > 0 }]} aria-hidden={r > 0 ? 'true' : undefined}>
+                            <span class="screw sm tl" aria-hidden="true" />
+                            <span class="screw sm br" aria-hidden="true" />
+                            <span class={g.live ? 'led' : 'led off'} aria-hidden="true" />
+                            <span class="name">{item.name}</span>
+                            <span class="note">{item.note}</span>
+                          </li>
+                        ))}
+                      </>
+                    )),
+                  )}
                 </ul>
               ))
             }
@@ -263,6 +273,7 @@ const { groups } = patchedIn;
     }
 
     .run[aria-hidden],
+    .echo,
     .pause {
       display: none;
     }

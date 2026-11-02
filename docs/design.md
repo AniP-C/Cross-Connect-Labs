@@ -50,7 +50,7 @@ There are more tokens for hardware details: screws, jacks, knobs, switches, cabl
 | --- | --- | --- |
 | Header | `Header.astro` | Logo, menu, "online" light, DAY/NIGHT switch. On phones the menu becomes a second row that scrolls sideways. |
 | Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Pick a problem and a build: the cable moves and the readout updates. "Flip to send" opens the contact form already filled in. A copper torch glow follows the mouse. The panel has a faint circuit-trace pattern. |
-| Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws, first the companies the team has worked at, then the clients we're live for (lit LED), with a caption line below. Pauses on hover, on focus and with its own `aria-pressed` button. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
+| Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws for the companies the team has worked at, with a caption line below. Groups come from `patchedIn.groups`; a short list repeats so the loop never shows a gap. Pauses on hover, on focus and with its own `aria-pressed` button. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
 | Services | `Rack.astro` | Eight rack modules, each with a "patch in" button that opens the form with that topic. |
 | Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. Five real projects; mark any placeholder with `example: true`. |
 | Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." |

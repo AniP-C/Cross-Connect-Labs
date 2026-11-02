@@ -55,11 +55,12 @@ export const booking = {
   eventTitle: 'Intro call · Cross-Connect Labs',
 };
 
-// The scrolling strip under the hero: where the team has worked, then clients we're live for.
-// `live: true` lights the LED on that group's cards.
+// The scrolling strip under the hero: where the team has worked. Each group gets its own
+// label-tape tag when there's more than one; `live: true` lights the LED on that group's cards.
+// Clients can come back as a second group, e.g. { tag: 'live for', live: true, items: [...] }.
 export const patchedIn = {
   label: 'Our team’s experience includes',
-  caption: 'Three engineers from TCS, AtkinsRéalis and Salesforce, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
+  caption: 'Engineers from TCS, AtkinsRéalis, Salesforce and KPMG, now building stores, apps, WhatsApp bots and automation for businesses of any size.',
   groups: [
     {
       tag: 'worked at',
@@ -68,15 +69,7 @@ export const patchedIn = {
         { name: 'TCS', note: 'Tata Consultancy Services' },
         { name: 'AtkinsRéalis', note: 'engineering' },
         { name: 'Salesforce', note: 'CRM software' },
-      ],
-    },
-    {
-      tag: 'live for',
-      live: true,
-      items: [
-        { name: 'Atul Dairy', note: 'store + Android app' },
-        { name: 'Aura Stitch', note: 'fashion storefront' },
-        { name: 'Aditya Dresses', note: 'counter billing' },
+        { name: 'KPMG', note: 'data engineering' },
       ],
     },
   ],
