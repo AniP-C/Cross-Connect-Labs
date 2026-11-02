@@ -1,12 +1,15 @@
 ---
-import { modules } from '../data/site';
+import { modules, rack } from '../data/site';
 ---
 
 <section id="services" class="section">
   <div class="wrap">
     <div class="section-head">
-      <h2 class="h2">The rack.</h2>
-      <p>Eight modules, one team. Each one plugs into the others, so your website, bot and automations work together.</p>
+      <div class="title">
+        <p class="label">{rack.label}</p>
+        <h2 class="h2">{rack.heading}</h2>
+      </div>
+      <p>{rack.intro}</p>
     </div>
     <div class="grid">
       {
@@ -39,6 +42,22 @@ import { modules } from '../data/site';
 </section>
 
 <style>
+  .title {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Plain words above the equipment name, so it reads as "services" at a glance. */
+  .section-head .label {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--copper-text);
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));

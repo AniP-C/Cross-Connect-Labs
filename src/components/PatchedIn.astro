@@ -15,15 +15,6 @@ const tagged = groups.length > 1;
       <div class="row">
         <div class="lead">
           <h2 id="patched-title"><span class="led" aria-hidden="true"></span>{patchedIn.label}</h2>
-          <button type="button" class="pause" aria-pressed="false" aria-label="Pause the scrolling list" data-pause>
-            <svg class="i-pause" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-              <rect x="1.5" y="1" width="3" height="10" rx="1"></rect>
-              <rect x="7.5" y="1" width="3" height="10" rx="1"></rect>
-            </svg>
-            <svg class="i-play" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-              <path d="M3 1.5v9l7.5-4.5z"></path>
-            </svg>
-          </button>
         </div>
         <div class="window">
           <div class="track">
@@ -97,31 +88,8 @@ const tagged = groups.length > 1;
     white-space: nowrap;
   }
 
-  .pause {
-    width: 34px;
-    height: 34px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid var(--chip-line);
-    background: var(--fill);
-    color: var(--text);
-  }
-
-  .pause svg {
-    fill: currentColor;
-  }
-
-  .i-play,
-  .pause[aria-pressed='true'] .i-pause {
-    display: none;
-  }
-
-  .pause[aria-pressed='true'] .i-play {
-    display: block;
-  }
-
   .window {
+    position: relative;
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -133,15 +101,11 @@ const tagged = groups.length > 1;
   }
 
   .track {
+    position: relative;
+    z-index: 1;
     display: flex;
     width: max-content;
     animation: slide 52s linear infinite;
-  }
-
-  .patched:hover .track,
-  .patched:focus-within .track,
-  .patched.paused .track {
-    animation-play-state: paused;
   }
 
   @keyframes slide {
@@ -217,6 +181,26 @@ const tagged = groups.length > 1;
     box-shadow: none;
   }
 
+  /* As a plate passes the middle of the strip it is "patched in": its light comes on and the
+     faceplate picks up a copper edge, then both fade as it moves on. */
+  .plate {
+    transition: border-color 0.5s, box-shadow 0.5s;
+  }
+
+  .plate .led {
+    transition: background 0.5s, box-shadow 0.5s;
+  }
+
+  .plate.lit {
+    border-color: var(--copper-line);
+    box-shadow: 0 0 0 3px var(--copper-tint);
+  }
+
+  .plate.lit .led {
+    background: var(--led);
+    box-shadow: 0 0 8px var(--led);
+  }
+
   .name {
     font-weight: 700;
     font-size: 20px;
@@ -237,16 +221,12 @@ const tagged = groups.length > 1;
     font-size: 15px;
   }
 
-  /* Phones: the label and pause button sit above the strip. */
+  /* Phones: the label sits above the strip. */
   @media (max-width: 760px) {
     .row {
       flex-direction: column;
       align-items: stretch;
       gap: 14px;
-    }
-
-    .lead {
-      justify-content: space-between;
     }
 
     .plate {
@@ -260,7 +240,7 @@ const tagged = groups.length > 1;
     }
   }
 
-  /* No motion: show every plate, wrapped, with no copy and no pause button. */
+  /* No motion: show every plate, wrapped, with no copy. */
   @media (prefers-reduced-motion: reduce) {
     .track {
       width: auto;
@@ -273,8 +253,7 @@ const tagged = groups.length > 1;
     }
 
     .run[aria-hidden],
-    .echo,
-    .pause {
+    .echo {
       display: none;
     }
 
@@ -282,18 +261,19 @@ const tagged = groups.length > 1;
       -webkit-mask-image: none;
       mask-image: none;
     }
+
   }
 </style>
 
 <script>
-  const strip = document.querySelector<HTMLElement>('[data-patched]');
-  const pause = strip?.querySelector<HTMLButtonElement>('[data-pause]');
-  if (strip && pause) {
-    pause.addEventListener('click', () => {
-      const paused = pause.getAttribute('aria-pressed') !== 'true';
-      pause.setAttribute('aria-pressed', String(paused));
-      pause.setAttribute('aria-label', paused ? 'Play the scrolling list' : 'Pause the scrolling list');
-      strip.classList.toggle('paused', paused);
-    });
+  // Light each plate while it crosses the middle of the strip.
+  const strip = document.querySelector<HTMLElement>('[data-patched] .window');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (strip && !still && 'IntersectionObserver' in window) {
+    const seen = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.target.classList.toggle('lit', e.isIntersecting)),
+      { root: strip, rootMargin: '0px -44% 0px -44%' },
+    );
+    strip.querySelectorAll('.plate').forEach((plate) => seen.observe(plate));
   }
 </script>

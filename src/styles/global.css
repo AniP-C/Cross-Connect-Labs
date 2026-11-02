@@ -23,7 +23,7 @@
   --copper-tint: rgba(194, 84, 31, 0.1);
   --copper-line: rgba(194, 84, 31, 0.4);
   --copper-glow: rgba(194, 84, 31, 0.45);
-  --spot: rgba(194, 84, 31, 0.14);
+  --spot: rgba(194, 84, 31, 0.09);
   --sel-bg: rgba(194, 84, 31, 0.08);
 
   --lcd: #17191e;
@@ -47,8 +47,10 @@
   --cable-out: #7c3812;
   --cable-hi: rgba(255, 255, 255, 0.6);
   --pulse: #ffffff;
-  --trace: rgba(194, 84, 31, 0.3);
-  --pad: rgba(194, 84, 31, 0.45);
+  --socket: #0b0b0c;
+  --wire-off: rgba(20, 24, 32, 0.2);
+  --trace: rgba(194, 84, 31, 0.12);
+  --pad: rgba(194, 84, 31, 0.18);
 
   --screw-a: #ffffff;
   --screw-b: #c3c7ce;
@@ -88,7 +90,7 @@
   --led: #e46a34;
   --copper-tint: rgba(194, 84, 31, 0.09);
   --copper-line: rgba(194, 84, 31, 0.42);
-  --spot: rgba(194, 84, 31, 0.11);
+  --spot: rgba(194, 84, 31, 0.07);
   --sel-bg: rgba(255, 255, 255, 0.05);
 
   --lcd: #0c0c0e;
@@ -111,8 +113,9 @@
   --cable-out: #0a0a0b;
   --cable-hi: rgba(255, 255, 255, 0.3);
   --pulse: #ffc9a6;
-  --trace: rgba(194, 84, 31, 0.38);
-  --pad: rgba(228, 106, 52, 0.5);
+  --wire-off: rgba(255, 255, 255, 0.18);
+  --trace: rgba(194, 84, 31, 0.16);
+  --pad: rgba(228, 106, 52, 0.2);
 
   --screw-a: #6e6e75;
   --screw-b: #2a2a2f;

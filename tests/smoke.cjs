@@ -60,20 +60,16 @@ const shot = async (target, name, options = {}) => {
   watch(page, 'interactions');
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  // Patch bay: pick the second problem and the second build.
-  const from = page.locator('.jack[data-side="from"][data-index="1"]');
-  const to = page.locator('.jack[data-side="to"][data-index="1"]');
-  const fromLabel = (await from.locator('.jack-label').textContent()).trim();
-  const toLabel = (await to.locator('.jack-label').textContent()).trim();
-  const toTopic = await to.getAttribute('data-topic');
-  const d0 = await page.getAttribute('[data-cable]', 'd');
-  await from.click();
-  await to.click();
-  await page.waitForTimeout(600);
-  ok('patch bay: cable moves', d0 !== (await page.getAttribute('[data-cable]', 'd')));
-  ok('patch bay: readout shows the problem', (await page.textContent('[data-readout="problem"]')) === fromLabel.toLowerCase());
-  ok('patch bay: readout shows the build', (await page.textContent('[data-readout="build"]')) === toLabel.toLowerCase());
-  ok('patch bay: chosen socket is pressed', (await to.getAttribute('aria-pressed')) === 'true');
+  // Patch bay: pick the second problem; the card shows its fix.
+  const key = page.locator('[data-patchbay] .key[data-index="1"]');
+  const fromLabel = (await key.locator('.problem').textContent()).trim();
+  const toLabel = await key.getAttribute('data-fix');
+  const toTopic = await key.getAttribute('data-topic');
+  await key.click();
+  ok('patch bay: picked problem is pressed', (await key.getAttribute('aria-pressed')) === 'true');
+  ok('patch bay: only one problem pressed', (await page.locator('[data-patchbay] .key[aria-pressed="true"]').count()) === 1);
+  ok('patch bay: card shows the fix', (await page.textContent('[data-readout="fix"]')) === toLabel);
+  ok('patch bay: card says what it does', (await page.textContent('[data-readout="does"]')) === (await key.getAttribute('data-does')));
 
   // Flip switch opens the contact form, filled in from the patch bay.
   await page.click('[data-flip]');
@@ -175,6 +171,7 @@ const shot = async (target, name, options = {}) => {
   await page.mouse.move(310, 410);
   await page.waitForTimeout(200);
   ok('torch: follows the mouse', (await page.evaluate(() => document.querySelector('[data-torch]').style.getPropertyValue('--mx'))) !== '');
+  ok('cursor ring: shows with the mouse', await page.evaluate(() => document.querySelector('[data-ring]').classList.contains('on')));
 
   // Unknown pages get the 404 page. The dev server has no 404 status, so only the content is checked.
   const lost = await ctx.newPage();
