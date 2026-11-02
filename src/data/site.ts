@@ -4,7 +4,10 @@ export const site = {
   name: 'Cross-Connect Labs',
   location: '[City, Country]',
   languages: '[English, …]',
-  replyTime: '[24 hours]',
+  // Read inside sentences: "We reply within 12 hours with the cost."
+  replyTime: '12 hours',
+  // The short form in the header's "online" light.
+  replyShort: '<12 hrs',
   // Shown as a badge in the hero. Set to '' to hide it.
   availability: 'booking projects for december',
   title: 'Cross-Connect Labs · Websites, apps, WhatsApp bots and automation',
