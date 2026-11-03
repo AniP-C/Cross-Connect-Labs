@@ -1,5 +1,5 @@
 ---
-import { modules, rack } from '../data/site';
+import { modules, phone, rack } from '../data/site';
 ---
 
 <section id="services" class="section">
@@ -9,7 +9,7 @@ import { modules, rack } from '../data/site';
         <p class="label">{rack.label}</p>
         <h2 class="h2">{rack.heading}</h2>
       </div>
-      <p>{rack.intro}</p>
+      <p><span class="long">{rack.intro}</span><span class="short">{phone.rackIntro}</span></p>
     </div>
     <div class="grid">
       {
@@ -35,6 +35,31 @@ import { modules, rack } from '../data/site';
               </button>
             </div>
           </article>
+        ))
+      }
+    </div>
+
+    <!-- Phones: the same modules as rows. Tap one to open what it does; one is open at a time. -->
+    <div class="rows" data-rack-rows>
+      {
+        modules.map((m, i) => (
+          <div class="row">
+            <button type="button" class="row-head" data-row aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`mod-${i}`}>
+              <span class="row-led" aria-hidden="true" />
+              <span class="row-name">
+                <span class="row-code">{m.code}</span>
+                {m.name}
+              </span>
+              <span class="row-time lcd">{m.time}</span>
+            </button>
+            <div class="row-body" id={`mod-${i}`} hidden={i !== 0}>
+              <p>{m.desc}</p>
+              <button type="button" class="cable-link" data-contact data-topic={m.topic}>
+                patch in <span aria-hidden="true">→</span>
+                <span class="sr-only">: ask about {m.name}</span>
+              </button>
+            </div>
+          </div>
         ))
       }
     </div>
@@ -152,6 +177,117 @@ import { modules, rack } from '../data/site';
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: radial-gradient(circle, #0b0b0c 0 36%, var(--jack-ring) 40% 58%, var(--jack-outer) 62% 100%);
+    background: radial-gradient(circle, var(--socket) 0 36%, var(--jack-ring) 40% 58%, var(--jack-outer) 62% 100%);
+  }
+
+  .rows,
+  .short {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .grid,
+    .long {
+      display: none;
+    }
+
+    .short {
+      display: inline;
+    }
+
+    .rows {
+      display: block;
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  .row {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row-head {
+    width: 100%;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    transition: background 0.25s;
+  }
+
+  .row-head[aria-expanded='true'] {
+    background: var(--sel-bg);
+  }
+
+  .row-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--led-off);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .row-head[aria-expanded='true'] .row-led {
+    background: var(--led);
+    box-shadow: 0 0 8px var(--led);
+  }
+
+  .row-name {
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .row-code {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .row-head[aria-expanded='true'] .row-code {
+    color: var(--copper-text);
+  }
+
+  .row-time {
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .row-body {
+    padding: 2px 4px 12px 24px;
   }
 </style>
+
+<script>
+  const rows = document.querySelector<HTMLElement>('[data-rack-rows]');
+  if (rows) {
+    const heads = Array.from(rows.querySelectorAll<HTMLButtonElement>('[data-row]'));
+    heads.forEach((head) =>
+      head.addEventListener('click', () => {
+        const open = head.getAttribute('aria-expanded') !== 'true';
+        heads.forEach((h) => {
+          const on = h === head && open;
+          h.setAttribute('aria-expanded', String(on));
+          const body = document.getElementById(h.getAttribute('aria-controls') ?? '');
+          if (body) body.hidden = !on;
+        });
+        // Closing a longer row above can pull this one off the top of the screen; bring it back.
+        const top = head.getBoundingClientRect().top;
+        if (open && top < 64) window.scrollBy({ top: top - 72 });
+      }),
+    );
+  }
+</script>

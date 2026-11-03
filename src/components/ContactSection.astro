@@ -254,4 +254,36 @@ const mailHref = contact.email ? `mailto:${contact.email}?subject=${encodeURICom
   .foot nav a:hover {
     opacity: 1;
   }
+
+  /* Phones: less space above, and links big enough to tap. */
+  @media (max-width: 760px) {
+    .contact {
+      margin-top: 56px;
+    }
+
+    .inner {
+      gap: 24px;
+      padding-top: 56px;
+    }
+
+    .direct {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .direct a,
+    .foot nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .foot {
+      margin-top: 32px;
+    }
+
+    .foot nav {
+      gap: 0 20px;
+    }
+  }
 </style>

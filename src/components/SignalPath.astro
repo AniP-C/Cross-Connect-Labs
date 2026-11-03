@@ -114,9 +114,29 @@ import { steps } from '../data/site';
     color: var(--muted);
   }
 
+  /* Phones: number on the left, title and text beside it. */
   @media (max-width: 760px) {
+    .head {
+      margin-bottom: 28px;
+    }
+
     .line {
       display: none;
+    }
+
+    li {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      gap: 4px 16px;
+    }
+
+    .num {
+      grid-row: span 2;
+    }
+
+    b {
+      font-size: 18px;
+      align-self: end;
     }
   }
 </style>

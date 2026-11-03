@@ -1,9 +1,11 @@
 ---
 import Logo from './Logo.astro';
-import { booking, nav, site } from '../data/site';
+import { booking, nav, phone, site } from '../data/site';
+
+const sheetLinks = [...nav, phone.contact];
 ---
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="wrap inner">
     <a href="#top" class="home" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
     <nav aria-label="Main" class="nav">
@@ -29,9 +31,32 @@ import { booking, nav, site } from '../data/site';
         </span>
         <span class="label"><span class="only-day">DAY</span><span class="only-night">NIGHT</span></span>
       </button>
+      <button type="button" class="menu-btn" data-menu aria-expanded="false" aria-controls="phone-menu">
+        <span class="rails" aria-hidden="true"><i></i><i></i><i></i></span>
+        {phone.menu}
+      </button>
     </div>
   </div>
+  <nav id="phone-menu" class="sheet" aria-label="Sections" data-sheet hidden>
+    <p class="sheet-head">{phone.menuHeading}</p>
+    {
+      sheetLinks.map((item, i) => (
+        <a class="jack" href={item.href}>
+          <span class="code">0{i + 1}</span>
+          {item.label}
+          <span class="hole" aria-hidden="true" />
+        </a>
+      ))
+    }
+  </nav>
 </header>
+
+<!-- Phones: the call bar at the bottom, shown once the hero has scrolled away. It sits outside the
+     header because the header's blur and slide would trap a fixed element inside it. -->
+<div class="dock" data-dock hidden>
+  <button type="button" class="dock-call" data-book>{booking.hurryCta}</button>
+  <button type="button" class="dock-send" data-contact><span class="led" aria-hidden="true"></span>{phone.send}</button>
+</div>
 
 <style>
   .site-header {
@@ -178,46 +203,206 @@ import { booking, nav, site } from '../data/site';
     color: #1c1c1e;
   }
 
+  .menu-btn,
+  .dock {
+    display: none;
+  }
+
+  /* Phones: one row (logo, switch, menu). The menu opens a sheet, the call button moves to the
+     bottom bar, and the header slides away while you scroll down. */
   @media (max-width: 760px) {
+    .site-header {
+      transition: transform 0.3s var(--ease);
+    }
+
+    .site-header.away {
+      transform: translateY(-100%);
+    }
+
     .inner {
-      gap: 8px 16px;
-      padding-top: 10px;
-      padding-bottom: 8px;
-    }
-
-    .nav {
-      order: 3;
-      flex: 1 1 100%;
       flex-wrap: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-      gap: 20px;
-    }
-
-    .nav a {
-      flex: none;
-      padding: 6px 0;
-    }
-
-    .status {
-      display: none;
-    }
-
-    .right {
       gap: 8px;
+      padding-top: 6px;
+      padding-bottom: 6px;
     }
 
-    .ask,
+    .home {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .home :global(svg) {
+      height: 32px;
+      width: auto;
+    }
+
+    .nav,
+    .status,
+    .hurry,
     .mode .label {
       display: none;
     }
 
-    .hurry {
-      padding: 0 12px;
+    .right {
+      flex-wrap: nowrap;
+      gap: 8px;
     }
 
     .mode {
-      padding: 0 6px;
+      min-height: 44px;
+      padding: 0 7px;
+    }
+
+    .menu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel-hi);
+      box-shadow: inset 0 1px 0 var(--hl);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .menu-btn[aria-expanded='true'] {
+      border-color: var(--copper-line);
+      background: var(--copper-tint);
+    }
+
+    .rails {
+      display: grid;
+      gap: 3px;
+    }
+
+    .rails i {
+      display: block;
+      width: 14px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--copper);
+    }
+
+    .rails i:nth-child(2) {
+      width: 9px;
+    }
+
+    .sheet {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: calc(100dvh - 60px);
+      overflow-y: auto;
+      padding: 14px var(--gutter) 18px;
+      background: var(--panel-hi);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 30px 60px -20px var(--shadow);
+    }
+
+    .sheet-head {
+      margin: 0 0 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--copper-text);
+    }
+
+    .jack {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      align-items: center;
+      min-height: 52px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .jack .code {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .hole {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--socket);
+      box-shadow: 0 0 0 4px var(--jack-outer), 0 0 0 5px var(--jack-ring);
+    }
+
+    .jack:active .hole {
+      box-shadow: 0 0 0 4px var(--copper), 0 0 0 5px var(--copper-line);
+    }
+
+    .dock {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      z-index: 25;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--header-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 20px 40px -20px var(--shadow);
+      animation: dock-rise 0.35s var(--ease);
+    }
+
+    .dock button {
+      min-height: 48px;
+      border-radius: 12px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .dock-call {
+      border: 1px solid var(--copper-line);
+      background: var(--copper-tint);
+      color: var(--copper-text);
+    }
+
+    .dock-send {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      background: var(--copper);
+      color: var(--on-copper);
+    }
+
+    .dock-send .led {
+      background: var(--on-copper);
+      box-shadow: none;
+    }
+  }
+
+  @keyframes dock-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
     }
   }
 </style>
@@ -243,4 +428,76 @@ import { booking, nav, site } from '../data/site';
       // Storage can be blocked; the toggle still works for this visit.
     }
   });
+
+  // Phones: menu sheet, a header that slides away on the way down, and the bottom call bar.
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const menu = header?.querySelector<HTMLButtonElement>('[data-menu]');
+  const sheet = header?.querySelector<HTMLElement>('[data-sheet]');
+  const dock = document.querySelector<HTMLElement>('[data-dock]');
+  const isPhone = window.matchMedia('(max-width: 760px)');
+
+  if (header && menu && sheet && dock) {
+    const setMenu = (open: boolean) => {
+      sheet.hidden = !open;
+      menu.setAttribute('aria-expanded', String(open));
+      if (open) {
+        header.classList.remove('away');
+        sheet.querySelector<HTMLElement>('a')?.focus();
+      }
+    };
+
+    menu.addEventListener('click', () => setMenu(sheet.hidden));
+    sheet.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) setMenu(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || sheet.hidden) return;
+      setMenu(false);
+      menu.focus();
+    });
+    document.addEventListener('click', (e) => {
+      if (!sheet.hidden && !header.contains(e.target as Node)) setMenu(false);
+    });
+
+    let lastY = window.scrollY;
+    window.addEventListener(
+      'scroll',
+      () => {
+        const y = window.scrollY;
+        if (Math.abs(y - lastY) < 6) return;
+        const keep = !isPhone.matches || !sheet.hidden || header.contains(document.activeElement);
+        header.classList.toggle('away', !keep && y > lastY && y > 120);
+        lastY = y;
+      },
+      { passive: true },
+    );
+
+    // The bar shows once the hero is fully gone, and steps aside at the contact section, which has the same buttons.
+    let pastHero = false;
+    let atContact = false;
+    const update = () => {
+      dock.hidden = !(isPhone.matches && pastHero && !atContact);
+    };
+    const hero = document.getElementById('top');
+    const contactSection = document.getElementById('contact');
+    if (hero) {
+      new IntersectionObserver(([e]) => {
+        pastHero = !e.isIntersecting && e.boundingClientRect.top < 0;
+        update();
+      }).observe(hero);
+    }
+    if (contactSection) {
+      new IntersectionObserver(([e]) => {
+        atContact = e.isIntersecting;
+        update();
+      }).observe(contactSection);
+    }
+    isPhone.addEventListener('change', () => {
+      if (!isPhone.matches) {
+        setMenu(false);
+        header.classList.remove('away');
+      }
+      update();
+    });
+  }
 </script>

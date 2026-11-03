@@ -44,7 +44,7 @@ export const booking = {
   // At the top of the enquiry form, so a call is one tap away from the start.
   quick: 'Rather talk than type?',
   quickCta: 'Patch into a free call',
-  // The call button in the sticky header. Phones show only `hurryCta`.
+  // The call button in the sticky header. Phones show `hurryCta` in the bottom call bar instead.
   hurry: 'In a hurry?',
   hurryCta: 'Book a call',
   // Opens the call dialog's description.
@@ -96,9 +96,21 @@ export const nav = [
   { href: '#faq', label: 'faq' },
 ];
 
+// Phones only: the menu sheet behind the header's menu button, the call bar that appears at the
+// bottom once the hero has scrolled away, and the hero's one-line intro.
+export const phone = {
+  menu: 'menu',
+  menuHeading: 'Patch to',
+  contact: { href: '#contact', label: 'contact' },
+  send: 'Patch in',
+  lede: 'Tap your problem, see the fix, flip to send.',
+  rackIntro: 'Eight modules, one team. Tap one to see what it does.',
+  reportsHint: 'Swipe for more',
+};
+
 // Hero patch bay: pick a problem on the left and the card on the right shows the fix we'd build.
 // `does` is the card's one-line description.
-export const patchHeads = { problem: 'What’s going wrong?', fix: 'We’d build', send: 'Flip to send' };
+export const patchHeads = { problem: 'What’s going wrong?', fix: 'We’d build', send: 'Flip to send', book: 'Flip to book' };
 
 export const patches = [
   { problem: 'Too many calls', fix: 'WhatsApp bot', topic: 'WhatsApp bot', time: '1–3 weeks', does: 'Answers questions and takes bookings for you, day and night.' },
@@ -107,6 +119,15 @@ export const patches = [
   { problem: 'Typing invoices', fix: 'AI automation', topic: 'AI automation', time: '1–3 weeks', does: 'Reads your bills and fills in the invoices for you to check.' },
   { problem: 'Same tasks every day', fix: 'Workflow automation', topic: 'Workflow automation', time: '1–2 weeks', does: 'Your apps and sheets talk to each other, so reports, reminders and follow-ups run on their own.' },
 ];
+
+// Phones only: a sixth key for visitors who don't know what they need. Flipping it opens the call dialog.
+export const patchUnsure = {
+  problem: 'Not sure yet',
+  fix: 'A free call',
+  time: `${booking.minutes} min`,
+  tail: 'free',
+  does: 'Tell us what’s slowing you down and we’ll work out the fix together.',
+};
 
 export const modules = [
   { code: 'MOD-01 · WEB', name: 'Websites', time: '1–3 wks', topic: 'Website', desc: 'Business sites and landing pages that load fast and are easy to update.' },

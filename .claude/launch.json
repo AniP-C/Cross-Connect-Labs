@@ -8,6 +8,12 @@
       "port": 4321
     },
     {
+      "name": "dev-lan",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--host"],
+      "port": 4321
+    },
+    {
       "name": "preview",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview"],

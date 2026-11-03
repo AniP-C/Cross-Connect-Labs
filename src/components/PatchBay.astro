@@ -1,6 +1,6 @@
 ---
 import IconMark from './IconMark.astro';
-import { patchHeads, patches } from '../data/site';
+import { patchHeads, patchUnsure, patches } from '../data/site';
 
 const first = patches[0];
 ---
@@ -56,18 +56,22 @@ const first = patches[0];
           </button>
         ))
       }
+      <button type="button" class="key unsure" data-index={patches.length} data-fix={patchUnsure.fix} data-time={patchUnsure.time} data-tail={patchUnsure.tail} data-does={patchUnsure.does} data-call aria-pressed="false">
+        <span class="dot" aria-hidden="true" />
+        <span class="problem">{patchUnsure.problem}</span>
+      </button>
     </div>
 
-    <div class="card" aria-live="polite">
+    <div class="card" aria-live="polite" data-card>
       <span class="label">{patchHeads.fix}</span>
       <div class="result" data-result>
         <b class="fix" data-readout="fix">{first.fix}</b>
         <p class="does" data-readout="does">{first.does}</p>
-        <span class="pill"><span data-readout="time">{first.time}</span> · any budget</span>
+        <span class="pill"><span data-readout="time">{first.time}</span> · <span data-readout="tail">any budget</span></span>
       </div>
       <button type="button" class="flip" data-flip aria-pressed="false" aria-label="Send this to us">
         <span class="flip-track" aria-hidden="true"><span class="flip-knob"></span></span>
-        <span class="flip-label" data-flip-label>{patchHeads.send}</span>
+        <span class="flip-label" data-flip-label data-label-send={patchHeads.send} data-label-book={patchHeads.book}>{patchHeads.send}</span>
       </button>
     </div>
   </div>
@@ -351,7 +355,19 @@ const first = patches[0];
     height: 7px;
   }
 
-  /* Phones: keys on top, the card underneath, joined by a short drop of cable. */
+  /* The "Not sure yet" key is for phones, where the hero has no call line. */
+  .key.unsure {
+    display: none;
+    border-style: dashed;
+  }
+
+  @media (max-width: 760px) {
+    .key.unsure {
+      display: flex;
+    }
+  }
+
+  /* Phones: keys in two columns on top, the card underneath, joined by a short drop of cable. */
   @media (max-width: 600px) {
     .patchbay {
       padding: 30px 14px 16px;
@@ -360,6 +376,35 @@ const first = patches[0];
     .body {
       grid-template-columns: 1fr;
       gap: 0;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ask {
+      grid-column: 1 / -1;
+    }
+
+    .key {
+      min-height: 48px;
+      padding: 8px 10px;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .label {
+      font-size: 12px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .flip {
+      min-height: 44px;
+      padding-top: 6px;
     }
 
     .key[aria-pressed='true']::after {
@@ -374,7 +419,8 @@ const first = patches[0];
     .card::before {
       content: '';
       position: absolute;
-      left: 26px;
+      left: 50%;
+      margin-left: -2px;
       top: -23px;
       width: 4px;
       height: 22px;
@@ -400,10 +446,14 @@ const first = patches[0];
       fix: root.querySelector<HTMLElement>('[data-readout="fix"]'),
       does: root.querySelector<HTMLElement>('[data-readout="does"]'),
       time: root.querySelector<HTMLElement>('[data-readout="time"]'),
+      tail: root.querySelector<HTMLElement>('[data-readout="tail"]'),
     };
+    const card = root.querySelector<HTMLElement>('[data-card]');
+    const tailText = out.tail?.textContent ?? '';
+    const stacked = window.matchMedia('(max-width: 600px)');
     const flip = root.querySelector<HTMLButtonElement>('[data-flip]');
     const flipLabel = root.querySelector<HTMLElement>('[data-flip-label]');
-    const flipText = flipLabel?.textContent ?? '';
+    const flipText = () => (keys[picked].dataset.call !== undefined ? flipLabel?.dataset.labelBook : flipLabel?.dataset.labelSend) ?? '';
     let picked = 0;
     let timer: number | undefined;
 
@@ -415,15 +465,22 @@ const first = patches[0];
         if (out.fix) out.fix.textContent = key.dataset.fix ?? '';
         if (out.does) out.does.textContent = key.dataset.does ?? '';
         if (out.time) out.time.textContent = key.dataset.time ?? '';
+        if (out.tail) out.tail.textContent = key.dataset.tail ?? tailText;
+        // "Not sure yet" books a call instead: booking.ts opens its dialog for any [data-book] click.
+        flip?.toggleAttribute('data-book', key.dataset.call !== undefined);
+        if (flipLabel) flipLabel.textContent = flipText();
         // Restart the small fade so the new fix reads as a change.
         result?.classList.remove('swap');
         void result?.offsetWidth;
         result?.classList.add('swap');
+        // Phones: if the card is below the screen, bring it up so the change is seen.
+        const bottom = card?.getBoundingClientRect().bottom ?? 0;
+        if (stacked.matches && bottom > window.innerHeight - 12) window.scrollBy({ top: bottom - window.innerHeight + 24 });
       }),
     );
 
     flip?.addEventListener('click', () => {
-      if (flip.getAttribute('aria-pressed') === 'true') return;
+      if (flip.hasAttribute('data-book') || flip.getAttribute('aria-pressed') === 'true') return;
       flip.setAttribute('aria-pressed', 'true');
       if (flipLabel) flipLabel.textContent = 'Sending…';
       window.clearTimeout(timer);
@@ -434,7 +491,7 @@ const first = patches[0];
           message: `Problem: ${key.querySelector('.problem')?.textContent?.trim()}. I think I need: ${key.dataset.fix}.`,
         });
         flip.setAttribute('aria-pressed', 'false');
-        if (flipLabel) flipLabel.textContent = flipText;
+        if (flipLabel) flipLabel.textContent = flipText();
       }, 650);
     });
   }
