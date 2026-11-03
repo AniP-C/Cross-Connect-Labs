@@ -352,9 +352,47 @@ import { cases } from '../data/site';
     text-underline-offset: 3px;
   }
 
+  /* Phones: the viewer moves right under the picked row (see the script), so the details open where you tapped. */
   @media (max-width: 760px) {
     .viewer {
       position: static;
+      flex: none;
+      margin: 0 0 14px;
+      padding: 10px;
+      border-radius: 16px;
+    }
+
+    .row {
+      gap: 14px;
+      padding: 16px 8px;
+    }
+
+    .row[aria-pressed='true'] .arrow {
+      transform: rotate(90deg);
+    }
+
+    .arrow {
+      transition: transform 0.25s var(--ease);
+    }
+
+    .screen {
+      height: auto;
+      padding: 16px;
+    }
+
+    .info {
+      padding: 16px 6px 4px;
+    }
+
+    .info h3 {
+      display: none;
+    }
+
+    .visit {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      margin: -10px 0 0;
     }
   }
 
@@ -369,8 +407,7 @@ import { cases } from '../data/site';
     }
 
     .screen {
-      height: auto;
-      min-height: 240px;
+      min-height: 150px;
     }
   }
 </style>
@@ -380,10 +417,29 @@ import { cases } from '../data/site';
   if (root) {
     const rows = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-case]'));
     const panes = Array.from(root.querySelectorAll<HTMLElement>('[data-pane]'));
+    const list = root.querySelector<HTMLElement>('.list');
+    const viewer = root.querySelector<HTMLElement>('.viewer');
+    const isPhone = window.matchMedia('(max-width: 760px)');
+    let picked = 0;
+
+    // Phones: the viewer sits right under the picked row. Wider screens: beside the list.
+    const place = () => {
+      if (!list || !viewer) return;
+      if (isPhone.matches) rows[picked].after(viewer);
+      else list.after(viewer);
+    };
+    place();
+    isPhone.addEventListener('change', place);
+
     rows.forEach((row, i) =>
       row.addEventListener('click', () => {
+        picked = i;
         rows.forEach((r, j) => r.setAttribute('aria-pressed', String(i === j)));
         panes.forEach((p, j) => (p.hidden = i !== j));
+        place();
+        // Moving the viewer from a row above can pull this row off the top of the screen; bring it back.
+        const top = row.getBoundingClientRect().top;
+        if (isPhone.matches && top < 64) window.scrollBy({ top: top - 72 });
       }),
     );
   }

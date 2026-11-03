@@ -38,8 +38,8 @@ const shot = async (target, name, options = {}) => {
     page.on('pageerror', (e) => errors.push(`${label}: ${e.message}`));
   };
 
-  // Layout: both themes, desktop and phone.
-  for (const [label, width, height] of [['desktop', 1440, 900], ['phone', 390, 844]]) {
+  // Layout: both themes, desktop, phone and a small phone.
+  for (const [label, width, height] of [['desktop', 1440, 900], ['phone', 390, 844], ['small phone', 360, 780]]) {
     for (const theme of ['light', 'dark']) {
       const ctx = await browser.newContext({ viewport: { width, height }, colorScheme: theme });
       const page = await ctx.newPage();
@@ -105,7 +105,7 @@ const shot = async (target, name, options = {}) => {
   ok('form: closes', !(await dialogOpen()));
 
   // Rack: a "patch in" button opens the form with its topic.
-  const patchIn = page.locator('#services .cable-link').nth(4);
+  const patchIn = page.locator('#services .grid .cable-link').nth(4);
   const rackTopic = await patchIn.getAttribute('data-topic');
   await patchIn.click();
   ok('rack: "patch in" opens the form with its topic', (await dialogOpen()) && (await checkedTopic()) === rackTopic, rackTopic);
@@ -172,6 +172,75 @@ const shot = async (target, name, options = {}) => {
   await page.waitForTimeout(200);
   ok('torch: follows the mouse', (await page.evaluate(() => document.querySelector('[data-torch]').style.getPropertyValue('--mx'))) !== '');
   ok('cursor ring: shows with the mouse', await page.evaluate(() => document.querySelector('[data-ring]').classList.contains('on')));
+
+  // Phone layout: 390px wide, day mode.
+  const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true });
+  const m = await mob.newPage();
+  watch(m, 'phone');
+  await m.goto(URL, { waitUntil: 'networkidle' });
+  await m.evaluate(() => (document.documentElement.style.scrollBehavior = 'auto'));
+  const height = await m.evaluate(() => document.documentElement.scrollHeight);
+  ok('phone: page is short', height < 8000, `${height}px`);
+  const headerH = await m.evaluate(() => document.querySelector('[data-header]').offsetHeight);
+  ok('phone: header is one row', headerH <= 64, `${headerH}px`);
+  const keysEnd = await m.evaluate(() => [...document.querySelectorAll('[data-patchbay] .key')].at(-1).getBoundingClientRect().bottom);
+  ok('phone: every fault finder key is on the first screen', keysEnd <= 844, `${Math.round(keysEnd)}px`);
+  const small = await m.evaluate(() =>
+    [...document.querySelectorAll('header button, header a, main button, main a, main summary')]
+      .filter((e) => e.offsetParent && !e.closest('[hidden]'))
+      .map((e) => [e.textContent.trim().slice(0, 20) || e.getAttribute('aria-label'), Math.round(e.getBoundingClientRect().height)])
+      .filter(([, h]) => h < 44),
+  );
+  ok('phone: buttons and links are at least 44px tall', small.length === 0, small.map((x) => x.join(' ')).join(', '));
+
+  // Menu sheet.
+  await m.click('[data-menu]');
+  ok('phone menu: opens', (await m.isVisible('[data-sheet]')) && (await m.getAttribute('[data-menu]', 'aria-expanded')) === 'true');
+  await m.keyboard.press('Escape');
+  ok('phone menu: closes with Escape', !(await m.isVisible('[data-sheet]')));
+
+  // Call bar: hidden in the hero, shown below it.
+  ok('call bar: hidden in the hero', !(await m.isVisible('[data-dock]')));
+  await m.evaluate(() => window.scrollTo(0, document.getElementById('services').offsetTop));
+  await m.waitForTimeout(400);
+  ok('call bar: shows below the hero', await m.isVisible('[data-dock]'));
+  await m.click('[data-dock] [data-contact]');
+  ok('call bar: "patch in" opens the form', await m.evaluate(() => document.querySelector('[data-contact-dialog]').open));
+  await m.keyboard.press('Escape');
+
+  // "Not sure yet" books a call. The browser answers /api/* itself, so nothing is booked.
+  await m.route('**/api/slots', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html>' }));
+  await m.evaluate(() => window.scrollTo(0, 0));
+  await m.click('[data-patchbay] .key.unsure');
+  ok('fault finder: "not sure yet" shows a free call', (await m.textContent('[data-readout="fix"]')) === (await m.getAttribute('[data-patchbay] .key.unsure', 'data-fix')));
+  await m.click('[data-flip]');
+  ok('fault finder: "not sure yet" opens the call dialog', await m.evaluate(() => document.querySelector('[data-book-dialog]').open));
+  await m.keyboard.press('Escape');
+  await m.unroute('**/api/slots');
+
+  // Services: rows open on tap, one at a time.
+  const row = m.locator('[data-row]').nth(3);
+  await row.click();
+  ok('phone services: row opens', (await row.getAttribute('aria-expanded')) === 'true' && (await m.isVisible('#mod-3')));
+  ok('phone services: one row open at a time', (await m.locator('[data-row][aria-expanded="true"]').count()) === 1);
+
+  // Case files: the details open right under the picked row.
+  await m.click('[data-case="2"]');
+  const under = await m.evaluate(() => document.querySelector('[data-case="2"]').nextElementSibling?.classList.contains('viewer'));
+  ok('phone case files: details open under the row', under && (await m.isVisible('#case-2')));
+
+  // Pricing: the sizes are a row of buttons.
+  await m.click('[data-budget-index="0"]');
+  ok('phone pricing: size buttons work', await m.isVisible('[data-budget-pane="0"]'));
+
+  // Field reports swipe sideways inside their strip only.
+  const strip = await m.evaluate(() => {
+    const s = document.querySelector('[data-reports]');
+    return s.scrollWidth > s.clientWidth && document.documentElement.scrollWidth <= window.innerWidth;
+  });
+  ok('phone field reports: strip swipes, page does not', strip);
+  await shot(m, 'phone-interactions', { fullPage: true });
+  await mob.close();
 
   // Unknown pages get the 404 page. The dev server has no 404 status, so only the content is checked.
   const lost = await ctx.newPage();

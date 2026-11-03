@@ -1,11 +1,16 @@
 ---
-import { reports } from '../data/site';
+import { phone, reports } from '../data/site';
+
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
 <section class="section" aria-labelledby="reports-title">
   <div class="wrap">
-    <h2 id="reports-title" class="h2 head">Field reports.</h2>
-    <div class="grid">
+    <div class="head">
+      <h2 id="reports-title" class="h2">Field reports.</h2>
+      <p class="count" aria-hidden="true"><span data-count>01</span> / {pad(reports.length)} · {phone.reportsHint}</p>
+    </div>
+    <div class="grid" data-reports aria-label="Field reports">
       {
         reports.map((r) => (
           <article class="surface">
@@ -67,4 +72,85 @@ import { reports } from '../data/site';
     font-size: 15px;
     color: var(--body);
   }
+
+  .head .count {
+    display: none;
+  }
+
+  /* Phones: one card at a time in a strip you swipe, with the next one peeking in. The strip runs to
+     the screen edges; the page itself never scrolls sideways. */
+  @media (max-width: 760px) {
+    .head {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .head .count {
+      display: block;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: flex;
+      gap: 12px;
+      margin: 0 calc(-1 * var(--gutter));
+      padding: 4px var(--gutter) 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    article {
+      flex: 0 0 86%;
+      scroll-snap-align: start;
+      padding: 20px;
+    }
+
+    .tag {
+      font-size: 12px;
+    }
+  }
 </style>
+
+<script>
+  const strip = document.querySelector<HTMLElement>('[data-reports]');
+  const count = document.querySelector<HTMLElement>('[data-count]');
+  const isPhone = window.matchMedia('(max-width: 760px)');
+
+  if (strip && count) {
+    const cards = Array.from(strip.children) as HTMLElement[];
+    // On phones the strip scrolls, so it needs to be reachable by keyboard.
+    const setup = () => {
+      if (isPhone.matches) {
+        strip.setAttribute('role', 'region');
+        strip.tabIndex = 0;
+      } else {
+        strip.removeAttribute('role');
+        strip.removeAttribute('tabindex');
+      }
+    };
+    setup();
+    isPhone.addEventListener('change', setup);
+
+    strip.addEventListener(
+      'scroll',
+      () => {
+        const step = cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+        const end = strip.scrollLeft >= strip.scrollWidth - strip.clientWidth - 2;
+        const i = end ? cards.length - 1 : Math.min(cards.length - 1, Math.round(strip.scrollLeft / step));
+        count.textContent = String(i + 1).padStart(2, '0');
+      },
+      { passive: true },
+    );
+  }
+</script>

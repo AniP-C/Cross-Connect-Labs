@@ -1,6 +1,6 @@
 ---
 import PatchBay from './PatchBay.astro';
-import { booking, site } from '../data/site';
+import { booking, phone, site } from '../data/site';
 ---
 
 <section id="top" class="hero" data-torch>
@@ -12,8 +12,11 @@ import { booking, site } from '../data/site';
       </div>
       <h1>Plug in your<br />problem.<br /><span class="accent">We’ll wire<br />the fix.</span></h1>
       <p class="lede">
-        We’re a small studio of developers and engineers. Tap your problem, see the fix we’d wire to it and flip the switch.
-        We’ll reply with the cost. No minimum budget.
+        <span class="long">
+          We’re a small studio of developers and engineers. Tap your problem, see the fix we’d wire to it and flip the switch.
+          We’ll reply with the cost. No minimum budget.
+        </span>
+        <span class="short">{phone.lede}</span>
       </p>
       <p class="list">websites · apps · online stores · whatsapp bots · clinic crms · ai · workflow automation</p>
       <p class="call">
@@ -130,9 +133,41 @@ import { booking, site } from '../data/site';
     color: var(--body);
   }
 
-  @media (max-width: 480px) {
+  .short {
+    display: none;
+  }
+
+  /* Phones: a one-line intro, so the fault finder starts on the first screen. The service list and
+     the call line step aside; the "Not sure yet" key and the bottom call bar cover them. */
+  @media (max-width: 760px) {
     .inner {
-      gap: 40px;
+      gap: 20px;
+      padding-top: 24px;
+      padding-bottom: 8px;
+    }
+
+    .copy {
+      gap: 14px;
+    }
+
+    .long,
+    .list,
+    .call {
+      display: none;
+    }
+
+    .short {
+      display: inline;
+    }
+
+    .lede {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 36px;
     }
   }
 </style>

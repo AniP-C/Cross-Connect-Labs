@@ -48,15 +48,15 @@ There are more tokens for hardware details: screws, jacks, sockets, knobs, switc
 
 | Section | Component | What it does |
 | --- | --- | --- |
-| Header | `Header.astro` | Logo, menu, "online" light (hidden under 1180px), an "In a hurry? Book a call" button (`data-book`), DAY/NIGHT switch. On phones the button shows only "Book a call", the switch drops its DAY/NIGHT word, and the menu becomes a second row that scrolls sideways. |
-| Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Fault finder on a faint circuit-trace background: "What's going wrong?" lists five problems as keys with status lights; picking one runs a short copper cable into the "We'd build" card, which shows the fix, what it does and the time (`patches` and `patchHeads` in `site.ts`). "Flip to send" in the card opens the contact form already filled in. A copper torch glow follows the mouse. |
+| Header | `Header.astro` | Logo, menu, "online" light (hidden under 1180px), an "In a hurry? Book a call" button (`data-book`), DAY/NIGHT switch. On phones (760px and under) it is one row: logo, switch without its word, and a `menu` button that opens a sheet of the sections as patch jacks (`phone` in `site.ts`). The header slides away while you scroll down and returns on the way up. The call button moves to a bar fixed at the bottom ("Book a call" and "Patch in"), which shows once the hero has scrolled away and steps aside at the contact section. |
+| Hero | `Hero.astro` + `PatchBay.astro` | "Plug in your problem. I'll wire the fix." Fault finder on a faint circuit-trace background: "What's going wrong?" lists five problems as keys with status lights; picking one runs a short copper cable into the "We'd build" card, which shows the fix, what it does and the time (`patches` and `patchHeads` in `site.ts`). "Flip to send" in the card opens the contact form already filled in. A copper torch glow follows the mouse. On phones the intro is one line (`phone.lede`), the service list and call line are hidden, the keys sit in two columns, and a sixth dashed key, "Not sure yet" (`patchUnsure`), turns the switch into "Flip to book", which opens the call dialog. |
 | Team and clients | `PatchedIn.astro` | "Our team's experience includes": a strip under the hero that scrolls sideways. Faceplate cards with screws for the companies the team has worked at, with a caption line below. Groups come from `patchedIn.groups`; a short list repeats so the loop never shows a gap. Each plate lights up (LED on, copper edge) as it passes the middle of the strip. Pauses on hover and on focus. With reduced motion it stops and wraps. Edit `patchedIn` in `site.ts`. |
-| Services | `Rack.astro` | "The Rack.", with a plain "our services" label above it (`rack` in `site.ts`). Eight rack modules, each with a "patch in" button that opens the form with that topic. |
-| Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. Five real projects; mark any placeholder with `example: true`. |
-| Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." |
+| Services | `Rack.astro` | "The Rack.", with a plain "our services" label above it (`rack` in `site.ts`). Eight rack modules, each with a "patch in" button that opens the form with that topic. On phones the grid is replaced by rows (code, name, build time) that open on tap, one at a time, with `aria-expanded`. |
+| Work | `CaseFiles.astro` | Case files: a list on the left, details on the right. Five real projects; mark any placeholder with `example: true`. On phones the script moves the details panel right under the picked row. |
+| Pricing | `Pricing.astro` | Budget knob: turn it from tiny to large. The message is "No minimum budget." On phones the knob shrinks and the four sizes become a row of buttons under it. |
 | Process | `SignalPath.astro` | How a project runs, step by step. |
 | ~~About~~ | removed | Site speaks as "we"; no photo or about section. |
-| Field reports | `FieldReports.astro` | Six short notes on what our builds have done, taken from the real projects (`reports` in `site.ts`). Generic on purpose: no client names or quotes. |
+| Field reports | `FieldReports.astro` | Six short notes on what our builds have done, taken from the real projects (`reports` in `site.ts`). Generic on purpose: no client names or quotes. On phones the cards are a strip you swipe, with a `01 / 06` counter. |
 | FAQ | `Faq.astro` | Native `<details>` items. |
 | Contact | `ContactSection.astro` | "Let's connect." with a plug button. |
 | Form | `ContactDialog.astro` | Native `<dialog>`. Any button with `data-contact` opens it (see `src/scripts/contact-bus.ts`). |
@@ -75,7 +75,8 @@ There are more tokens for hardware details: screws, jacks, sockets, knobs, switc
 
 - **Container:** `.wrap`, with side gutters of `clamp(16px, 4vw, 56px)`.
 - **Phone headings:** section headings stack below 760px.
-- **No sideways scrolling** at any width. The smoke test checks this at 390px and 1440px.
+- **No sideways scrolling** at any width. The smoke test checks this at 360px, 390px and 1440px.
+- **Phones (760px and under):** sections start 56px apart, every button and link is at least 44px tall, and the page stays under 8,000px at 390px. The smoke test checks all three, and that every fault finder key is on the first screen.
 - **Hero headline:** has fixed line breaks and is sized `clamp(40px, 5.2vw, 76px)` so it always breaks the same way.
 
 ## What to avoid
