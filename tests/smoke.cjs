@@ -8,7 +8,8 @@
 //
 // It never sends a real enquiry or books a real call. If the contact form is set up (form service,
 // WhatsApp or email in src/data/site.ts), the send step is skipped. Booking is tested
-// against a stand-in API inside the browser.
+// against a stand-in API inside the browser. Visit log beacons (/api/ping) are answered inside
+// the browser too, so a run against the live site never adds to the log.
 
 const { chromium } = require('playwright');
 const fs = require('node:fs');
@@ -33,6 +34,18 @@ const shot = async (target, name, options = {}) => {
 (async () => {
   const browser = await chromium.launch();
   const errors = [];
+  // Every context answers /api/ping itself and keeps what the page sent, for the visit log checks.
+  const pings = [];
+  const newContext = async (options) => {
+    const c = await browser.newContext(options);
+    await c.route('**/api/ping', (r) => {
+      try {
+        pings.push(JSON.parse(r.request().postData() || '{}'));
+      } catch {}
+      return r.fulfill({ status: 204 });
+    });
+    return c;
+  };
   const watch = (page, label) => {
     page.on('console', (m) => m.type() === 'error' && errors.push(`${label}: ${m.text()}`));
     page.on('pageerror', (e) => errors.push(`${label}: ${e.message}`));
@@ -41,7 +54,7 @@ const shot = async (target, name, options = {}) => {
   // Layout: both themes, desktop, phone and a small phone.
   for (const [label, width, height] of [['desktop', 1440, 900], ['phone', 390, 844], ['small phone', 360, 780]]) {
     for (const theme of ['light', 'dark']) {
-      const ctx = await browser.newContext({ viewport: { width, height }, colorScheme: theme });
+      const ctx = await newContext({ viewport: { width, height }, colorScheme: theme });
       const page = await ctx.newPage();
       watch(page, `${label}/${theme}`);
       await page.goto(URL, { waitUntil: 'networkidle' });
@@ -54,11 +67,16 @@ const shot = async (target, name, options = {}) => {
     }
   }
 
-  // Interactions: desktop, day mode.
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' });
+  // Interactions: desktop, day mode. The visit log is forced on here (it is off on localhost).
+  const ctx = await newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' });
+  await ctx.addInitScript(() => localStorage.setItem('cc-track-force', '1'));
   const page = await ctx.newPage();
   watch(page, 'interactions');
+  pings.length = 0;
   await page.goto(URL, { waitUntil: 'networkidle' });
+  const view = pings.find((p) => p.type === 'view');
+  ok('visit log: page view sent', view && view.path === new globalThis.URL(URL).pathname && Boolean(view.visitor && view.session && view.screen), JSON.stringify(view ?? {}).slice(0, 120));
+  const actions = (name) => pings.filter((p) => p.type === 'event' && p.name === name);
 
   // Patch bay: pick the second problem; the card shows its fix.
   const key = page.locator('[data-patchbay] .key[data-index="1"]');
@@ -80,6 +98,7 @@ const shot = async (target, name, options = {}) => {
   ok('flip switch: topic filled in', (await checkedTopic()) === toTopic, await checkedTopic());
   const message = await page.inputValue('textarea[name="message"]');
   ok('flip switch: message filled in', message.toLowerCase().includes(fromLabel.toLowerCase()), message);
+  ok('visit log: contact form opening recorded with its topic', actions('contact-open').some((p) => p.detail.startsWith(toTopic)), actions('contact-open').map((p) => p.detail).join(' | '));
   await shot(page, 'contact-form');
 
   // Validation: sending with no name marks the field.
@@ -138,6 +157,8 @@ const shot = async (target, name, options = {}) => {
   await page.click('[data-book-send]');
   await page.waitForSelector('[data-book-done]:not([hidden])');
   ok('booking: confirms the call', ((await page.textContent('[data-book-done-text]')) || '').includes('test@example.com'));
+  ok('visit log: call dialog and booking recorded', actions('book-open').length >= 2 && actions('booked').length === 1 && actions('book-fallback').length === 1);
+  ok('visit log: nothing typed is sent', !pings.some((p) => /Smoke Test|test@example\.com/.test(JSON.stringify(p))));
   await page.click('[data-book-done] .back');
   ok('booking: closes', !(await bookOpen()));
   await page.unroute('**/api/*');
@@ -157,6 +178,17 @@ const shot = async (target, name, options = {}) => {
   ok('knob: button carries the budget', (await page.getAttribute('[data-knob-cta]', 'data-budget')) !== ctaBefore);
   await shot(page.locator('#pricing'), 'budget-knob');
 
+  // Hiding the tab sends the exit numbers. (Beacons sent while a page unloads never reach the route, so not a reload.)
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(300);
+  const end = pings.find((p) => p.type === 'end');
+  ok('visit log: leaving a page sends time and scroll', end && end.id === view?.id && end.durationMs > 0 && end.maxScroll >= 0, JSON.stringify(end ?? {}).slice(0, 120));
+
   // Day/night switch is remembered.
   await page.click('[data-theme-toggle]');
   ok('day/night: switches to night', (await page.evaluate(() => document.documentElement.dataset.theme)) === 'dark');
@@ -174,7 +206,7 @@ const shot = async (target, name, options = {}) => {
   ok('cursor ring: shows with the mouse', await page.evaluate(() => document.querySelector('[data-ring]').classList.contains('on')));
 
   // Phone layout: 390px wide, day mode.
-  const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true });
+  const mob = await newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true });
   const m = await mob.newPage();
   watch(m, 'phone');
   await m.goto(URL, { waitUntil: 'networkidle' });
@@ -241,6 +273,45 @@ const shot = async (target, name, options = {}) => {
   ok('phone field reports: strip swipes, page does not', strip);
   await shot(m, 'phone-interactions', { fullPage: true });
   await mob.close();
+
+  // Visit log dashboard: a dead end without the key; with it, the report. /api/stats is answered here.
+  const admin = await ctx.newPage();
+  watch(admin, 'admin');
+  const now = Date.now();
+  const rec = (i, extra = {}) => ({ kind: 'view', id: `view000${i}`, session: `sess000${i % 2}`, visitor: 'visitor01', ts: new Date(now - i * 6e5).toISOString(), t0: now - i * 6e5, ip: '203.0.113.9', ua: 'Mozilla/5.0', browser: 'Chrome', browserVersion: '140', os: 'Android', osVersion: '15', device: 'mobile', bot: false, city: 'Jhansi', country: 'India', countryCode: 'IN', path: '/', referrer: 'https://www.google.com/', params: { utm_source: 'newsletter' }, durationMs: 42000, activeMs: 30000, maxScroll: 80, completed: true, ...extra });
+  const stats = {
+    ok: true,
+    days: 30,
+    truncated: false,
+    generatedAt: new Date(now).toISOString(),
+    records: [rec(1), rec(2), rec(3, { path: '/privacy/' })],
+    events: [{ kind: 'event', id: 'event0001', session: 'sess0001', visitor: 'visitor01', ts: new Date(now - 6e5).toISOString(), t0: now - 6e5, name: 'contact-send', detail: 'whatsapp · Website · budget Small', path: '/', ip: '203.0.113.9', countryCode: 'IN' }],
+  };
+  await admin.route('**/api/stats', (r) => {
+    const sent = JSON.parse(r.request().postData() || '{}');
+    return sent.key === 'right-key' ? r.fulfill({ json: stats }) : r.fulfill({ status: 401, json: { error: 'wrong key' } });
+  });
+  pings.length = 0;
+  await admin.goto(new globalThis.URL('/admin/', URL).href, { waitUntil: 'networkidle' });
+  ok('admin: looks like a dead end without the key', (await admin.isVisible('[data-gate]')) && !(await admin.isVisible('[data-report]')));
+  ok('admin: is not in the visit log', pings.length === 0, `${pings.length} beacons`);
+  await admin.fill('#admin-key', 'wrong-key');
+  await admin.press('#admin-key', 'Enter');
+  await admin.waitForFunction(() => document.querySelector('[data-gate-note]').textContent.length > 0);
+  ok('admin: wrong key is refused', (await admin.isVisible('[data-gate]')) && (await admin.textContent('[data-gate-note]')).includes('Wrong'));
+  // Chrome logs the 401 for the wrong key as a console error. That one is expected.
+  errors.splice(0, errors.length, ...errors.filter((e) => !(e.startsWith('admin:') && e.includes('401'))));
+  await admin.fill('#admin-key', 'right-key');
+  await admin.press('#admin-key', 'Enter');
+  await admin.waitForSelector('[data-report] .tiles');
+  ok('admin: right key shows the report', (await admin.textContent('.tiles')).includes('Page views') && (await admin.locator('details.item').count()) === 2);
+  await shot(admin, 'admin', { fullPage: true });
+  await admin.setViewportSize({ width: 390, height: 844 });
+  const adminOver = await admin.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  ok('admin: no sideways scrolling on a phone', adminOver <= 0, `${adminOver}px`);
+  await admin.click('[data-lock]');
+  ok('admin: lock goes back to the key box', await admin.isVisible('[data-gate]'));
+  await admin.close();
 
   // Unknown pages get the 404 page. The dev server has no 404 status, so only the content is checked.
   const lost = await ctx.newPage();

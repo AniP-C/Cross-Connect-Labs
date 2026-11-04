@@ -3,11 +3,14 @@
 //
 // /api/slots  GET   free call times from Google Calendar, as UTC ISO strings
 // /api/book   POST  books one of them as a calendar event with a Google Meet link
+// /api/ping   POST  the visit log (worker/visits.ts, docs/analytics.md)
+// /api/stats  POST  reads the visit log for /admin
 //
 // Setup, Google credentials and secrets: docs/booking.md.
 import { booking, site } from '../src/data/site';
+import { ping, purge, stats, type VisitEnv } from './visits';
 
-interface Env {
+interface Env extends VisitEnv {
   ASSETS: { fetch(request: Request): Promise<Response> };
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
@@ -29,6 +32,9 @@ export default {
       return env.ASSETS.fetch(new Request(new URL(pathname.slice(0, -'.html'.length), request.url), request));
     }
     if (!pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
+    // The visit log works with or without the booking secrets.
+    if (pathname === '/api/ping') return ping(request, env);
+    if (pathname === '/api/stats') return stats(request, env);
     if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REFRESH_TOKEN) {
       return json({ error: 'booking is not set up' }, 503);
     }
@@ -40,6 +46,11 @@ export default {
       console.error('booking failed', err);
       return json({ error: 'calendar unavailable' }, 502);
     }
+  },
+
+  // The nightly cron in wrangler.jsonc: delete visit log rows past their keep date.
+  async scheduled(_controller: unknown, env: Env, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<void> {
+    ctx.waitUntil(purge(env).then((removed) => console.log(`visit log: removed ${removed} old rows`)));
   },
 };
 

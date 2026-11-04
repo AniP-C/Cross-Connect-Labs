@@ -2,6 +2,7 @@
 // Free times come from the Worker (/api/slots in worker/index.ts) and are shown in the
 // visitor's own time zone. Where there is no Worker or it isn't set up (dev server, Docker,
 // no Google secrets yet), the dialog offers WhatsApp and email instead.
+import { clickArea, trackAction } from './track';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-book-dialog]');
 
@@ -85,6 +86,7 @@ if (dialog) {
       if (!byDay.size) {
         fallbackText.textContent = 'Every slot in the next two weeks is taken. Message us and we’ll find a time.';
         show(fallback);
+        trackAction('book-fallback', 'no free times');
         return;
       }
       const keys = [...byDay.keys()];
@@ -102,11 +104,13 @@ if (dialog) {
     } catch {
       fallbackText.textContent = defaultFallback;
       show(fallback);
+      trackAction('book-fallback', 'booking API unavailable');
     }
   }
 
   function open() {
     if (!dialog!.open) dialog!.showModal();
+    trackAction('book-open', clickArea() && `from ${clickArea()}`);
     load();
   }
 
@@ -152,6 +156,7 @@ if (dialog) {
         return say('Someone just took that time. Pick another one.', true);
       }
       if (!res.ok) throw new Error(String(res.status));
+      trackAction('booked', chosen.toISOString());
       doneText.textContent = `See you ${fullFormat.format(chosen)}. The invite with the Google Meet link is on its way to ${email}.`;
       form.reset();
       show(done);

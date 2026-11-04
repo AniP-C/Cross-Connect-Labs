@@ -8,7 +8,7 @@
 | Address | https://cross-connect-labs.anipy2000.workers.dev |
 | Worker name | `cross-connect-labs` |
 | Config | `wrangler.jsonc` in the repo |
-| Code | `worker/index.ts`, only for `/api/*` (call booking, see [booking.md](booking.md)) |
+| Code | `worker/index.ts`, only for `/api/*` (call booking, see [booking.md](booking.md); visit log, see [analytics.md](analytics.md)) |
 | Production branch | `main` |
 
 ### How a deploy works
