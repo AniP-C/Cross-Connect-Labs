@@ -33,6 +33,15 @@
   // Every night at 03:00 UTC the Worker deletes visit log rows older than 90 days.
   "triggers": {
     "crons": ["0 3 * * *"]
+  },
+
+  // Worker logs (console output and each /api/* request) in the dashboard under Observability.
+  // Kept here as well because a deploy from this file replaces settings made in the dashboard.
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
   }
 
   // Secrets are set in the dashboard, never here: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and
