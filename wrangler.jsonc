@@ -1,5 +1,5 @@
 // Cloudflare Workers settings for the live site.
-// dist/ is served as static assets. worker/index.ts only answers /api/* (call booking).
+// dist/ is served as static assets. worker/index.ts only answers /api/* (call booking and the visit log).
 // Docs: https://developers.cloudflare.com/workers/static-assets/
 {
   // Must match the Worker's name in the Cloudflare dashboard.
@@ -15,12 +15,47 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // Only the booking API and the Google verification file run code; everything else is a plain file.
+    // Only the API and the Google verification file run code; everything else is a plain file.
     "run_worker_first": ["/api/*", "/google3db46dd8c61fef25.html"],
     // Unknown URLs get dist/404.html with a 404 status.
     "not_found_handling": "404-page"
+  },
+
+  // The visit log behind /api/ping and /admin. Table: migrations/0001_visits.sql. See docs/analytics.md.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cross-connect-visits",
+      "database_id": "e919bd02-d94c-451a-a9aa-b5b349ce81d7"
+    }
+  ],
+
+  // Preview builds (other branches, `npx wrangler preview`) use their own database, so test
+  // visits on a preview link never land in the live log. Same table, same migration.
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "cross-connect-visits-preview",
+        "database_id": "674da3c3-2679-4a5b-9cf3-638b161baa60"
+      }
+    ]
+  },
+
+  // Every night at 03:00 UTC the Worker deletes visit log rows older than 90 days.
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
+
+  // Worker logs (console output and each /api/* request) in the dashboard under Observability.
+  // Kept here as well because a deploy from this file replaces settings made in the dashboard.
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
   }
 
-  // Secrets for booking (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN) are set in
-  // the dashboard, never here. See docs/booking.md.
+  // Secrets are set in the dashboard, never here: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and
+  // GOOGLE_REFRESH_TOKEN for booking (docs/booking.md), TRACKER_KEY for /admin (docs/analytics.md).
 }

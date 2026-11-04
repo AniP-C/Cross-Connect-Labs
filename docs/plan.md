@@ -72,11 +72,27 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [x] **Own domain.** Buy one (Cloudflare Registrar sells at cost), connect it to the Worker, then update `site` in `astro.config.mjs`. Steps in [hosting.md](hosting.md).
 - [x] **Email on your domain.** hello@crossconnectlabs.com is routed to Gmail with Cloudflare Email Routing. Replying as hello@ is still in the launch checklist.
 - [x] **Social preview image.** `public/og-image.png` (1200 × 630), made by `npm run og-image`.
-- [ ] **Analytics.** Cloudflare Web Analytics is free and needs no cookie banner.
+- [x] **Analytics.** Our own visit log in D1 with a private dashboard at /admin, ported from ANI / SYSTEMS. No cookies, no third-party scripts. See [analytics.md](analytics.md).
+- [ ] **Visit log password.** Run `npx wrangler secret put TRACKER_KEY` so /admin opens ([analytics.md](analytics.md)).
 - [x] **Search basics.** `sitemap.xml`, `robots.txt` pointing to it, structured data (ProfessionalService, FAQ), Open Graph and Twitter tags, `noindex` on the 404 page.
 - [ ] **Google Search Console.** Verification file `public/google3db46dd8c61fef25.html` is live; finish verifying, then submit `https://crossconnectlabs.com/sitemap.xml`. Do the same in Bing Webmaster Tools (it can import from Search Console).
 - [ ] **Google Business Profile**, if you want local clients to find you.
 - [x] **Custom booking dialog.** "No idea what you're looking for? Let's hop on a call" in the hero and contact section. On-brand dialog with Google Calendar behind it (free/busy, events with a Meet link) through `worker/index.ts`. Chosen over Cal.com because Cal.com's brand colours and branding removal are paid. Live; setup in [booking.md](booking.md).
+
+### Ads tracking (before running paid ads)
+
+The visit log already records `utm_*` tags, enquiries and bookings. What paid ads need on top:
+
+- [ ] **Pick the ad network** (Google Ads, Meta, or both). Everything below depends on it.
+- [ ] **Keep ad-click IDs.** Add `gclid`, `gbraid`, `wbraid` (Google), `fbclid` (Meta) and `msclkid` (Microsoft) to `CAMPAIGN` in `src/scripts/track.ts` and `worker/visits.ts`. Today the Worker drops them.
+- [ ] **Remember the first campaign per visitor.** Store the first-seen `utm_*` and click ID in `localStorage` and send it with every action, so a call booked days after the ad click still counts for that ad.
+- [ ] **Campaign results on /admin.** A table of campaign → sessions → forms sent → calls booked → WhatsApp taps, plus a field for ad spend to show cost per enquiry.
+- [ ] **UTM links for every ad.** For example `?utm_source=google&utm_medium=cpc&utm_campaign=<name>&utm_content=<ad>`. Most ad networks can add them automatically.
+- [ ] **The ad network's conversion tag** (Google tag with conversion actions, or Meta Pixel), fired on `contact-send` and `booked`. Without it the network can't tell which clicks became enquiries, so it can't optimise.
+  - Add its hosts to any Content-Security-Policy, and keep `public/_headers` and `nginx.conf` in step.
+  - It sets cookies, so rewrite the privacy page and add a consent banner for visitors from the EU and UK. India's DPDP Act expects a clear notice too.
+  - Better option to look at: server-side conversions from the Worker (Google Ads offline conversions with the `gclid`, Meta Conversions API). They need no browser tag and are not blocked by ad blockers.
+- [ ] **Smoke test:** block the ad tag's requests too, so test runs never count as conversions.
 
 ### Later
 

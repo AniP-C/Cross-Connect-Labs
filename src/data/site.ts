@@ -236,9 +236,34 @@ export const faqs = [
 export const topics = ['Website', 'Mobile app', 'Online store', 'WhatsApp bot', 'Clinic bot & CRM', 'AI automation', 'Workflow automation', 'PLC & automation', 'Small job / fix', 'Not sure yet'];
 export const budgetChoices = ['Not sure', 'Tiny', 'Small', 'Medium', 'Large'];
 
+// The visit log behind /admin (docs/analytics.md). The Worker deletes rows older than `keepDays`
+// every night, and only accepts the action names below; the labels are what /admin shows.
+export const visitLog = {
+  keepDays: 90,
+  // /admin looks like the 404 page until the key goes in.
+  gate: {
+    code: 'E404 · NO SIGNAL',
+    heading: 'This cable isn’t plugged in.',
+    hint: '…unless you brought a key.',
+  },
+  heading: 'Who patched in.',
+  actions: {
+    'contact-open': 'Contact form opened',
+    'contact-send': 'Contact form sent',
+    'book-open': 'Call dialog opened',
+    'book-fallback': 'Booking offline, WhatsApp shown',
+    booked: 'Call booked',
+    whatsapp: 'WhatsApp link tapped',
+    email: 'Email link clicked',
+    phone: 'Phone number tapped',
+    'copy-email': 'Email address copied',
+    outbound: 'Outside link followed',
+  },
+} as const;
+
 // Privacy policy at /privacy. Google needs this link to publish the booking app.
 export const privacy = {
-  updated: '1 November 2026',
+  updated: '4 November 2026',
   intro: 'This page explains what Cross-Connect Labs collects when you use crossconnectlabs.com and what we do with it. In short: only what you send us, and only to reply to you.',
   sections: [
     {
@@ -247,7 +272,8 @@ export const privacy = {
         'Contact form. The form stores nothing on this site. It opens WhatsApp or your email app with your message typed in, and you decide whether to send it. What you send then sits in our WhatsApp or email.',
         'Call booking. When you book a call we receive your name, your email address, the time you picked and any note you add. They are saved as an event in our Google Calendar, and Google emails you an invite with a Google Meet link.',
         'Hosting. The site runs on Cloudflare. Like any web host, Cloudflare processes technical data such as your IP address and browser type to deliver pages and protect the site.',
-        'Your browser. We remember your day or night choice in your browser’s local storage. There are no cookies, no analytics and no advertising trackers.',
+        'Visits. We keep a simple log of visits, such as pages viewed and the type of device, to see how the site is used. It is not shared, and it is deleted after 90 days.',
+        'Your browser. We remember your day or night choice in your browser’s local storage. There are no cookies and no advertising trackers.',
       ],
     },
     {

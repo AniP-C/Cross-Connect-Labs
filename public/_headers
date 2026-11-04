@@ -11,3 +11,11 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+
+# The visit log dashboard (docs/analytics.md): never cached, never indexed.
+/admin
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive
+/admin/
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow, noarchive

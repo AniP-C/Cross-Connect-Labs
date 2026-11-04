@@ -514,6 +514,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
 <script>
   import '../scripts/booking';
   import { CONTACT_EVENT, bindContactButtons, type ContactPrefill } from '../scripts/contact-bus';
+  import { clickArea, trackAction } from '../scripts/track';
 
   bindContactButtons();
 
@@ -551,7 +552,11 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       // Keep the sheet at the top so the heading and the call line show first, even on a phone.
       nameInput.focus({ preventScroll: true });
       dialog!.querySelector('.sheet')!.scrollTop = 0;
+      trackAction('contact-open', [radioValue('topic'), clickArea() && `from ${clickArea()}`].filter(Boolean).join(' · '));
     }
+
+    // For the visit log: how it was sent and what about, never what was typed.
+    const sent = (via: string) => trackAction('contact-send', `${via} · ${radioValue('topic')} · budget ${radioValue('budget')}`);
 
     function finish(text: string, copy?: string) {
       form.hidden = true;
@@ -619,6 +624,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
             }),
           });
           if (!res.ok) throw new Error(String(res.status));
+          sent('form');
           finish(`Thanks, ${name}. We’ll look at your idea and reply on ${reach} within ${reply} with the cost.`);
           form.reset();
         } catch {
@@ -627,12 +633,15 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
           send.disabled = false;
         }
       } else if (cfg.whatsapp) {
+        sent('whatsapp');
         window.open(`https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
         finish('WhatsApp should open with your message ready. Press send there and we’ll reply with the cost.');
       } else if (cfg.email) {
+        sent('email');
         window.location.href = `mailto:${cfg.email}?subject=${encodeURIComponent(`New enquiry: ${topic}`)}&body=${encodeURIComponent(text)}`;
         finish('Your email app should open with the message ready. Press send there and we’ll reply with the cost.');
       } else {
+        sent('not set up');
         finish('Contact details are not set up on this site yet, so nothing was sent. Here is your message, ready to copy:', text);
       }
     });

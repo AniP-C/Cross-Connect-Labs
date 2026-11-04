@@ -1,0 +1,396 @@
+---
+// The visit log dashboard. Looks like the 404 page until the TRACKER_KEY goes in; then it reads
+// /api/stats (worker/visits.ts) and draws everything in the browser (src/scripts/admin.ts).
+// Kept out of search (noindex here, X-Robots-Tag in public/_headers) and out of the visit log itself.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import { visitLog } from '../data/site';
+---
+
+<BaseLayout title="Page not found · Cross-Connect Labs" noindex track={false}>
+  <main id="main" class="wrap admin">
+    <section class="gate" data-gate>
+      <a href="/" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
+      <p class="code">{visitLog.gate.code}</p>
+      <h1>{visitLog.gate.heading}</h1>
+      <form class="hatch" data-unlock>
+        <label for="admin-key">{visitLog.gate.hint}</label>
+        <div class="hatch-row">
+          <input id="admin-key" name="key" type="password" autocomplete="current-password" required />
+          <button type="submit" class="go" aria-label="Open the visit log">patch in</button>
+        </div>
+        <p class="note" data-gate-note role="status"></p>
+      </form>
+    </section>
+
+    <section class="report" data-report hidden>
+      <div class="top">
+        <div>
+          <p class="code" data-range-label>VISIT LOG</p>
+          <h1>{visitLog.heading}</h1>
+        </div>
+        <div class="controls">
+          <div class="group" role="group" aria-label="Date range">
+            {[7, 30, 90, 365].map((d) => <button type="button" class="pill" data-days={d} aria-pressed={d === 30 ? 'true' : 'false'}>{d}d</button>)}
+          </div>
+          <button type="button" class="pill" data-bots aria-pressed="false">bots</button>
+          <button type="button" class="pill" data-refresh>refresh</button>
+          <button type="button" class="pill" data-lock>lock</button>
+        </div>
+      </div>
+      <p class="note" data-status role="status">Reading the log…</p>
+      <div data-body></div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .admin {
+    padding-top: 48px;
+    padding-bottom: 72px;
+  }
+
+  .gate {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .code {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--copper-text);
+  }
+
+  .gate .code {
+    margin-top: 24px;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(36px, 6vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+
+  .report h1 {
+    font-size: clamp(32px, 5vw, 56px);
+  }
+
+  .hatch {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(100%, 420px);
+  }
+
+  .hatch label {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+
+  .hatch-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .hatch input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--chip-line);
+    border-radius: 6px;
+    background: var(--input-bg);
+    font-family: var(--mono);
+  }
+
+  .go,
+  .pill {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--chip-line);
+    border-radius: 999px;
+    background: transparent;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .go {
+    border-color: var(--copper);
+    background: var(--copper);
+    color: var(--on-copper);
+  }
+
+  .pill[aria-pressed='true'] {
+    border-color: var(--copper);
+    background: var(--copper-tint);
+    color: var(--copper-text);
+  }
+
+  .note {
+    min-height: 1.6em;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+
+  .note.error {
+    color: var(--copper-text);
+  }
+
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 12px;
+  }
+
+  .top .code {
+    margin-bottom: 10px;
+  }
+
+  .controls,
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Everything below is drawn by src/scripts/admin.ts. */
+  .report :global(.tiles) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .report :global(.panel) {
+    position: relative;
+    padding: 16px;
+    border-radius: 10px;
+    min-width: 0;
+  }
+
+  .report :global(.tile-value) {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+  }
+
+  .report :global(.label) {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .report :global(.hint) {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .report :global(h2) {
+    margin: 40px 0 14px;
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .report :global(.chart) {
+    padding: 18px 16px 12px;
+    border-radius: 10px;
+  }
+
+  .report :global(.chart .label) {
+    color: var(--lcd-muted);
+  }
+
+  .report :global(.bars) {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 140px;
+    margin-top: 12px;
+  }
+
+  .report :global(.bars span) {
+    flex: 1;
+    min-width: 1px;
+    min-height: 1px;
+    border-radius: 2px 2px 0 0;
+    background: var(--lcd-accent);
+  }
+
+  .report :global(.bars span.empty) {
+    background: var(--lcd-dash);
+  }
+
+  .report :global(.axis) {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--lcd-muted);
+  }
+
+  .report :global(.grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .report :global(.rows) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .report :global(.row) {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .report :global(.row .fill) {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--copper-tint);
+  }
+
+  .report :global(.row span) {
+    position: relative;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .report :global(.row .count) {
+    font-family: var(--mono);
+    color: var(--copper-text);
+    flex: none;
+  }
+
+  .report :global(.funnel .row) {
+    padding: 8px 10px;
+  }
+
+  .report :global(.list) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .report :global(.item) {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .report :global(.item summary) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .report :global(.mono) {
+    font-family: var(--mono);
+  }
+
+  .report :global(.muted) {
+    color: var(--muted);
+  }
+
+  .report :global(.tag) {
+    padding: 2px 8px;
+    border: 1px solid var(--copper-line);
+    border-radius: 999px;
+    color: var(--copper-text);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .report :global(.trail) {
+    margin: 12px 0 0;
+    padding-left: 20px;
+    color: var(--body);
+  }
+
+  .report :global(.trail li) {
+    overflow-wrap: anywhere;
+  }
+
+  .report :global(.facts) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px 16px;
+    margin: 14px 0 0;
+  }
+
+  .report :global(.facts div) {
+    min-width: 0;
+  }
+
+  .report :global(.facts .wide) {
+    grid-column: 1 / -1;
+  }
+
+  .report :global(.facts dd) {
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .report :global(.event) {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 4px 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .report :global(.event span) {
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 560px) {
+    .report :global(.event) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/admin';
+</script>

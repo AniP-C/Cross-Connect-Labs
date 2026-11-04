@@ -1,0 +1,125 @@
+# Visit log
+
+Our own record of who visits the site and what they do, with a private dashboard at **/admin**. It is ported from the tracker on ANI / SYSTEMS (`AniP-C/Ani-Portfolio-Web`), moved from Netlify Blobs to Cloudflare D1, and extended with this site's actions. There are no cookies and no third-party scripts.
+
+Ads tracking (ad-click IDs, conversion tags) is not built yet. It is in the to-do list in [plan.md](plan.md).
+
+## How it works
+
+```
+every page ── view / end / event ──► POST /api/ping ──► D1: cross-connect-visits (table visits)
+/admin ──── key ───────────────────► POST /api/stats ─► rows for the range ─► counted in the browser
+cron 03:00 UTC ─────────────────────────────────────► deletes rows older than 90 days
+```
+
+| File | What it does |
+| --- | --- |
+| `src/scripts/track.ts` | The browser half. Started by `BaseLayout.astro` on every page. Exports `trackAction()` for the dialogs. |
+| `worker/visits.ts` | `/api/ping` (public, writes one row), `/api/stats` (needs `TRACKER_KEY`), the nightly purge, user-agent parsing. **The record types live here.** |
+| `worker/index.ts` | Routes the two paths and runs the cron. |
+| `migrations/0001_visits.sql` | The table. |
+| `src/pages/admin.astro` + `src/scripts/admin.ts` | The dashboard. |
+| `src/data/site.ts` → `visitLog` | Days kept, the action names the Worker accepts, and their labels on /admin. |
+
+The public path is `/api/ping`, not `/api/track`: ad blockers match the word "track" even on the site's own address.
+
+## What it records
+
+**Page view** (one per page load), sent when the page opens:
+
+- page path and title, the referrer, and `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` and `ref` from the address
+- visitor id (random, in `localStorage`), session id (per tab, in `sessionStorage`), visit number and page number in the session
+- screen and window size, pixel ratio, language, time zone, day or night, touch screen, CPU cores, memory, connection type
+- added by the Worker: IP address, city, region, country and time zone (from Cloudflare), browser, OS, device type, and a bot flag
+
+**Exit numbers**, sent when the tab is hidden or closed and merged into the same row: time on the page, time the tab was visible, deepest scroll, clicks and key presses.
+
+**Actions** (names in `visitLog.actions`):
+
+| Action | When | Detail |
+| --- | --- | --- |
+| `contact-open` | The contact form opens | Topic, and where the button was (`from hero`, `from call bar`…) |
+| `contact-send` | The form is sent | How (`whatsapp`, `email`, `form`), topic and budget. Never the name or message. |
+| `book-open` | The call dialog opens | Where the button was |
+| `book-fallback` | Booking is offline and WhatsApp/email is shown instead | Why |
+| `booked` | A call is booked | The time picked. Never the name or email. |
+| `whatsapp`, `email`, `phone` | A `wa.me`, `mailto:` or `tel:` link is clicked | Where, or the address |
+| `copy-email` | Someone copies exactly an email address | The address |
+| `outbound` | A link to another site is clicked | The address, without its query string |
+
+**Not recorded:** anything typed into a form. Nothing at all when the browser sends Do Not Track or Global Privacy Control, on `localhost`, or on `/admin`.
+
+## Setup, once
+
+The D1 database `cross-connect-visits` exists (APAC) and is bound as `DB` in `wrangler.jsonc`. Preview links from other branches use a second database, `cross-connect-visits-preview` (the `previews` block), so test visits stay out of the live log. Both have the table.
+
+1. **Create the table** (already done for the live database; run it again only for a new one):
+
+   ```bash
+   npx wrangler d1 migrations apply cross-connect-visits --remote
+   ```
+
+   For the preview database: `npx wrangler d1 execute cross-connect-visits-preview --remote --file migrations/0001_visits.sql`.
+
+2. **Set the dashboard password.** Until it is set, `/api/stats` answers 503 and /admin stays shut:
+
+   ```bash
+   npx wrangler secret put TRACKER_KEY
+   ```
+
+   Paste a long random string. Keep it in your password manager.
+
+3. **Deploy** (push to `main`), then open `https://crossconnectlabs.com/admin` and paste the key.
+
+## Using /admin
+
+The page looks like the 404 page until you enter the key. The key is kept in that browser's local storage until you press **lock**.
+
+- **Range:** 7, 30, 90 or 365 days. The log only keeps 90.
+- **bots:** shows or hides crawler sessions (hidden by default).
+- **Tiles:** page views, sessions, unique browsers, returning visitors, average session, average time looking, average scroll, sessions that left at once, messages sent, calls booked.
+- **Towards an enquiry:** how many sessions opened the form, sent it, opened the call dialog, booked, or tapped WhatsApp.
+- **Breakdowns:** pages, where people came from, campaign, country, city, device, browser, OS, screen, language, time zone, day or night, actions, topics, where buttons were pressed, links followed out.
+- **Actions and sessions:** the latest actions, and each session with its pages, times, scroll and the full device details.
+
+Use `utm_*` tags on links you share, for example `https://crossconnectlabs.com/?utm_source=linkedin&utm_campaign=launch`. They show under **Campaign**.
+
+## Health check
+
+If nothing shows up, test the endpoint before touching code. A `204` means the log is working:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://crossconnectlabs.com/api/ping -H 'Content-Type: application/json' -d '{"type":"view","id":"probe0000001","session":"probe0000001","visitor":"probe0000001","path":"/probe"}'
+```
+
+`503` means the database binding is missing. `404` means the request never reached the Worker.
+
+To look at rows directly:
+
+```bash
+npx wrangler d1 execute cross-connect-visits --remote --command "SELECT kind, datetime(t0/1000,'unixepoch') AS at, json_extract(data,'$.path') AS path, json_extract(data,'$.name') AS action FROM visits ORDER BY t0 DESC LIMIT 20"
+```
+
+## Testing locally
+
+The log is off on `localhost`. To try the whole thing with a local database:
+
+```bash
+npx wrangler d1 migrations apply cross-connect-visits --local
+```
+
+```bash
+npx wrangler dev --var TRACKER_KEY:local-testing
+```
+
+Open the address it prints. In the browser console run `localStorage.setItem('cc-track-force', '1')` and reload. Then open `/admin` and use the key `local-testing`. `npm run dev` has no Worker, so there /admin only shows that the log isn't answering.
+
+`npm run test:smoke` forces the log on, answers `/api/ping` and `/api/stats` inside the browser, and checks the beacons and the dashboard. It never writes to the real log.
+
+## Privacy
+
+The privacy page (`privacy` in `site.ts`) says only that we keep a simple log of visits, don't share it and delete it after 90 days. IP addresses are personal data. Keep the 90-day purge on, and delete a person's rows if they ask:
+
+```bash
+npx wrangler d1 execute cross-connect-visits --remote --command "DELETE FROM visits WHERE json_extract(data,'$.ip') = '<their IP>'"
+```

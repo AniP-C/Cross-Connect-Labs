@@ -16,16 +16,18 @@ interface Props {
   description?: string;
   // Keep a page out of search results (the 404 page).
   noindex?: boolean;
+  // Leave the page out of the visit log (/admin).
+  track?: boolean;
 }
 
-const { title = site.title, description = site.description, noindex = false } = Astro.props;
+const { title = site.title, description = site.description, noindex = false, track = true } = Astro.props;
 const canonical = Astro.site && !noindex ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 // Shown when the link is shared. Made by `npm run og-image`.
 const image = new URL('/og-image.png', Astro.site ?? Astro.url).href;
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-no-track={track ? undefined : ''}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -70,5 +72,10 @@ const image = new URL('/og-image.png', Astro.site ?? Astro.url).href;
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
     <Cursor />
+    <!-- The visit log (docs/analytics.md). Off on localhost, with Do Not Track, and on pages with track={false}. -->
+    <script>
+      import { startTracking } from '../scripts/track';
+      startTracking();
+    </script>
   </body>
 </html>
