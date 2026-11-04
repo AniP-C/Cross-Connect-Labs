@@ -16,7 +16,7 @@
 1. You push to GitHub.
 2. Cloudflare's build system (Workers Builds) clones the repo, runs `npm ci`, then:
    - for a push to **`main`**, it runs `npx wrangler deploy` and the site goes live
-   - for a push to **any other branch**, it runs `npx wrangler versions upload`, which gives a **preview link** (`<something>-cross-connect-labs.anipy2000.workers.dev`) and doesn't touch the live site
+   - for a push to **any other branch**, it runs `npx wrangler preview`, which gives a **preview link** and doesn't touch the live site. Previews use the `previews` block in `wrangler.jsonc`: their own D1 database (`cross-connect-visits-preview`) and no cron
 3. Wrangler reads `wrangler.jsonc`, runs `npm run build`, and uploads `dist/`.
 
 `wrangler.jsonc` sets:
@@ -38,7 +38,7 @@ Go to **Workers & Pages**, then **cross-connect-labs**, then **Settings → Buil
 - **Production branch:** `main`
 - **Build command:** empty or `npm run build`. Either works, because `wrangler.jsonc` runs the build anyway.
 - **Deploy command:** `npx wrangler deploy`
-- **Non-production branch deploy command:** `npx wrangler versions upload`, with builds for non-production branches turned on if you want preview links
+- **Non-production branch deploy command:** `npx wrangler preview`, with builds for non-production branches turned on if you want preview links
 - **Root directory:** `/`
 
 ### Rollback

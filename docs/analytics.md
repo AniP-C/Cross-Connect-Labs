@@ -51,13 +51,15 @@ The public path is `/api/ping`, not `/api/track`: ad blockers match the word "tr
 
 ## Setup, once
 
-The D1 database `cross-connect-visits` exists (APAC) and is bound as `DB` in `wrangler.jsonc`.
+The D1 database `cross-connect-visits` exists (APAC) and is bound as `DB` in `wrangler.jsonc`. Preview links from other branches use a second database, `cross-connect-visits-preview` (the `previews` block), so test visits stay out of the live log. Both have the table.
 
 1. **Create the table** (already done for the live database; run it again only for a new one):
 
    ```bash
    npx wrangler d1 migrations apply cross-connect-visits --remote
    ```
+
+   For the preview database: `npx wrangler d1 execute cross-connect-visits-preview --remote --file migrations/0001_visits.sql`.
 
 2. **Set the dashboard password.** Until it is set, `/api/stats` answers 503 and /admin stays shut:
 

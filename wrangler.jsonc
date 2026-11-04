@@ -30,6 +30,18 @@
     }
   ],
 
+  // Preview builds (other branches, `npx wrangler preview`) use their own database, so test
+  // visits on a preview link never land in the live log. Same table, same migration.
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "cross-connect-visits-preview",
+        "database_id": "674da3c3-2679-4a5b-9cf3-638b161baa60"
+      }
+    ]
+  },
+
   // Every night at 03:00 UTC the Worker deletes visit log rows older than 90 days.
   "triggers": {
     "crons": ["0 3 * * *"]
