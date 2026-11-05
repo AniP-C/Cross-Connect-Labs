@@ -20,6 +20,7 @@ Run `check` and `test:smoke` before pushing.
 - `src/scripts/contact-bus.ts`: `openContact()`. Any `[data-contact]` button opens the dialog, pre-filled from `data-topic`, `data-budget` and `data-message`.
 - `src/scripts/booking.ts` + `worker/index.ts`: "hop on a call". Any `[data-book]` button opens the booking dialog. The Worker reads Google Calendar free/busy and books with a Meet link; setup and secrets in `docs/booking.md`. Without the Worker or secrets the dialog falls back to WhatsApp and email.
 - `src/scripts/track.ts` + `worker/visits.ts`: the visit log. Every page sends beacons to `/api/ping`, stored in the D1 database `cross-connect-visits`; `/admin` reads them with `TRACKER_KEY`. Record dialog actions with `trackAction()`; new action names go in `visitLog.actions` in `site.ts`. Details in `docs/analytics.md`. Ads tracking is a to-do in `docs/plan.md`, not built.
+- `src/pages/services/[slug].astro`: one page per rack module at `/services/<slug>/`, from `services` and `servicePage` in `site.ts`. A new module needs a `slug` and a `services` entry; the sitemap picks it up.
 - `src/pages/sitemap.xml.ts`, `src/pages/robots.txt.ts`: add new pages to the sitemap's `paths`. Leave `/admin` out.
 - `docs/`: plan, design rules, hosting, research and Docker guides. **Read `docs/design.md` before changing anything visual.**
 

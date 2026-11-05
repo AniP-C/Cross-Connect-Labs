@@ -1,5 +1,7 @@
 ---
-import { modules, phone, rack } from '../data/site';
+import { modules, phone, rack, servicePage } from '../data/site';
+
+const page = (slug: string) => `/services/${slug}/`;
 ---
 
 <section id="services" class="section">
@@ -21,14 +23,18 @@ import { modules, phone, rack } from '../data/site';
               <span>{m.code}</span>
               <span class="mod-led" aria-hidden="true" />
             </div>
-            <h3>{m.name}</h3>
+            <h3><a href={page(m.slug)}>{m.name}</a></h3>
             <div class="time lcd">
               <span class="k">build time</span>
               <span class="v">{m.time}</span>
             </div>
             <p>{m.desc}</p>
             <div class="foot">
-              <span class="jack-deco" aria-hidden="true" />
+              <a class="spec" href={page(m.slug)}>
+                <span class="jack-deco" aria-hidden="true" />
+                {servicePage.spec}
+                <span class="sr-only">: {m.name}</span>
+              </a>
               <button type="button" class="cable-link" data-contact data-topic={m.topic}>
                 patch in <span aria-hidden="true">→</span>
                 <span class="sr-only">: ask about {m.name}</span>
@@ -54,10 +60,16 @@ import { modules, phone, rack } from '../data/site';
             </button>
             <div class="row-body" id={`mod-${i}`} hidden={i !== 0}>
               <p>{m.desc}</p>
-              <button type="button" class="cable-link" data-contact data-topic={m.topic}>
-                patch in <span aria-hidden="true">→</span>
-                <span class="sr-only">: ask about {m.name}</span>
-              </button>
+              <div class="row-foot">
+                <a class="spec" href={page(m.slug)}>
+                  {servicePage.spec}
+                  <span class="sr-only">: {m.name}</span>
+                </a>
+                <button type="button" class="cable-link" data-contact data-topic={m.topic}>
+                  patch in <span aria-hidden="true">→</span>
+                  <span class="sr-only">: ask about {m.name}</span>
+                </button>
+              </div>
             </div>
           </div>
         ))
@@ -171,6 +183,41 @@ import { modules, phone, rack } from '../data/site';
     gap: 12px;
     border-top: 1px solid var(--line-soft);
     padding-top: 14px;
+  }
+
+  h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  h3 a:hover {
+    color: var(--copper-text);
+  }
+
+  /* Link to the module's own page. Quieter than "patch in", so the card keeps one main action. */
+  .spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .spec:hover {
+    color: var(--copper-text);
+  }
+
+  .row-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 16px;
   }
 
   .jack-deco {

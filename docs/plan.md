@@ -75,6 +75,9 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [x] **Analytics.** Our own visit log in D1 with a private dashboard at /admin, ported from ANI / SYSTEMS. No cookies, no third-party scripts. See [analytics.md](analytics.md).
 - [ ] **Visit log password.** Run `npx wrangler secret put TRACKER_KEY` so /admin opens ([analytics.md](analytics.md)).
 - [x] **Search basics.** `sitemap.xml`, `robots.txt` pointing to it, structured data (ProfessionalService, FAQ), Open Graph and Twitter tags, `noindex` on the 404 page.
+- [x] **Site name in search results.** `WebSite` structured data with the name and other spellings, linked to the business entry (`altNames`, `areaServed`, `profiles` in `site.ts`).
+- [ ] **One address only.** Today `http://`, `https://www.` and `https://` all answer 200, so search engines see three copies (the canonical tag only hints). In the Cloudflare dashboard for crossconnectlabs.com: SSL/TLS → Edge Certificates → turn on **Always Use HTTPS**; then Rules → Redirect Rules → template **Redirect from WWW to root** (301). Check with `curl -sI http://www.crossconnectlabs.com/`: one 301 to `https://crossconnectlabs.com/`.
+- [ ] **Profile links.** Once LinkedIn, GitHub or Instagram pages exist, add their URLs to `profiles` in `site.ts` and link them from the footer.
 - [ ] **Google Search Console.** Verification file `public/google3db46dd8c61fef25.html` is live; finish verifying, then submit `https://crossconnectlabs.com/sitemap.xml`. Do the same in Bing Webmaster Tools (it can import from Search Console).
 - [ ] **Google Business Profile**, if you want local clients to find you.
 - [x] **Custom booking dialog.** "No idea what you're looking for? Let's hop on a call" in the hero and contact section. On-brand dialog with Google Calendar behind it (free/busy, events with a Meet link) through `worker/index.ts`. Chosen over Cal.com because Cal.com's brand colours and branding removal are paid. Live; setup in [booking.md](booking.md).
@@ -97,7 +100,9 @@ The visit log already records `utm_*` tags, enquiries and bookings. What paid ad
 ### Later
 
 - [ ] **Case study pages** (`/work/<project>`), written as Markdown files with Astro content collections.
-- [ ] **Service pages** for the big services (WhatsApp bots, clinic CRM, online stores, AI automation, PLC/SCADA). Separate pages help with search.
+- [x] **Service pages** at `/services/<slug>/`, one per rack module, linked from the Rack. Each has its own title, description, FAQ and structured data (`services` in `site.ts`).
+- [ ] **Read the service pages through** and fix anything that isn't how you work, especially the FAQ answers on costs, WhatsApp rules, data and app store timing.
+- [ ] **PLC & SCADA page.** Only in the FAQ and the form topics so far; it needs a rack module and a `services` entry.
 - [ ] **Notes or blog**, for short write-ups of what you built.
 - [ ] **Other languages**, if your clients need them.
 

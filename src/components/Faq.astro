@@ -1,10 +1,18 @@
 ---
-import { faqs } from '../data/site';
+import { faqs as allFaqs } from '../data/site';
+
+interface Props {
+  // Service pages pass their own questions; the home page shows the full list.
+  items?: { q: string; a: string }[];
+  heading?: string;
+}
+
+const { items: faqs = allFaqs, heading = 'Troubleshooting.' } = Astro.props;
 ---
 
 <section id="faq" class="section">
   <div class="wrap layout">
-    <h2 class="h2">Troubleshooting.</h2>
+    <h2 class="h2">{heading}</h2>
     <div class="list">
       {
         faqs.map((f, i) => (

@@ -18,12 +18,28 @@ import { contact, faqs, modules, site } from '../data/site';
 // Anything still a [placeholder] is left out.
 const real = (text: string) => !text.includes('[');
 const home = Astro.site?.href ?? Astro.url.href;
+const org = `${home}#org`;
 const structured = [
+  // Tells Google which name to show above the result instead of the bare domain.
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${home}#website`,
+    name: site.name,
+    alternateName: site.altNames,
+    url: home,
+    inLanguage: 'en-IN',
+    publisher: { '@id': org },
+  },
   {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
+    '@id': org,
     name: site.name,
     url: home,
+    areaServed: site.areaServed,
+    address: { '@type': 'PostalAddress', addressCountry: 'IN' },
+    sameAs: site.profiles.length ? site.profiles : undefined,
     description: site.description,
     logo: new URL('/apple-touch-icon.png', home).href,
     image: new URL('/og-image.png', home).href,
@@ -33,7 +49,7 @@ const structured = [
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Services',
-      itemListElement: modules.map((m) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: m.name, description: m.desc } })),
+      itemListElement: modules.map((m) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: m.name, description: m.desc, url: new URL(`/services/${m.slug}/`, home).href } })),
     },
   },
   {

@@ -2,14 +2,21 @@
 import Logo from './Logo.astro';
 import { booking, nav, phone, site } from '../data/site';
 
-const sheetLinks = [...nav, phone.contact];
+interface Props {
+  // Off on other pages, so the section links point back to the home page.
+  home?: boolean;
+}
+
+const { home = true } = Astro.props;
+const base = home ? '' : '/';
+const sheetLinks = [...nav, phone.contact].map((item) => ({ ...item, href: base + item.href }));
 ---
 
 <header class="site-header" data-header>
   <div class="wrap inner">
-    <a href="#top" class="home" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
+    <a href={home ? '#top' : '/'} class="home" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
     <nav aria-label="Main" class="nav">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      {nav.map((item) => <a href={base + item.href}>{item.label}</a>)}
     </nav>
     <div class="right">
       <span class="status"><span class="led"></span>online · replies in {site.replyShort}</span>

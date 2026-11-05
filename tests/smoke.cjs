@@ -318,6 +318,33 @@ const shot = async (target, name, options = {}) => {
   await lost.goto(new globalThis.URL('/this-page-does-not-exist', URL).href);
   ok('404 page: shown for unknown pages', ((await lost.textContent('body')) || '').includes('NO SIGNAL'));
 
+  // Service pages: linked from the Rack, each with its own heading, and "patch in" fills the form.
+  const specLinks = await page.evaluate(() => [...document.querySelectorAll('#services .grid a.spec')].map((a) => a.getAttribute('href')));
+  ok('rack: every module links to its service page', specLinks.length === 8 && specLinks.every((h) => /^\/services\/[a-z-]+\/$/.test(h)), specLinks.join(' '));
+  const svc = await ctx.newPage();
+  watch(svc, 'service page');
+  await svc.goto(new globalThis.URL(specLinks[4] || '/services/whatsapp-bots/', URL).href, { waitUntil: 'networkidle' });
+  ok('service page: has its own heading and title', ((await svc.textContent('h1')) || '').trim().length > 0 && !(await svc.title()).startsWith('Page not found'));
+  ok('service page: header links go back to the home page', (await svc.getAttribute('header .nav a', 'href')).startsWith('/#'));
+  const svcTopic = await svc.getAttribute('#top [data-contact]', 'data-topic');
+  await svc.click('#top [data-contact]');
+  ok('service page: "patch in" opens the form with its topic', await svc.evaluate((t) => document.querySelector('[data-contact-dialog]').open && document.querySelector('input[name="topic"]:checked')?.value === t, svcTopic), svcTopic);
+  await svc.keyboard.press('Escape');
+  const svcLd = await svc.evaluate(() => JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent).map((d) => d['@type']));
+  ok('service page: structured data for the service, breadcrumb and FAQ', ['Service', 'BreadcrumbList', 'FAQPage'].every((t) => svcLd.includes(t)), svcLd.join(' '));
+  await svc.setViewportSize({ width: 390, height: 844 });
+  const svcOver = await svc.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  ok('service page: no sideways scrolling on a phone', svcOver <= 0, `${svcOver}px`);
+  const svcSmall = await svc.evaluate(() =>
+    [...document.querySelectorAll('main a, main button, main summary')]
+      .filter((e) => e.offsetParent && !e.closest('[hidden]'))
+      .map((e) => [e.textContent.trim().slice(0, 20) || e.getAttribute('aria-label'), Math.round(e.getBoundingClientRect().height)])
+      .filter(([, h]) => h < 44),
+  );
+  ok('service page: buttons and links are at least 44px tall on a phone', svcSmall.length === 0, svcSmall.map((x) => x.join(' ')).join(', '));
+  await shot(svc, 'service-phone', { fullPage: true });
+  await svc.close();
+
   ok('no errors in the browser console', errors.length === 0, errors.join(' | '));
 
   console.log(`Smoke test: ${URL}\n`);

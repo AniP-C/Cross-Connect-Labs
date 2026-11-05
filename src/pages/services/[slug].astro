@@ -1,0 +1,516 @@
+---
+// One page per rack module, at /services/<slug>/. Text is in `services` and `servicePage` in src/data/site.ts.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactDialog from '../../components/ContactDialog.astro';
+import ContactSection from '../../components/ContactSection.astro';
+import Faq from '../../components/Faq.astro';
+import Header from '../../components/Header.astro';
+import Rails from '../../components/Rails.astro';
+import { booking, cases, modules, servicePage as label, services, site } from '../../data/site';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const service = services.find((s) => s.slug === slug)!;
+const mod = modules.find((m) => m.slug === slug)!;
+const related = cases.filter((c) => service.cases.includes(c.code) && !c.example);
+const others = modules.filter((m) => m.slug !== slug);
+
+// Structured data: the service, where it sits in the site, and its questions.
+const home = Astro.site?.href ?? Astro.url.href;
+const url = new URL(`/services/${slug}/`, home).href;
+const structured = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${url}#service`,
+    name: mod.name,
+    serviceType: mod.name,
+    description: service.description,
+    url,
+    areaServed: site.areaServed,
+    provider: { '@id': `${home}#org` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: site.name, item: home },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: new URL('/#services', home).href },
+      { '@type': 'ListItem', position: 3, name: mod.name, item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: service.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={service.title} description={service.description}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(structured)} />
+  <div class="page">
+    <Rails />
+    <Header home={false} />
+    <main id="main">
+      <section id="top" class="intro">
+        <div class="wrap inner">
+          <div class="copy">
+            <nav class="crumbs" aria-label="Breadcrumb">
+              <a href="/">home</a>
+              <span aria-hidden="true">/</span>
+              <a href="/#services">{label.crumb}</a>
+              <span aria-hidden="true">/</span>
+              <span aria-current="page">{mod.name.toLowerCase()}</span>
+            </nav>
+            <p class="code">{mod.code}</p>
+            <h1>{service.heading}</h1>
+            <p class="lede">{service.intro}</p>
+            <div class="actions">
+              <button type="button" class="send" data-contact data-topic={mod.topic}>
+                <span class="led" aria-hidden="true"></span>
+                {label.patchIn}
+                <span class="sr-only">: ask about {mod.name}</span>
+              </button>
+              <p class="call">
+                {booking.heading}
+                <button type="button" class="cable-link" data-book>{booking.cta} <span aria-hidden="true">→</span></button>
+              </p>
+            </div>
+          </div>
+
+          <aside class="sheet surface" aria-label={`${mod.name} ${label.spec}`}>
+            <span class="screw" style="left: 12px; top: 12px"></span>
+            <span class="screw" style="right: 12px; top: 12px"></span>
+            <span class="screw" style="left: 12px; bottom: 12px"></span>
+            <span class="screw" style="right: 12px; bottom: 12px"></span>
+            <p class="sheet-head"><span class="led" aria-hidden="true"></span>{label.spec}</p>
+            <dl class="readout lcd">
+              <div><dt>{label.buildTime}</dt><dd>{mod.time}</dd></div>
+              <div><dt>{label.budget}</dt><dd>{label.budgetValue}</dd></div>
+              <div><dt>{label.handover}</dt><dd>{label.handoverValue}</dd></div>
+            </dl>
+            <p class="sheet-desc">{mod.desc}</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="includes-title">
+        <div class="wrap split">
+          <div class="block">
+            <h2 id="includes-title" class="h3">{label.includes}</h2>
+            <ul class="includes">
+              {service.includes.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+          <div class="block fits surface">
+            <h2 class="h3">{label.fits}</h2>
+            <ul>
+              {service.fits.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {
+        related.length > 0 && (
+          <section class="section" aria-labelledby="cases-title">
+            <div class="wrap">
+              <div class="section-head">
+                <h2 id="cases-title" class="h2">{label.cases}</h2>
+                <a class="cable-link" href="/#work">{label.casesLink} <span aria-hidden="true">→</span></a>
+              </div>
+              <div class="cases">
+                {related.map((c) => (
+                  <article class="case surface">
+                    <p class="case-code">{c.code} · {c.sector}</p>
+                    <h3>{c.title}</h3>
+                    <p>{c.built}</p>
+                    <p class="result">{c.result}</p>
+                    <p class="stack">{c.stack}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      <Faq items={service.faqs} heading={label.faq} />
+
+      <section class="section" aria-labelledby="others-title">
+        <div class="wrap">
+          <h2 id="others-title" class="h3">{label.others}</h2>
+          <ul class="others">
+            {
+              others.map((m) => (
+                <li>
+                  <a href={`/services/${m.slug}/`}>
+                    <span class="other-code">{m.code}</span>
+                    {m.name}
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+
+      <ContactSection home={false} />
+    </main>
+  </div>
+  <ContactDialog />
+</BaseLayout>
+
+<style>
+  .page {
+    position: relative;
+  }
+
+  .intro {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 40px clamp(32px, 5vw, 80px);
+    align-items: center;
+    padding-top: clamp(32px, 5vw, 64px);
+    padding-bottom: 8px;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--muted);
+    text-underline-offset: 3px;
+  }
+
+  .crumbs a:hover {
+    color: var(--copper-text);
+  }
+
+  .crumbs [aria-current] {
+    color: var(--text);
+  }
+
+  .code {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--copper-text);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(36px, 5vw, 68px);
+    line-height: 1.04;
+    letter-spacing: -0.05em;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 34em;
+    font-size: clamp(17px, 1.6vw, 19px);
+    color: var(--body);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 28px;
+    margin-top: 6px;
+  }
+
+  .send {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--copper);
+    color: var(--on-copper);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 14px 30px -14px var(--copper-glow);
+    transition: transform 0.3s var(--ease);
+  }
+
+  .send:hover {
+    transform: translateY(-2px);
+  }
+
+  .send .led {
+    background: var(--on-copper);
+    box-shadow: 0 0 10px var(--on-copper);
+  }
+
+  .call {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 10px;
+    color: var(--muted);
+  }
+
+  /* Spec sheet: a screwed-on panel with an LCD readout. */
+  .sheet {
+    position: relative;
+    margin: 0;
+    padding: 30px 28px 26px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sheet-head {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .readout {
+    margin: 0;
+    padding: 6px 18px;
+    border-radius: 10px;
+    font-family: var(--mono);
+  }
+
+  .readout div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--lcd-dash);
+  }
+
+  .readout div:last-child {
+    border-bottom: 0;
+  }
+
+  .readout dt {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lcd-muted);
+  }
+
+  .readout dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--lcd-accent);
+  }
+
+  .sheet-desc {
+    margin: 0;
+    color: var(--body);
+  }
+
+  .h3 {
+    margin: 0 0 22px;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--text);
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 32px clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .includes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 0 28px;
+    border-top: 1px solid var(--line);
+  }
+
+  .includes li {
+    position: relative;
+    padding: 14px 0 14px 24px;
+    border-bottom: 1px solid var(--line);
+    color: var(--body);
+  }
+
+  .includes li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 23px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--led);
+    box-shadow: 0 0 8px var(--led);
+  }
+
+  .fits {
+    padding: 26px 26px 18px;
+    border-radius: 16px;
+  }
+
+  .fits li {
+    padding: 10px 0;
+    border-top: 1px solid var(--line-soft);
+    color: var(--body);
+  }
+
+  .fits li::before {
+    content: '→ ';
+    font-family: var(--mono);
+    color: var(--copper-text);
+  }
+
+  .cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 14px;
+  }
+
+  .case {
+    margin: 0;
+    padding: 24px 24px 20px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .case p {
+    margin: 0;
+    color: var(--body);
+  }
+
+  .case-code,
+  .case .stack {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .case .case-code {
+    color: var(--copper-text);
+  }
+
+  .case .stack {
+    color: var(--muted);
+  }
+
+  .case h3 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.25;
+    color: var(--text);
+  }
+
+  .case .result {
+    padding-left: 14px;
+    border-left: 2px solid var(--copper);
+  }
+
+  .others {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .others a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .others a:hover {
+    border-color: var(--copper-line);
+    color: var(--copper-text);
+  }
+
+  .other-code {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .inner,
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .actions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .other-code {
+      display: none;
+    }
+  }
+</style>
