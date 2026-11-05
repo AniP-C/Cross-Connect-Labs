@@ -8,6 +8,7 @@ One-page Astro 7 site for a small studio (the site speaks as "we"). Static pages
 - `npm run build`: builds to `dist/`
 - `npm run check`: `astro check`. Must report 0 errors.
 - `npm run og-image`: regenerates `public/og-image.png` (the link preview picture).
+- `npm run indexnow`: tells Bing about every page in the live sitemap. Run it after a deploy that adds or changes pages. Steps for Google and Bing are in `docs/search.md`.
 - `npm run test:smoke`: Playwright click-through. Needs the dev server or `npm run preview` running. Pass a URL to test another address: `npm run test:smoke -- <url>`.
 
 Run `check` and `test:smoke` before pushing.
@@ -21,7 +22,7 @@ Run `check` and `test:smoke` before pushing.
 - `src/scripts/booking.ts` + `worker/index.ts`: "hop on a call". Any `[data-book]` button opens the booking dialog. The Worker reads Google Calendar free/busy and books with a Meet link; setup and secrets in `docs/booking.md`. Without the Worker or secrets the dialog falls back to WhatsApp and email.
 - `src/scripts/track.ts` + `worker/visits.ts`: the visit log. Every page sends beacons to `/api/ping`, stored in the D1 database `cross-connect-visits`; `/admin` reads them with `TRACKER_KEY`. Record dialog actions with `trackAction()`; new action names go in `visitLog.actions` in `site.ts`. Details in `docs/analytics.md`. Ads tracking is a to-do in `docs/plan.md`, not built.
 - `src/pages/services/[slug].astro`: one page per rack module at `/services/<slug>/`, from `services` and `servicePage` in `site.ts`. A new module needs a `slug` and a `services` entry; the sitemap picks it up.
-- `src/pages/sitemap.xml.ts`, `src/pages/robots.txt.ts`: add new pages to the sitemap's `paths`. Leave `/admin` out.
+- `src/pages/sitemap.xml.ts`, `src/pages/robots.txt.ts`: add new pages to the sitemap's `paths`. Leave `/admin` and `/privacy/` out (both are `noindex`).
 - `docs/`: plan, design rules, hosting, research and Docker guides. **Read `docs/design.md` before changing anything visual.**
 
 ## Rules
