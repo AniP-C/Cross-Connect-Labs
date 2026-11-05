@@ -2,9 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Logo from '../components/Logo.astro';
 import { contact, privacy } from '../data/site';
+
+const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.whatsappMessage)}` : undefined;
 ---
 
-<BaseLayout title="Privacy policy · Cross-Connect Labs" description="What Cross-Connect Labs collects through crossconnectlabs.com, including call bookings, and how we use it.">
+<!-- noindex: a search for our name should land on the home page, not here. Google's booking app review only needs the page to open. -->
+<BaseLayout title="Privacy policy · Cross-Connect Labs" description="What Cross-Connect Labs collects through crossconnectlabs.com, including call bookings, and how we use it." noindex>
   <main id="main" class="wrap legal">
     <a href="/" aria-label="Cross-Connect Labs home"><Logo height={42} /></a>
     <p class="code">PRIVACY · UPDATED {privacy.updated.toUpperCase()}</p>
@@ -21,7 +24,7 @@ import { contact, privacy } from '../data/site';
     }
     <section>
       <h2>Contact</h2>
-      <p>Cross-Connect Labs · <a href={`mailto:${contact.email}`}>{contact.emailDisplay}</a> · WhatsApp {contact.whatsappDisplay}</p>
+      <p>Cross-Connect Labs · <a href={`mailto:${contact.email}`}>{contact.emailDisplay}</a> · WhatsApp {waHref ? <a href={waHref} target="_blank" rel="noopener">{contact.whatsappDisplay}</a> : contact.whatsappDisplay}</p>
     </section>
     <a class="cable-link" href="/">back to the home page <span aria-hidden="true">→</span></a>
   </main>

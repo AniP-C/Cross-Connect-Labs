@@ -74,7 +74,7 @@ Most of this is in `src/data/site.ts`. Every placeholder is in `[square brackets
 - [x] **Social preview image.** `public/og-image.png` (1200 × 630), made by `npm run og-image`.
 - [x] **Analytics.** Our own visit log in D1 with a private dashboard at /admin, ported from ANI / SYSTEMS. No cookies, no third-party scripts. See [analytics.md](analytics.md).
 - [ ] **Visit log password.** Run `npx wrangler secret put TRACKER_KEY` so /admin opens ([analytics.md](analytics.md)).
-- [x] **Search basics.** `sitemap.xml`, `robots.txt` pointing to it, structured data (ProfessionalService, FAQ), Open Graph and Twitter tags, `noindex` on the 404 page.
+- [x] **Search basics.** `sitemap.xml`, `robots.txt` pointing to it, structured data (ProfessionalService, FAQ), Open Graph and Twitter tags, `noindex` on the 404 and privacy pages, IndexNow for Bing (`npm run indexnow`). Steps for Google and Bing in [search.md](search.md).
 - [x] **Site name in search results.** `WebSite` structured data with the name and other spellings, linked to the business entry (`altNames`, `areaServed`, `profiles` in `site.ts`).
 - [ ] **One address only.** Today `http://`, `https://www.` and `https://` all answer 200, so search engines see three copies (the canonical tag only hints). In the Cloudflare dashboard for crossconnectlabs.com: SSL/TLS → Edge Certificates → turn on **Always Use HTTPS**; then Rules → Redirect Rules → template **Redirect from WWW to root** (301). Check with `curl -sI http://www.crossconnectlabs.com/`: one 301 to `https://crossconnectlabs.com/`.
 - [ ] **Profile links.** Once LinkedIn, GitHub or Instagram pages exist, add their URLs to `profiles` in `site.ts` and link them from the footer.

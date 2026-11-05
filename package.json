@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test:smoke": "node tests/smoke.cjs",
-    "og-image": "node scripts/og-image.cjs"
+    "og-image": "node scripts/og-image.cjs",
+    "indexnow": "node scripts/indexnow.cjs"
   },
   "engines": {
     "node": ">=22.22.0"
