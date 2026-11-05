@@ -14,6 +14,13 @@ export const site = {
     'Websites, mobile apps, online stores, WhatsApp bots, clinic CRMs, AI and workflow automation from a small studio of engineers. No minimum budget.',
   // Describes public/og-image.png for screen readers when the link is shared.
   imageAlt: 'Cross-Connect Labs: Plug in your problem. We’ll wire the fix. No minimum budget.',
+  // Search structured data (src/pages/index.astro). Other spellings people may type for the name.
+  altNames: ['Cross Connect Labs', 'CrossConnect Labs'],
+  // Where we take clients. Add a city here, and to `address` in index.astro, once there's an office.
+  areaServed: 'India',
+  // Full URLs of our profiles (LinkedIn, GitHub, Instagram…). Search engines use them to tie
+  // the profiles to this site. Leave empty until they exist.
+  profiles: [] as string[],
 };
 
 export const contact = {
@@ -130,14 +137,14 @@ export const patchUnsure = {
 };
 
 export const modules = [
-  { code: 'MOD-01 · WEB', name: 'Websites', time: '1–3 wks', topic: 'Website', desc: 'Business sites and landing pages that load fast and are easy to update.' },
-  { code: 'MOD-02 · APP', name: 'Web apps & dashboards', time: '3–8 wks', topic: 'Website', desc: 'Customer portals, dashboards and internal tools with logins and roles.' },
-  { code: 'MOD-03 · MOB', name: 'Mobile apps', time: '4–10 wks', topic: 'Mobile app', desc: 'Android and iOS from one codebase, with payments and notifications.' },
-  { code: 'MOD-04 · SHOP', name: 'Online stores', time: '3–6 wks', topic: 'Online store', desc: 'Payments, stock and an admin panel you run yourself.' },
-  { code: 'MOD-05 · WA', name: 'WhatsApp bots', time: '1–3 wks', topic: 'WhatsApp bot', desc: 'Answers, bookings and order updates on WhatsApp, with hand-over to you.' },
-  { code: 'MOD-06 · CRM', name: 'Clinic bot & CRM', time: '3–6 wks', topic: 'Clinic bot & CRM', desc: 'Appointments, reminders and patient records. No medical advice, urgent messages go to staff.' },
-  { code: 'MOD-07 · AI', name: 'AI automation', time: '1–3 wks', topic: 'AI automation', desc: 'AI that reads emails and documents, fills sheets and drafts replies, with you approving.' },
-  { code: 'MOD-08 · FLOW', name: 'Workflow automation', time: '1–2 wks', topic: 'Workflow automation', desc: 'Connect Sheets, CRM, WhatsApp and email so reports, reminders and follow-ups run on their own.' },
+  { code: 'MOD-01 · WEB', slug: 'websites', name: 'Websites', time: '1–3 wks', topic: 'Website', desc: 'Business sites and landing pages that load fast and are easy to update.' },
+  { code: 'MOD-02 · APP', slug: 'web-apps', name: 'Web apps & dashboards', time: '3–8 wks', topic: 'Website', desc: 'Customer portals, dashboards and internal tools with logins and roles.' },
+  { code: 'MOD-03 · MOB', slug: 'mobile-apps', name: 'Mobile apps', time: '4–10 wks', topic: 'Mobile app', desc: 'Android and iOS from one codebase, with payments and notifications.' },
+  { code: 'MOD-04 · SHOP', slug: 'online-stores', name: 'Online stores', time: '3–6 wks', topic: 'Online store', desc: 'Payments, stock and an admin panel you run yourself.' },
+  { code: 'MOD-05 · WA', slug: 'whatsapp-bots', name: 'WhatsApp bots', time: '1–3 wks', topic: 'WhatsApp bot', desc: 'Answers, bookings and order updates on WhatsApp, with hand-over to you.' },
+  { code: 'MOD-06 · CRM', slug: 'clinic-crm', name: 'Clinic bot & CRM', time: '3–6 wks', topic: 'Clinic bot & CRM', desc: 'Appointments, reminders and patient records. No medical advice, urgent messages go to staff.' },
+  { code: 'MOD-07 · AI', slug: 'ai-automation', name: 'AI automation', time: '1–3 wks', topic: 'AI automation', desc: 'AI that reads emails and documents, fills sheets and drafts replies, with you approving.' },
+  { code: 'MOD-08 · FLOW', slug: 'workflow-automation', name: 'Workflow automation', time: '1–2 wks', topic: 'Workflow automation', desc: 'Connect Sheets, CRM, WhatsApp and email so reports, reminders and follow-ups run on their own.' },
 ];
 
 // Case files. `kind` picks the readout screen: a `store` case fills it from `screen`, a `flow` case
@@ -190,6 +197,205 @@ export const cases = [
     built: 'An AI agent that reads each alert, finds similar past incidents, works out the cause and suggests the fix. When an alert is noise, it says so and does nothing.',
     flow: [{ t: 'alert fires' }, { t: 'past incidents found', hot: true }, { t: 'cause + fix' }, { t: 'engineer approves ✓', hot: true }],
     result: 'Manual log triage dropped from about two hours to fifteen minutes.',
+  },
+];
+
+// Service pages at /services/<slug>/ (src/pages/services/[slug].astro), one per module above.
+// `heading` is the page's h1 and `title` its search result title, so both say plainly what it is.
+// `description` is about 155 characters. `cases` are case file codes from `cases` above.
+export const servicePage = {
+  crumb: 'services',
+  spec: 'spec sheet',
+  buildTime: 'build time',
+  budget: 'budget',
+  budgetValue: 'no minimum',
+  handover: 'hand-over',
+  handoverValue: 'code + logins',
+  includes: 'What we wire up',
+  fits: 'Good fit if',
+  cases: 'From the case files',
+  casesLink: 'see all case files',
+  faq: 'Troubleshooting.',
+  patchIn: 'patch in',
+  others: 'Other modules in the rack',
+};
+
+export const services = [
+  {
+    slug: 'websites',
+    heading: 'Business websites that load fast',
+    title: 'Business websites and landing pages · Cross-Connect Labs',
+    description: 'Fast business websites and landing pages that show up on Google and are easy to update. Built in 1–3 weeks by a small team of engineers. No minimum budget.',
+    intro: 'A website is often the first place a customer checks before they call. We build sites that load fast on a phone, show up on Google and turn a visit into a WhatsApp message, a call or an enquiry.',
+    includes: [
+      'One page or many: services, work, pricing, contact',
+      'Fast on phones, with search basics set up: titles, sitemap, Google Search Console',
+      'WhatsApp, call and enquiry buttons that reach you straight away',
+      'Day and night modes, readable type and real buttons for every visitor',
+      'Text and photos you can change yourself, or send to us',
+      'Hosting set up on your own account, with your own domain and email',
+    ],
+    fits: ['You have no website yet, or one you can’t update', 'Customers ask the same things before they call', 'You want to be found on Google in your area'],
+    cases: ['CF-02', 'CF-01'],
+    faqs: [
+      { q: 'Will it show up on Google?', a: 'We set up the basics Google needs: page titles, descriptions, a sitemap and Search Console. Ranking takes time and depends on your area and competition, so we won’t promise a position. A fast, clear site gives you the best start.' },
+      { q: 'Can I change the text myself?', a: 'Yes. We can set up a simple way to edit text and photos, or you can send changes to us. Small edits in the first 30 days are free.' },
+      { q: 'Do I need to buy hosting?', a: 'Usually not much. Most business sites run on free or very cheap hosting. You pay for the domain name, about a thousand rupees a year, and it is in your name.' },
+    ],
+  },
+  {
+    slug: 'web-apps',
+    heading: 'Web apps, portals and dashboards',
+    title: 'Web apps, customer portals and dashboards · Cross-Connect Labs',
+    description: 'Customer portals, admin dashboards and internal tools with logins and roles. Built in 3–8 weeks by a small team of engineers. No minimum budget.',
+    intro: 'When a spreadsheet stops keeping up, a small web app takes over. We build portals, dashboards and internal tools that open in any browser, with logins and roles so each person sees what they need.',
+    includes: [
+      'Logins with roles: owner, staff, customer',
+      'Dashboards with the numbers you check every day',
+      'Forms and records that replace sheets and paper',
+      'Works on a phone, a tablet and a desktop',
+      'Exports to Excel or PDF, and links to Google Sheets',
+      'Built in stages, with a working version early',
+    ],
+    fits: ['Your team shares one overloaded spreadsheet', 'Customers keep asking for updates you could show them', 'You want one screen with today’s numbers'],
+    cases: ['CF-03', 'CF-04'],
+    faqs: [
+      { q: 'Web app or mobile app?', a: 'A web app opens in any browser, needs no app store and is cheaper to build and change. Choose a mobile app when you need push notifications, offline use or a place on the home screen. We’ll tell you which fits.' },
+      { q: 'Can it use my existing Google Sheet?', a: 'Yes. We can keep the sheet as the place you edit prices or records, and build the app on top of it, as we did for a uniform shop’s billing app.' },
+      { q: 'Who can see the data?', a: 'Only the people you add. Each role sees its own screens, and the data stays in accounts that belong to you.' },
+    ],
+  },
+  {
+    slug: 'mobile-apps',
+    heading: 'Mobile apps for Android and iOS',
+    title: 'Mobile app development for Android and iOS · Cross-Connect Labs',
+    description: 'Android and iOS apps from one codebase, with sign-in, payments and push notifications. Built in 4–10 weeks by a small team of engineers. No minimum budget.',
+    intro: 'An app puts your business on your customer’s home screen. We build Android and iOS apps from one codebase, so you pay for one build, and we handle the store listings too.',
+    includes: [
+      'One codebase for Android and iOS',
+      'Sign-in with Google or a phone OTP',
+      'Online payments, including Razorpay and Cash on Delivery',
+      'Push notifications for orders, bookings and reminders',
+      'An admin panel to run products, prices and content',
+      'Play Store and App Store listings, under your account',
+    ],
+    fits: ['Customers order from you again and again', 'You need alerts that reach people’s phones', 'Your website already works and you want the next step'],
+    cases: ['CF-01'],
+    faqs: [
+      { q: 'Do I need both Android and iOS?', a: 'Not always. In India most customers use Android, so many businesses start there. Because we build from one codebase, adding iOS later is a smaller job.' },
+      { q: 'How long does the store review take?', a: 'Google Play usually takes a few days, and new accounts need a short closed test first. Apple usually takes one to three days. We plan for both in the timeline.' },
+      { q: 'Can the app share data with my website?', a: 'Yes. The app and the website can use the same orders, products and accounts, so you run everything from one admin panel.' },
+    ],
+  },
+  {
+    slug: 'online-stores',
+    heading: 'Online stores you run yourself',
+    title: 'Online store development with Razorpay · Cross-Connect Labs',
+    description: 'Online stores with Razorpay payments, stock and an admin panel you run yourself. Built in 3–6 weeks by a small team of engineers. No minimum budget.',
+    intro: 'We build online stores that you run, not us. Customers browse, pay with Razorpay or Cash on Delivery and track their order. You change prices, stock and offers from your own admin panel.',
+    includes: [
+      'Products with sizes, colours and collections',
+      'Razorpay, UPI and Cash on Delivery',
+      'Coupons, offers and monthly plans',
+      'Order tracking for customers, new-order alerts for you',
+      'An admin panel for orders, stock, couriers and pages',
+      'No monthly platform fee: the store runs on your own account',
+    ],
+    fits: ['Orders come in by phone or WhatsApp and get lost', 'You pay a platform fee on every sale', 'You want to change stock and prices without a developer'],
+    cases: ['CF-01', 'CF-02'],
+    faqs: [
+      { q: 'Why not use Shopify?', a: 'Shopify is a good choice for many shops, and we’ll say so if it fits. A store of your own has no monthly fee or per-sale cut, and can do things a template can’t, like daily milk plans.' },
+      { q: 'How do payments reach me?', a: 'Through your own Razorpay account, straight to your bank. We help you set it up. We never hold your money.' },
+      { q: 'Can I add products myself?', a: 'Yes. A new product is on sale the moment you save it in the admin panel, with its own page that Google can find.' },
+    ],
+  },
+  {
+    slug: 'whatsapp-bots',
+    heading: 'WhatsApp bots for business',
+    title: 'WhatsApp bots for bookings and customer questions · Cross-Connect Labs',
+    description: 'WhatsApp bots that answer questions, take bookings and send order updates, then hand over to you. Built in 1–3 weeks. No minimum budget.',
+    intro: 'Your customers are already on WhatsApp. A bot answers the questions you get every day, takes bookings, sends reminders and order updates, and hands the chat to you when a person is needed.',
+    includes: [
+      'Answers to common questions: timings, prices, location',
+      'Bookings and reschedules, with reminders before the visit',
+      'Order updates and files such as bills or reports',
+      'Hand-over to your staff from a simple dashboard',
+      'Built on the official WhatsApp Business API',
+      'Replies in the languages your customers use',
+    ],
+    fits: ['Your phone rings all day with the same questions', 'Customers miss appointments', 'You want replies at night and on holidays'],
+    cases: ['CF-04'],
+    faqs: [
+      { q: 'Will my number be banned?', a: 'No. We use the official WhatsApp Business API from Meta, not unofficial tools that get numbers blocked. Messages follow Meta’s rules on templates and opt-in.' },
+      { q: 'What does WhatsApp itself cost?', a: 'Meta charges for some messages you send first, such as reminders. Replies within 24 hours of a customer’s message are free. We work out the cost for your case before you start.' },
+      { q: 'Can a person take over the chat?', a: 'Yes. Your staff see every chat in a dashboard and can step in at any time. The bot stops replying while a person is in the chat.' },
+    ],
+  },
+  {
+    slug: 'clinic-crm',
+    heading: 'Clinic WhatsApp bot and patient CRM',
+    title: 'Clinic appointment bot and patient CRM · Cross-Connect Labs',
+    description: 'A WhatsApp bot for clinic appointments and reminders, with a simple patient CRM for staff. No medical advice; urgent messages go to staff. No minimum budget.',
+    intro: 'Reception spends the day answering the same calls. A clinic bot books and moves appointments on WhatsApp, sends reminders and report files, and keeps patient records in one place for your staff.',
+    includes: [
+      'Booking, rescheduling and cancelling on WhatsApp',
+      'Reminders before each visit, to cut no-shows',
+      'Report files and bills sent on WhatsApp',
+      'A patient list with visit history for staff',
+      'Urgent messages go straight to a person',
+      'No medical advice from the bot, ever',
+    ],
+    fits: ['Reception is always on the phone', 'Patients miss or forget appointments', 'Records live in a register or many sheets'],
+    cases: ['CF-04'],
+    faqs: [
+      { q: 'Does the bot give medical advice?', a: 'No. It books, reminds and answers questions like timings and fees. Anything about symptoms or anything urgent goes straight to your staff.' },
+      { q: 'Where is patient data kept?', a: 'In accounts that belong to the clinic, and only your staff can see it. Tell us your rules and we’ll build to them.' },
+      { q: 'Can it run several clinics or doctors?', a: 'Yes. One system can run many clinics, each with its own doctors, timings and staff.' },
+    ],
+  },
+  {
+    slug: 'ai-automation',
+    heading: 'AI automation for documents, emails and support',
+    title: 'AI automation for documents, emails and support · Cross-Connect Labs',
+    description: 'AI that reads emails and documents, fills sheets and drafts replies, while you approve. Built in 1–3 weeks by a small team of engineers. No minimum budget.',
+    intro: 'Much of office work is reading something and typing it somewhere else. We build AI that reads emails, bills and documents, fills your sheets and drafts replies, and leaves the final say to you.',
+    includes: [
+      'Reads bills, invoices and forms, and fills the data in',
+      'Drafts email and chat replies for you to approve',
+      'Sorts and tags incoming messages and tickets',
+      'Searches your own documents and past cases for answers',
+      'A person approves before anything important is sent',
+      'Runs on your accounts, with your data kept private',
+    ],
+    fits: ['Someone types data from documents into a sheet', 'Your inbox has the same kinds of questions every day', 'Your team searches old records to solve new problems'],
+    cases: ['CF-05'],
+    faqs: [
+      { q: 'Will the AI make mistakes?', a: 'Sometimes, which is why a person checks before anything important goes out. We start where a mistake is cheap to catch, and measure how often it is right.' },
+      { q: 'Is my data used to train the AI?', a: 'We use AI services set up so your data is not used to train their models, and we keep your documents in your own accounts.' },
+      { q: 'What does the AI cost to run?', a: 'A monthly bill that grows with use, usually small for a small business. We estimate it before we build, so there are no surprises.' },
+    ],
+  },
+  {
+    slug: 'workflow-automation',
+    heading: 'Workflow automation for Sheets, CRM, WhatsApp and email',
+    title: 'Workflow automation for Sheets, CRM, WhatsApp and email · Cross-Connect Labs',
+    description: 'Connect Google Sheets, your CRM, WhatsApp and email so reports, reminders and follow-ups run on their own. Built in 1–2 weeks. No minimum budget.',
+    intro: 'If you copy the same data between apps every day, it can run on its own. We connect Google Sheets, your CRM, WhatsApp and email so reports, reminders and follow-ups happen without anyone pressing a button.',
+    includes: [
+      'Data moves between Sheets, CRM and forms by itself',
+      'Daily or weekly reports land in your inbox or WhatsApp',
+      'Reminders and follow-ups go out on time',
+      'New enquiries reach the right person straight away',
+      'Alerts when something needs a human',
+      'Built on tools you already use where we can',
+    ],
+    fits: ['You copy and paste between apps every day', 'Follow-ups slip through the cracks', 'Making the weekly report takes an afternoon'],
+    cases: ['CF-03'],
+    faqs: [
+      { q: 'Do I need new software?', a: 'Often not. We start with what you already use, such as Google Sheets, Gmail and WhatsApp, and add only what is missing.' },
+      { q: 'What if something breaks?', a: 'Every automation tells you when it fails, so nothing breaks quietly. The first 30 days of fixes are free.' },
+      { q: 'Which task should we start with?', a: 'The one that eats the most hours each week. We look at your day with you and pick it together.' },
+    ],
   },
 ];
 

@@ -2,6 +2,13 @@
 import IconMark from './IconMark.astro';
 import { booking, contact, nav } from '../data/site';
 
+interface Props {
+  // Off on other pages, so the footer links point back to the home page.
+  home?: boolean;
+}
+
+const { home = true } = Astro.props;
+const base = home ? '' : '/';
 const waHref = contact.whatsapp ? `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.whatsappMessage)}` : undefined;
 const mailHref = contact.email ? `mailto:${contact.email}?subject=${encodeURIComponent(contact.emailSubject)}` : undefined;
 ---
@@ -41,7 +48,7 @@ const mailHref = contact.email ? `mailto:${contact.email}?subject=${encodeURICom
     <footer class="foot">
       <span class="brand"><IconMark app size={40} label="crossconnect labs icon" />© {new Date().getFullYear()} cross-connect labs</span>
       <nav aria-label="Footer">
-        {nav.slice(0, 3).map((item) => <a href={item.href}>{item.label}</a>)}
+        {nav.slice(0, 3).map((item) => <a href={base + item.href}>{item.label}</a>)}
         <a href="/privacy/">privacy</a>
         <a href="#top">back to top ↑</a>
       </nav>

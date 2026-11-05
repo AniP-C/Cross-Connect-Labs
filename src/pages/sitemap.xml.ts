@@ -1,7 +1,8 @@
 // sitemap.xml for search engines. Add new pages to `paths` when they exist.
 import type { APIRoute } from 'astro';
+import { services } from '../data/site';
 
-const paths = ['/', '/privacy/'];
+const paths = ['/', ...services.map((s) => `/services/${s.slug}/`), '/privacy/'];
 
 export const GET: APIRoute = ({ site }) => {
   const urls = paths.map((p) => `  <url><loc>${new URL(p, site).href}</loc></url>`).join('\n');
