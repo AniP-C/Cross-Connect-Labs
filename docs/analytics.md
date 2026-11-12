@@ -39,6 +39,7 @@ The public path is `/api/ping`, not `/api/track`: ad blockers match the word "tr
 - time on the page, time the tab was visible, deepest scroll, clicks, key presses and rage clicks (three quick clicks on one spot)
 - time per section: whichever `main section` crosses the middle of the screen gets the time, while the tab is visible. Sections without an id are named from their heading (`aria-labelledby="signal-title"` → `signal`). Also the section on screen when they left.
 - page speed on their device: LCP, INP and CLS (Core Web Vitals, measured with the browser's own `PerformanceObserver`), time to first byte and load time
+- heatmap click spots, up to 80 per page: `section:x:y`, where x and y run 0–1000 across and down the section the click landed in, so they line up on any screen size. A click on nothing clickable (not a link, button, summary, label, form field or `[data-contact]`/`[data-book]`) ends in `:d`. The header counts as a section; clicks in the call bar and dialogs aren't kept, because the map can't show them in place.
 
 **Actions** (names in `visitLog.actions`):
 
@@ -63,6 +64,7 @@ The public path is `/api/ping`, not `/api/track`: ad blockers match the word "tr
 | `theme`, `menu` | Day/night switched; phone menu opened | `to night` / `to day` |
 | `rage-click` | Three quick clicks on one spot | Where, and the element's own text (never a form field's) |
 | `error` | A script error, a file that failed to load, or the contact form or booking failing | The message and file. At most 5 per page. |
+| `translate` | The browser translated the page (Chrome, Google Translate, Edge, Firefox, Safari change `<html lang>`; Google also adds `translated-ltr`) | The language code and the tool, such as `hi · Google`. Never the translated text. |
 
 Actions from the page's own controls (`patch-pick` to `rage-click`, and `error`) are sent once per page for each value, with `trackOnce()`, so turning the knob back and forth is one row per size, not twenty. Report a failure from code with `trackError()`.
 
@@ -100,8 +102,9 @@ The page looks like the 404 page until you enter the key. The key is kept in tha
 - **Towards an enquiry:** how many sessions opened the form, sent it, opened the call dialog, booked, or tapped WhatsApp.
 - **Where they are:** a map of sessions by city, fitted to where visits came from (**whole world** zooms out), with filled dots where someone reached out and rings where they only looked. Beside it, **City → enquiry rate**: visits, how many opened the form or call dialog, how many reached out (sent, booked, or tapped WhatsApp, email or phone), and the rate. The outlines are Natural Earth's 1:110m countries from the `world-atlas` package, built into a file of our own and only loaded on /admin.
 - **Attention and speed:** for home page views, the share that reached each section and the average time there; page speed at the 75th percentile for phones and computers, marked good, needs work or poor by Google's limits.
+- **Click heatmap:** pick a page and **computer** or **phone**. The real page loads in a frame at 1440px or 390px wide (scaled to fit, scroll inside the box) and every click is drawn over it: copper glows for clicks on buttons and links, brighter where they pile up, and rings for dead clicks. A cluster of rings means something looks clickable but isn't. Tracking is off inside frames (`track.ts`), so the frame never adds a visit. Views count as phone when their window was 760px wide or less.
 - **Breakdowns:** pages, where people came from, campaign, country, city, network, device, phone model, app it was opened inside, browser, OS and version, screen, language, time zone, day or night, actions, topics, where buttons were pressed, links followed out, how pages were opened.
-- **On the page:** problems picked, budget sizes, case files, FAQ questions, service rows and pages, where people gave up on the form or a call, rage clicks, errors, pages not found (with where the link came from), and the section people left from.
+- **On the page:** problems picked, budget sizes, case files, FAQ questions, service rows and pages, where people gave up on the form or a call, rage clicks, errors, languages the page was translated into, pages not found (with where the link came from), and the section people left from.
 - **Actions and sessions:** the latest actions, and each session with its pages, times, scroll and the full device details.
 
 Use `utm_*` tags on links you share, for example `https://crossconnectlabs.com/?utm_source=linkedin&utm_campaign=launch`. They show under **Campaign**.
@@ -124,7 +127,7 @@ npx wrangler d1 execute cross-connect-visits --remote --command "SELECT kind, da
 
 ## Testing locally
 
-The log is off on `localhost`. To try the whole thing with a local database:
+The log is off on `localhost` and inside frames. To try the whole thing with a local database:
 
 ```bash
 npx wrangler d1 migrations apply cross-connect-visits --local

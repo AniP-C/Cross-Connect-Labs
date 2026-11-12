@@ -20,6 +20,10 @@ const CAMPAIGN = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'ut
 const ID = /^[a-z0-9]{8,64}$/;
 // At most this many error beacons per page, so a broken loop can't flood the log.
 const MAX_ERRORS = 5;
+// Click spots kept per page for the heatmap. Enough for any real visit; a bot clicking forever stops here.
+const MAX_HEAT = 80;
+// Anything a visitor can expect to react to a click. A click anywhere else is a "dead" click.
+const CLICKABLE = 'a, button, summary, label, input, textarea, select, [role="button"], [tabindex], [data-contact], [data-book]';
 
 interface LiveView {
   id: string;
@@ -39,6 +43,9 @@ interface LiveView {
   // name|detail pairs already sent from this page, for trackOnce.
   sent: Set<string>;
   errors: number;
+  // Click spots for the heatmap: "section:x:y", or "section:x:y:d" for a dead click. x and y are
+  // 0–1000 across and down the section, so they line up on any screen size.
+  heat: string[];
 }
 
 let live: LiveView | null = null;
@@ -165,7 +172,8 @@ function scrollDepth(): number {
 
 // Sections: whichever one crosses the middle of the screen has the visitor's attention.
 // Sections without an id are named from their heading id: aria-labelledby="signal-title" → "signal".
-function sectionName(el: HTMLElement): string {
+// /admin's heatmap uses the same names to find each section again.
+export function sectionName(el: HTMLElement): string {
   const name = el.id || el.getAttribute('aria-labelledby')?.replace(/-title$/, '') || el.tagName.toLowerCase();
   return /^[a-z0-9-]{1,40}$/.test(name) ? name : '';
 }
@@ -265,6 +273,7 @@ function flush(exit: string) {
       rageClicks: view.rageClicks,
       sections: Object.fromEntries(Object.entries(view.sections).map(([id, ms]) => [id, Math.round(ms)])),
       lastSection: view.section || undefined,
+      heat: view.heat.length ? view.heat : undefined,
       ...timing(),
       exit,
     },
@@ -275,6 +284,8 @@ function flush(exit: string) {
 // Do Not Track and Global Privacy Control are explicit requests, so they are honoured.
 function enabled(): boolean {
   if (document.documentElement.hasAttribute('data-no-track')) return false;
+  // Inside a frame is /admin's heatmap showing the page, not a visitor.
+  if (window.self !== window.top) return false;
   if (read(() => localStorage, KEY_FORCE) === '1') return true;
   const nav = navigator as Navigator & { doNotTrack?: string | null; globalPrivacyControl?: boolean };
   if (nav.doNotTrack === '1' || nav.globalPrivacyControl === true) return false;
@@ -388,6 +399,43 @@ function checkRage(event: MouseEvent, target: Element) {
   trackOnce('rage-click', [lastArea, what.tagName.toLowerCase(), textOf(what, 40)].filter(Boolean).join(' · '));
 }
 
+// One heatmap spot: where in its section the click landed. The header counts as a section; the
+// call bar and dialogs don't, because the heatmap can't show them in place.
+function recordHeat(event: MouseEvent, target: Element) {
+  if (!live || event.detail === 0 || live.heat.length >= MAX_HEAT || target.closest('[data-dock], dialog')) return;
+  const box = target.closest<HTMLElement>('main section, footer, header');
+  const name = box && sectionName(box);
+  if (!box || !name) return;
+  const r = box.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const scale = (v: number) => Math.max(0, Math.min(1000, Math.round(v * 1000)));
+  const dead = target.closest(CLICKABLE) ? '' : ':d';
+  live.heat.push(`${name}:${scale((event.clientX - r.left) / r.width)}:${scale((event.clientY - r.top) / r.height)}${dead}`);
+}
+
+// Browser translation (Chrome, Google Translate, Edge, Firefox, Safari) rewrites the page and sets
+// <html lang> to the language it translated into. We record the language and the tool, once per
+// page, never the translated text.
+function watchTranslation() {
+  // Every page here is written in English (BaseLayout sets lang="en").
+  const html = document.documentElement;
+  const check = () => {
+    const lang = (html.lang || '').toLowerCase().slice(0, 16);
+    const google = /\btranslated-(ltr|rtl)\b/.test(html.className);
+    const changed = Boolean(lang) && !lang.startsWith('en');
+    if (!google && !changed) return;
+    const by = google ? 'Google' : document.querySelector('[_msttexthash], [_msthash]') ? 'Microsoft Edge' : 'browser';
+    trackOnce('translate', `${changed ? lang : 'unknown'} · ${by}`);
+  };
+  try {
+    new MutationObserver(check).observe(html, { attributes: true, attributeFilter: ['lang', 'class'] });
+  } catch {
+    // No MutationObserver: nothing to watch with.
+  }
+  // It may have happened before this script ran.
+  check();
+}
+
 function fileName(url: string | undefined): string {
   if (!url) return '';
   try {
@@ -411,6 +459,7 @@ export function startTracking() {
       lastArea = areaOf(target);
       if (live) live.clicks += 1;
       checkRage(event, target);
+      recordHeat(event, target);
       const link = target.closest('a');
       const action = (link && linkAction(link)) || controlAction(target);
       if (!action) return;
@@ -509,11 +558,13 @@ export function startTracking() {
     sectionSince: null,
     sent: new Set(),
     errors: 0,
+    heat: [],
   };
   sectionEls = [...document.querySelectorAll<HTMLElement>('main section, footer')];
   live.section = sectionAtMiddle();
   live.sectionSince = document.visibilityState === 'visible' ? Date.now() : null;
   watchVitals();
+  watchTranslation();
 
   const view = live;
   const session = sessionId();
