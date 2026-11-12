@@ -113,6 +113,9 @@ export interface VisitRecord {
   sections?: Record<string, number>;
   // The section on screen when the visitor left.
   lastSection?: string;
+  // Click spots for the heatmap: "section:x:y", plus ":d" for a click on nothing clickable.
+  // x and y run 0–1000 across and down the section.
+  heat?: string[];
   // Page speed on the visitor's own device. lcp, inp, ttfb and loadMs in milliseconds; cls has no unit.
   lcp?: number;
   inp?: number;
@@ -196,6 +199,7 @@ export async function ping(request: Request, env: VisitEnv): Promise<Response> {
         rageClicks: num(body.rageClicks, 0, 10_000),
         sections: sections(body.sections),
         lastSection: str(body.lastSection, 40),
+        heat: heat(body.heat),
         lcp: num(body.lcp, 0, 120_000),
         inp: num(body.inp, 0, 60_000),
         cls: num(body.cls, 0, 50, false),
@@ -345,6 +349,13 @@ function sections(value: unknown): Record<string, number> | undefined {
     if (/^[a-z0-9-]{1,40}$/.test(id) && n) out[id] = n;
   }
   return Object.keys(out).length ? out : undefined;
+}
+
+// Heatmap spots. Only the exact shape track.ts sends gets through, at most 80 per page.
+function heat(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const out = value.filter((v): v is string => typeof v === 'string' && /^[a-z0-9-]{1,40}:\d{1,4}:\d{1,4}(:d)?$/.test(v)).slice(0, 80);
+  return out.length ? out : undefined;
 }
 
 function readIp(request: Request): string {

@@ -390,6 +390,57 @@ import { visitLog } from '../data/site';
     }
   }
 
+  /* Click heatmap: the page in a scaled frame, scrolled inside its own box. */
+  .report :global(.heat-controls) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .report :global(.heat-select),
+  .report :global(.heat-toggle) {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--chip-line);
+    border-radius: 999px;
+    background: transparent;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+
+  .report :global(.heat-select) {
+    max-width: 100%;
+    background: var(--input-bg);
+  }
+
+  .report :global(.heat-toggle[aria-pressed='true']) {
+    border-color: var(--copper);
+    background: var(--copper-tint);
+    color: var(--copper-text);
+  }
+
+  .report :global(.heat-box) {
+    max-height: 80vh;
+    margin-top: 12px;
+    overflow: auto;
+    border: 1px solid var(--chip-line);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+
+  .report :global(.heat-stage) {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .report :global(.heat-stage iframe) {
+    display: block;
+    border: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+
   .report :global(.grid.pair) {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   }

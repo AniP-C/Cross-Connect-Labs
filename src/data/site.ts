@@ -479,6 +479,8 @@ export const visitLog = {
     menu: 'Phone menu opened',
     'rage-click': 'Rage click',
     error: 'Error on the page',
+    // The browser translated the page. Detail: the language code and the tool, never the text.
+    translate: 'Page translated',
   },
 } as const;
 

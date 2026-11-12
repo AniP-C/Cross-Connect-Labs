@@ -3,6 +3,7 @@
 // so it only ever goes into the page as textContent, never as HTML.
 import type { EventRecord, StatsResponse, VisitRecord } from '../../worker/visits';
 import { visitLog } from '../data/site';
+import { sectionName } from './track';
 // Country outlines from Natural Earth, served as a file of our own and only fetched on /admin.
 import atlasUrl from 'world-atlas/countries-110m.json?url';
 
@@ -243,6 +244,7 @@ if (root) {
       breakdown('Gave up on a call', details('book-close', afterOpen), count('book-close')),
       breakdown('Rage clicks', details('rage-click'), count('rage-click')),
       breakdown('Errors', details('error'), count('error')),
+      breakdown('Translated into', details('translate', languageName), count('translate')),
       breakdown('Pages not found', tally(views.filter((v) => v.notFound), (v) => `${v.path} ← ${referrer(v.referrer)}`), views.filter((v) => v.notFound).length),
       breakdown(
         'Left from',
@@ -271,6 +273,8 @@ if (root) {
       el('div', { class: 'where' }, mapPanel(sessions, reachedOut), cityTable(sessions, reachedOut)),
       el('h2', {}, 'Attention and speed'),
       el('div', { class: 'grid pair' }, attentionPanel(views.filter((v) => v.path === '/')), speedPanel(views)),
+      el('h2', {}, 'Click heatmap'),
+      heatmapPanel(views),
       el('h2', {}, 'Breakdowns'),
       breakdowns,
       el('h2', {}, 'On the page'),
@@ -569,6 +573,149 @@ function cityTable(sessions: Session[], reachedOut: (s: Session) => boolean): HT
       : el('p', { class: 'hint' }, 'Nothing yet.'),
     el('p', { class: 'hint' }, 'Opened: the form or the call dialog. Reached: sent, booked, or tapped WhatsApp, email or phone.'),
   );
+}
+
+// ── Click heatmap ─────────────────────────────────────────────────────────────────────────────
+
+// The real page in a frame, at computer (1440px) or phone (390px) width, with every recorded click
+// drawn on a canvas laid over it: glows for clicks on buttons and links, rings for dead clicks.
+// track.ts stays off inside frames, so showing the page here never adds a visit.
+function heatmapPanel(views: VisitRecord[]): HTMLElement {
+  const withHeat = views.filter((v) => v.heat?.length);
+  if (!withHeat.length) return panel('Clicks on the page', el('p', { class: 'hint' }, 'No clicks recorded yet. They come with the exit numbers when a visitor leaves.'));
+
+  const onPhoneLayout = (v: VisitRecord) => Number(v.viewport?.split('x')[0]) <= 760;
+  const pages = tally(withHeat, (v) => v.path, 30).map(([path]) => path);
+  let page = pages.includes('/') ? '/' : pages[0];
+  let phone = withHeat.filter(onPhoneLayout).length > withHeat.length / 2;
+
+  const select = el('select', { class: 'heat-select', 'aria-label': 'Page' }, ...pages.map((p) => el('option', { value: p }, p))) as HTMLSelectElement;
+  select.value = page;
+  const layouts = ([['computer', false], ['phone', true]] as const).map(([name, value]) => {
+    const button = el('button', { type: 'button', class: 'heat-toggle', 'aria-pressed': String(phone === value) }, name);
+    button.addEventListener('click', () => {
+      phone = value;
+      layouts.forEach((b, i) => b.setAttribute('aria-pressed', String((i === 1) === phone)));
+      render();
+    });
+    return button;
+  });
+  select.addEventListener('change', () => {
+    page = select.value;
+    render();
+  });
+
+  const summary = el('p', { class: 'hint' });
+  const stage = el('div', { class: 'heat-stage' });
+  const box = el('div', { class: 'heat-box' }, stage);
+  let fit = () => {};
+  new ResizeObserver(() => fit()).observe(box);
+
+  function render() {
+    const chosen = withHeat.filter((v) => v.path === page && onPhoneLayout(v) === phone);
+    const points = chosen.flatMap((v) => v.heat!);
+    const dead = points.filter((p) => p.endsWith(':d')).length;
+    const bySection = tally(points, (p) => p.split(':')[0], 4).map(([name, n]) => `#${name} ${Math.round((n / points.length) * 100)}%`);
+    summary.textContent = points.length
+      ? `${points.length} clicks from ${chosen.length} page view${chosen.length === 1 ? '' : 's'} · ${dead} dead (rings) · most: ${bySection.join(', ')}`
+      : `No clicks on ${page} on a ${phone ? 'phone' : 'computer'} yet.`;
+
+    const width = phone ? 390 : 1440;
+    const frame = el('iframe', { title: `Click heatmap of ${page}`, tabindex: '-1', 'aria-hidden': 'true' }) as HTMLIFrameElement;
+    frame.style.width = `${width}px`;
+    frame.style.height = '900px';
+    stage.replaceChildren(frame);
+    fit = () => {
+      const scale = Math.min(1, box.clientWidth / width);
+      frame.style.transform = `scale(${scale})`;
+      stage.style.width = `${width * scale}px`;
+      stage.style.height = `${(parseFloat(frame.style.height) || 900) * scale}px`;
+    };
+    fit();
+    frame.addEventListener('load', async () => {
+      const doc = frame.contentDocument;
+      if (!doc) return;
+      await doc.fonts?.ready.catch(() => {});
+      await new Promise((r) => setTimeout(r, 300));
+      frame.style.height = `${doc.documentElement.scrollHeight}px`;
+      fit();
+      drawHeat(doc, points);
+    });
+    frame.src = page;
+  }
+  render();
+
+  return panel(
+    'Clicks on the page',
+    el('div', { class: 'heat-controls' }, select, el('div', { class: 'group', role: 'group', 'aria-label': 'Layout' }, ...layouts)),
+    summary,
+    box,
+  );
+}
+
+function drawHeat(doc: Document, points: string[]) {
+  const root = doc.documentElement;
+  // The page's own copper, so the overlay follows the brand and the day or night setting.
+  const copper = getComputedStyle(root).getPropertyValue('--copper').trim();
+  if (!copper) return;
+  // The same copper at zero opacity. Fading to plain `transparent` would pass through black.
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(copper);
+  const clear = hex ? `rgba(${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}, 0)` : 'transparent';
+  const boxes = new Map<string, { left: number; top: number; width: number; height: number }>();
+  for (const section of doc.querySelectorAll<HTMLElement>('main section, footer, header')) {
+    const name = sectionName(section);
+    if (!name || boxes.has(name)) continue;
+    const r = section.getBoundingClientRect();
+    boxes.set(name, { left: r.left + (doc.defaultView?.scrollX ?? 0), top: r.top + (doc.defaultView?.scrollY ?? 0), width: r.width, height: r.height });
+  }
+
+  const canvas = doc.createElement('canvas');
+  canvas.width = root.scrollWidth;
+  canvas.height = root.scrollHeight;
+  Object.assign(canvas.style, { position: 'absolute', left: '0', top: '0', width: `${canvas.width}px`, height: `${canvas.height}px`, pointerEvents: 'none', zIndex: '2147483647' });
+  canvas.setAttribute('data-heat', String(points.length));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  for (const point of points) {
+    const [name, xs, ys, flag] = point.split(':');
+    const b = boxes.get(name);
+    if (!b) continue;
+    const x = b.left + (Number(xs) / 1000) * b.width;
+    const y = b.top + (Number(ys) / 1000) * b.height;
+    if (flag === 'd') {
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = copper;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 9, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      // Overlapping glows add up, so a busy button burns brighter.
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, 30);
+      glow.addColorStop(0, copper);
+      glow.addColorStop(1, clear);
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x, y, 30, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  doc.querySelector('[data-heat]')?.remove();
+  doc.body.append(canvas);
+}
+
+// "hi · Google" → "Hindi · Google".
+function languageName(detail: string): string {
+  const [code, ...rest] = detail.split(' · ');
+  let name = code;
+  try {
+    name = (code !== 'unknown' && new Intl.DisplayNames(['en'], { type: 'language' }).of(code)) || code;
+  } catch {
+    // Not a language code we know: keep it as it came.
+  }
+  return [name, ...rest].join(' · ');
 }
 
 // ── Attention and speed ───────────────────────────────────────────────────────────────────────

@@ -204,6 +204,23 @@ const shot = async (target, name, options = {}) => {
   ok('visit log: leaving a page sends time and scroll', end && end.id === view?.id && end.durationMs > 0 && end.maxScroll >= 0, JSON.stringify(end ?? {}).slice(0, 120));
   ok('visit log: exit numbers include time per section', end && end.sections && Object.keys(end.sections).length >= 2 && Boolean(end.lastSection), JSON.stringify(end?.sections ?? {}));
   ok('visit log: no errors reported from the page', actions('error').length === 0, actions('error').map((p) => p.detail).join(' | '));
+  ok(
+    'visit log: exit numbers carry heatmap click spots',
+    end && Array.isArray(end.heat) && end.heat.length >= 3 && end.heat.every((h) => /^[a-z0-9-]+:\d{1,4}:\d{1,4}(:d)?$/.test(h)) && end.heat.some((h) => h.startsWith('pricing:')),
+    (end?.heat ?? []).slice(0, 6).join(' '),
+  );
+
+  // Browser translation: Google Translate marks <html> like this. Recorded once, with the language only.
+  await page.evaluate(() => {
+    document.documentElement.lang = 'hi';
+    document.documentElement.classList.add('translated-ltr');
+  });
+  await page.waitForTimeout(200);
+  ok('visit log: browser translation recorded', actions('translate').length === 1 && actions('translate')[0].detail === 'hi · Google', actions('translate').map((p) => p.detail).join(' | '));
+  await page.evaluate(() => {
+    document.documentElement.lang = 'en';
+    document.documentElement.classList.remove('translated-ltr');
+  });
 
   // Day/night switch is remembered.
   await page.click('[data-theme-toggle]');
@@ -294,7 +311,7 @@ const shot = async (target, name, options = {}) => {
   const admin = await ctx.newPage();
   watch(admin, 'admin');
   const now = Date.now();
-  const rec = (i, extra = {}) => ({ kind: 'view', id: `view000${i}`, session: `sess000${i % 2}`, visitor: 'visitor01', ts: new Date(now - i * 6e5).toISOString(), t0: now - i * 6e5, ip: '203.0.113.9', ua: 'Mozilla/5.0', browser: 'Chrome', browserVersion: '140', os: 'Android', osVersion: '15', device: 'mobile', bot: false, city: 'Jhansi', country: 'India', countryCode: 'IN', lat: 25.45, lon: 78.57, network: 'Reliance Jio', path: '/', sections: { top: 9000, services: 4000 }, lastSection: 'services', lcp: 1800, referrer: 'https://www.google.com/', params: { utm_source: 'newsletter' }, durationMs: 42000, activeMs: 30000, maxScroll: 80, completed: true, ...extra });
+  const rec = (i, extra = {}) => ({ kind: 'view', id: `view000${i}`, session: `sess000${i % 2}`, visitor: 'visitor01', ts: new Date(now - i * 6e5).toISOString(), t0: now - i * 6e5, ip: '203.0.113.9', ua: 'Mozilla/5.0', browser: 'Chrome', browserVersion: '140', os: 'Android', osVersion: '15', device: 'mobile', bot: false, city: 'Jhansi', country: 'India', countryCode: 'IN', lat: 25.45, lon: 78.57, network: 'Reliance Jio', path: '/', sections: { top: 9000, services: 4000 }, lastSection: 'services', lcp: 1800, viewport: '1440x900', heat: ['top:300:400', 'top:310:410', 'services:500:200:d'], referrer: 'https://www.google.com/', params: { utm_source: 'newsletter' }, durationMs: 42000, activeMs: 30000, maxScroll: 80, completed: true, ...extra });
   const stats = {
     ok: true,
     days: 30,
@@ -323,6 +340,11 @@ const shot = async (target, name, options = {}) => {
   ok('admin: right key shows the report', (await admin.textContent('.tiles')).includes('Page views') && (await admin.locator('details.item').count()) === 2);
   await admin.waitForSelector('.map svg', { timeout: 5000 }).catch(() => {});
   ok('admin: map shows the places', (await admin.locator('.map svg circle').count()) === 1 && (await admin.locator('.map svg .map-land').count()) === 1);
+  await admin.waitForSelector('.heat-stage iframe', { timeout: 5000 }).catch(() => {});
+  const heatFrame = admin.frameLocator('.heat-stage iframe');
+  await heatFrame.locator('canvas[data-heat]').waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
+  ok('admin: click heatmap draws on the page', (await heatFrame.locator('canvas[data-heat]').getAttribute('data-heat').catch(() => null)) === '6', await admin.locator('.heat-box').evaluate((b) => b.previousElementSibling?.textContent ?? ''));
+  ok('admin: the heatmap frame is not in the visit log', !pings.some((p) => p.type === 'view'), `${pings.length} beacons`);
   ok('admin: city table shows the enquiry rate', /Jhansi, IN\s*2\s*0\s*1\s*50%/.test(await admin.locator('.where table').innerText()), (await admin.locator('.where table').innerText()).replace(/\s+/g, ' '));
   await shot(admin, 'admin', { fullPage: true });
   await admin.setViewportSize({ width: 390, height: 844 });
