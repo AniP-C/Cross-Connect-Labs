@@ -464,12 +464,27 @@ export const visitLog = {
     phone: 'Phone number tapped',
     'copy-email': 'Email address copied',
     outbound: 'Outside link followed',
+    // Gave up: the detail says how far they got, never what they typed.
+    'contact-close': 'Contact form closed, not sent',
+    'book-close': 'Call dialog closed, not booked',
+    // The page's own controls, once per page each.
+    'patch-pick': 'Fault finder: problem picked',
+    'patch-flip': 'Fault finder: switch flipped',
+    'knob-turn': 'Budget knob turned',
+    'case-open': 'Case file opened',
+    'faq-open': 'FAQ question opened',
+    'rack-row': 'Service row opened (phone)',
+    'service-link': 'Service page link',
+    theme: 'Day/night switched',
+    menu: 'Phone menu opened',
+    'rage-click': 'Rage click',
+    error: 'Error on the page',
   },
 } as const;
 
 // Privacy policy at /privacy. Google needs this link to publish the booking app.
 export const privacy = {
-  updated: '4 November 2026',
+  updated: '12 November 2026',
   intro: 'This page explains what Cross-Connect Labs collects when you use crossconnectlabs.com and what we do with it. In short: only what you send us, and only to reply to you.',
   sections: [
     {
@@ -478,7 +493,7 @@ export const privacy = {
         'Contact form. The form stores nothing on this site. It opens WhatsApp or your email app with your message typed in, and you decide whether to send it. What you send then sits in our WhatsApp or email.',
         'Call booking. When you book a call we receive your name, your email address, the time you picked and any note you add. They are saved as an event in our Google Calendar, and Google emails you an invite with a Google Meet link.',
         'Hosting. The site runs on Cloudflare. Like any web host, Cloudflare processes technical data such as your IP address and browser type to deliver pages and protect the site.',
-        'Visits. We keep a simple log of visits, such as pages viewed and the type of device, to see how the site is used. It is not shared, and it is deleted after 90 days.',
+        'Visits. We keep a simple log of visits, such as pages viewed, the type of device, the rough area (city level) and the network a visit came from, and how quickly the page loaded, to see how the site is used and where to improve it. It never includes what you type. It is not shared, and it is deleted after 90 days.',
         'Your browser. We remember your day or night choice in your browser’s local storage. There are no cookies and no advertising trackers.',
       ],
     },

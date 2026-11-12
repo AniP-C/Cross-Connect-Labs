@@ -88,6 +88,7 @@ const shot = async (target, name, options = {}) => {
   ok('patch bay: only one problem pressed', (await page.locator('[data-patchbay] .key[aria-pressed="true"]').count()) === 1);
   ok('patch bay: card shows the fix', (await page.textContent('[data-readout="fix"]')) === toLabel);
   ok('patch bay: card says what it does', (await page.textContent('[data-readout="does"]')) === (await key.getAttribute('data-does')));
+  ok('visit log: picked problem recorded', actions('patch-pick').some((p) => p.detail === fromLabel), actions('patch-pick').map((p) => p.detail).join(' | '));
 
   // Flip switch opens the contact form, filled in from the patch bay.
   await page.click('[data-flip]');
@@ -159,6 +160,11 @@ const shot = async (target, name, options = {}) => {
   ok('booking: confirms the call', ((await page.textContent('[data-book-done-text]')) || '').includes('test@example.com'));
   ok('visit log: call dialog and booking recorded', actions('book-open').length >= 2 && actions('booked').length === 1 && actions('book-fallback').length === 1);
   ok('visit log: nothing typed is sent', !pings.some((p) => /Smoke Test|test@example\.com/.test(JSON.stringify(p))));
+  ok(
+    'visit log: dialogs closed unsent are recorded with how far they got',
+    actions('contact-close').some((p) => /of 3 filled/.test(p.detail)) && actions('book-close').some((p) => p.detail.includes('WhatsApp')),
+    [...actions('contact-close'), ...actions('book-close')].map((p) => p.detail).join(' | '),
+  );
   await page.click('[data-book-done] .back');
   ok('booking: closes', !(await bookOpen()));
   await page.unroute('**/api/*');
@@ -166,6 +172,7 @@ const shot = async (target, name, options = {}) => {
   // Case files.
   await page.click('[data-case="2"]');
   ok('case files: switches project', (await page.isVisible('#case-2')) && !(await page.isVisible('#case-0')));
+  ok('visit log: opened case file recorded', actions('case-open').length === 1);
 
   // Budget knob.
   const ctaBefore = await page.getAttribute('[data-knob-cta]', 'data-budget');
@@ -176,7 +183,14 @@ const shot = async (target, name, options = {}) => {
   ok('knob: needle turns', (await page.evaluate(() => document.querySelector('[data-dial]').style.getPropertyValue('--deg'))) === `${deg}deg`);
   ok('knob: shows the matching budget', await page.isVisible('[data-budget-pane="3"]'));
   ok('knob: button carries the budget', (await page.getAttribute('[data-knob-cta]', 'data-budget')) !== ctaBefore);
+  ok('visit log: knob turn recorded once', actions('knob-turn').length === 1);
   await shot(page.locator('#pricing'), 'budget-knob');
+
+  // FAQ: opening a question is recorded with the question.
+  const question = page.locator('#faq details:not([open]) summary').first();
+  const questionText = (await question.locator('.q').textContent()).replace(/\s+/g, ' ').trim();
+  await question.click();
+  ok('visit log: opened FAQ question recorded', actions('faq-open').some((p) => p.detail === questionText), actions('faq-open').map((p) => p.detail).join(' | '));
 
   // Hiding the tab sends the exit numbers. (Beacons sent while a page unloads never reach the route, so not a reload.)
   await page.evaluate(() => {
@@ -188,6 +202,8 @@ const shot = async (target, name, options = {}) => {
   await page.waitForTimeout(300);
   const end = pings.find((p) => p.type === 'end');
   ok('visit log: leaving a page sends time and scroll', end && end.id === view?.id && end.durationMs > 0 && end.maxScroll >= 0, JSON.stringify(end ?? {}).slice(0, 120));
+  ok('visit log: exit numbers include time per section', end && end.sections && Object.keys(end.sections).length >= 2 && Boolean(end.lastSection), JSON.stringify(end?.sections ?? {}));
+  ok('visit log: no errors reported from the page', actions('error').length === 0, actions('error').map((p) => p.detail).join(' | '));
 
   // Day/night switch is remembered.
   await page.click('[data-theme-toggle]');
@@ -278,7 +294,7 @@ const shot = async (target, name, options = {}) => {
   const admin = await ctx.newPage();
   watch(admin, 'admin');
   const now = Date.now();
-  const rec = (i, extra = {}) => ({ kind: 'view', id: `view000${i}`, session: `sess000${i % 2}`, visitor: 'visitor01', ts: new Date(now - i * 6e5).toISOString(), t0: now - i * 6e5, ip: '203.0.113.9', ua: 'Mozilla/5.0', browser: 'Chrome', browserVersion: '140', os: 'Android', osVersion: '15', device: 'mobile', bot: false, city: 'Jhansi', country: 'India', countryCode: 'IN', path: '/', referrer: 'https://www.google.com/', params: { utm_source: 'newsletter' }, durationMs: 42000, activeMs: 30000, maxScroll: 80, completed: true, ...extra });
+  const rec = (i, extra = {}) => ({ kind: 'view', id: `view000${i}`, session: `sess000${i % 2}`, visitor: 'visitor01', ts: new Date(now - i * 6e5).toISOString(), t0: now - i * 6e5, ip: '203.0.113.9', ua: 'Mozilla/5.0', browser: 'Chrome', browserVersion: '140', os: 'Android', osVersion: '15', device: 'mobile', bot: false, city: 'Jhansi', country: 'India', countryCode: 'IN', lat: 25.45, lon: 78.57, network: 'Reliance Jio', path: '/', sections: { top: 9000, services: 4000 }, lastSection: 'services', lcp: 1800, referrer: 'https://www.google.com/', params: { utm_source: 'newsletter' }, durationMs: 42000, activeMs: 30000, maxScroll: 80, completed: true, ...extra });
   const stats = {
     ok: true,
     days: 30,
@@ -305,6 +321,9 @@ const shot = async (target, name, options = {}) => {
   await admin.press('#admin-key', 'Enter');
   await admin.waitForSelector('[data-report] .tiles');
   ok('admin: right key shows the report', (await admin.textContent('.tiles')).includes('Page views') && (await admin.locator('details.item').count()) === 2);
+  await admin.waitForSelector('.map svg', { timeout: 5000 }).catch(() => {});
+  ok('admin: map shows the places', (await admin.locator('.map svg circle').count()) === 1 && (await admin.locator('.map svg .map-land').count()) === 1);
+  ok('admin: city table shows the enquiry rate', /Jhansi, IN\s*2\s*0\s*1\s*50%/.test(await admin.locator('.where table').innerText()), (await admin.locator('.where table').innerText()).replace(/\s+/g, ' '));
   await shot(admin, 'admin', { fullPage: true });
   await admin.setViewportSize({ width: 390, height: 844 });
   const adminOver = await admin.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

@@ -2,7 +2,7 @@
 // Free times come from the Worker (/api/slots in worker/index.ts) and are shown in the
 // visitor's own time zone. Where there is no Worker or it isn't set up (dev server, Docker,
 // no Google secrets yet), the dialog offers WhatsApp and email instead.
-import { clickArea, trackAction } from './track';
+import { clickArea, trackAction, trackError } from './track';
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-book-dialog]');
 
@@ -32,6 +32,10 @@ if (dialog) {
 
   let byDay = new Map<string, Date[]>();
   let chosen: Date | undefined;
+  // For book-close: how long it was open and how far they got, never what they typed.
+  let openedAt = 0;
+  let booked = false;
+  let dayClicks = 0;
 
   const show = (part: HTMLElement) => {
     for (const el of [status, picker, fallback, done]) el.hidden = el !== part;
@@ -93,6 +97,7 @@ if (dialog) {
       days.replaceChildren(
         ...keys.map((key, i) => {
           const b = pick(key, i === 0, () => {
+            dayClicks++;
             press(days, b);
             selectDay(key);
           });
@@ -109,7 +114,13 @@ if (dialog) {
   }
 
   function open() {
-    if (!dialog!.open) dialog!.showModal();
+    if (!dialog!.open) {
+      openedAt = Date.now();
+      booked = false;
+      dayClicks = 0;
+      chosen = undefined;
+      dialog!.showModal();
+    }
     trackAction('book-open', clickArea() && `from ${clickArea()}`);
     load();
   }
@@ -118,6 +129,19 @@ if (dialog) {
     if (!(event.target as Element | null)?.closest('[data-book]')) return;
     event.preventDefault();
     open();
+  });
+
+  dialog.addEventListener('close', () => {
+    if (booked || !openedAt) return;
+    const step = !fallback.hidden
+      ? 'saw WhatsApp and email instead'
+      : !status.hidden
+        ? 'times still loading'
+        : chosen
+          ? `time picked, ${[nameInput.value.trim(), emailInput.value.trim()].filter(Boolean).length} of 2 details filled`
+          : `looked at times${dayClicks ? `, ${dayClicks} other day${dayClicks === 1 ? '' : 's'}` : ''}`;
+    trackAction('book-close', `${Math.round((Date.now() - openedAt) / 1000)}s open · ${step}`);
+    openedAt = 0;
   });
 
   dialog.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => dialog.close()));
@@ -156,11 +180,13 @@ if (dialog) {
         return say('Someone just took that time. Pick another one.', true);
       }
       if (!res.ok) throw new Error(String(res.status));
+      booked = true;
       trackAction('booked', chosen.toISOString());
       doneText.textContent = `See you ${fullFormat.format(chosen)}. The invite with the Google Meet link is on its way to ${email}.`;
       form.reset();
       show(done);
-    } catch {
+    } catch (err) {
+      trackError(`booking did not go through: ${(err as Error).message}`);
       say('That did not go through. Please try again, or message us on WhatsApp.', true);
     } finally {
       send.disabled = false;

@@ -57,14 +57,28 @@ export interface VisitRecord {
   osVersion: string;
   device: 'desktop' | 'mobile' | 'tablet' | 'bot' | 'unknown';
   bot: boolean;
+  // Opened inside another app's browser: Instagram, LinkedIn, Facebook… These often break forms.
+  inApp?: string;
+  // The phone's model ("SM-S918B", "Pixel 8"), where Chrome tells us. iPhones never do.
+  model?: string;
   city?: string;
   region?: string;
   country?: string;
   countryCode?: string;
   geoTz?: string;
+  // Rough, city-level spot from Cloudflare, rounded to about a kilometre. Drawn on the /admin map.
+  lat?: number;
+  lon?: number;
+  // The network the visit came from: "Reliance Jio", "Infosys Ltd", "Google Cloud".
+  network?: string;
+  asn?: number;
 
   path: string;
   title?: string;
+  // The 404 page was shown for this path.
+  notFound?: boolean;
+  // How the page was opened: navigate, reload or back_forward.
+  navType?: string;
   referrer?: string;
   // utm_* and ref from the address, if it had any.
   params?: Record<string, string>;
@@ -93,6 +107,18 @@ export interface VisitRecord {
   maxScroll?: number;
   clicks?: number;
   keys?: number;
+  // Rapid repeat clicks on one spot: something looked clickable and wasn't, or was slow.
+  rageClicks?: number;
+  // Milliseconds each section (by id) held the middle of the screen while the tab was visible.
+  sections?: Record<string, number>;
+  // The section on screen when the visitor left.
+  lastSection?: string;
+  // Page speed on the visitor's own device. lcp, inp, ttfb and loadMs in milliseconds; cls has no unit.
+  lcp?: number;
+  inp?: number;
+  cls?: number;
+  ttfb?: number;
+  loadMs?: number;
   exit?: string;
   completed: boolean;
   updatedAt?: string;
@@ -167,6 +193,14 @@ export async function ping(request: Request, env: VisitEnv): Promise<Response> {
         maxScroll: num(body.maxScroll, 0, 100),
         clicks: num(body.clicks, 0, 100_000),
         keys: num(body.keys, 0, 100_000),
+        rageClicks: num(body.rageClicks, 0, 10_000),
+        sections: sections(body.sections),
+        lastSection: str(body.lastSection, 40),
+        lcp: num(body.lcp, 0, 120_000),
+        inp: num(body.inp, 0, 60_000),
+        cls: num(body.cls, 0, 50, false),
+        ttfb: num(body.ttfb, 0, 120_000),
+        loadMs: num(body.loadMs, 0, 600_000),
         exit: str(body.exit, 32),
         completed: true,
         updatedAt: new Date(now).toISOString(),
@@ -263,11 +297,14 @@ function viewRecord(body: Payload, who: { id: string; session: string; visitor: 
     ts: new Date(who.t0).toISOString(),
     ip: readIp(request),
     ua: ua.slice(0, 512),
-    ...parseAgent(ua, request.headers),
+    ...parseAgent(ua, request.headers, str(body.platformVersion, 32)),
+    model: str(body.model, 64),
     ...geo,
 
     path: str(body.path, 512) ?? '/',
     title: str(body.title, 200),
+    notFound: body.notFound === true ? true : undefined,
+    navType: str(body.navType, 16),
     referrer: str(body.referrer, 512),
     params: campaign(body.params),
     pageIndex: num(body.pageIndex, 1, 10_000),
@@ -299,6 +336,17 @@ function campaign(params: unknown): Record<string, string> | undefined {
   return Object.keys(out).length ? out : undefined;
 }
 
+// Section id → milliseconds. Ids are our own, so anything that doesn't look like one is dropped.
+function sections(value: unknown): Record<string, number> | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const out: Record<string, number> = {};
+  for (const [id, ms] of Object.entries(value).slice(0, 24)) {
+    const n = num(ms, 0, DAY);
+    if (/^[a-z0-9-]{1,40}$/.test(id) && n) out[id] = n;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 function readIp(request: Request): string {
   return (request.headers.get('CF-Connecting-IP') ?? request.headers.get('X-Forwarded-For')?.split(',')[0] ?? 'unknown').trim().slice(0, 64);
 }
@@ -313,12 +361,21 @@ function readGeo(request: Request) {
   } catch {
     country = code;
   }
+  // Two decimals is about a kilometre: enough for a map of cities, not a street address.
+  const coord = (v: unknown, max: number) => {
+    const n = typeof v === 'string' || typeof v === 'number' ? Number(v) : NaN;
+    return Number.isFinite(n) && Math.abs(n) <= max ? Math.round(n * 100) / 100 : undefined;
+  };
   return {
     city: str(cf.city, 80),
     region: str(cf.region, 80),
     country,
     countryCode: code,
     geoTz: str(cf.timezone, 64),
+    lat: coord(cf.latitude, 90),
+    lon: coord(cf.longitude, 180),
+    network: str(cf.asOrganization, 120),
+    asn: num(cf.asn, 1, 4_294_967_295),
   };
 }
 
@@ -409,7 +466,32 @@ const SYSTEMS: [string, RegExp, ((v: string) => string)?][] = [
   ['Linux', /Linux|X11/],
 ];
 
-function parseAgent(ua: string, headers: Headers): Pick<VisitRecord, 'browser' | 'browserVersion' | 'os' | 'osVersion' | 'device' | 'bot'> {
+// Apps that open links in their own browser say so in the user agent. Checked before BOT, whose
+// "whatsapp" and "telegram" are the link-preview fetchers, not people.
+const IN_APP: [string, RegExp][] = [
+  ['Instagram', /Instagram/],
+  ['Facebook', /FBAN|FBAV|FB_IAB|FBIOS/],
+  ['LinkedIn', /LinkedInApp/],
+  ['Snapchat', /Snapchat/],
+  ['X / Twitter', /Twitter/],
+  ['Threads', /Barcelona/],
+  ['Telegram', /Telegram(?!Bot)/],
+  ['Google app', /\bGSA\//],
+  ['Line', /\bLine\//],
+  ['Android app (WebView)', /; wv\)/],
+];
+
+function parseAgent(
+  ua: string,
+  headers: Headers,
+  platformVersion?: string,
+): Pick<VisitRecord, 'browser' | 'browserVersion' | 'os' | 'osVersion' | 'device' | 'bot' | 'inApp'> {
+  const inApp = IN_APP.find(([, re]) => re.test(ua))?.[0];
+  if (inApp) return { ...parseBrowser(ua, headers, platformVersion), inApp };
+  return parseBrowser(ua, headers, platformVersion);
+}
+
+function parseBrowser(ua: string, headers: Headers, platformVersion?: string): Pick<VisitRecord, 'browser' | 'browserVersion' | 'os' | 'osVersion' | 'device' | 'bot'> {
   if (!ua) return { browser: 'Unknown', browserVersion: '', os: 'Unknown', osVersion: '', device: 'unknown', bot: false };
   if (BOT.test(ua)) return { browser: 'Bot / crawler', browserVersion: '', os: 'Unknown', osVersion: '', device: 'bot', bot: true };
 
@@ -435,6 +517,12 @@ function parseAgent(ua: string, headers: Headers): Pick<VisitRecord, 'browser' |
   if (platform && platform !== 'Unknown') {
     os = platform;
     osVersion = headers.get('Sec-CH-UA-Platform-Version')?.replace(/"/g, '') || osVersion;
+  }
+  // The browser asked itself (track.ts). On Windows, platform version 13 and up is Windows 11.
+  if (platformVersion && /^\d+(\.\d+)*$/.test(platformVersion)) {
+    const major = Number(platformVersion.split('.')[0]);
+    if (os === 'Windows') osVersion = major >= 13 ? '11' : major > 0 ? '10' : osVersion;
+    else if (os === 'Android' || os === 'macOS' || os === 'Chrome OS') osVersion = platformVersion;
   }
 
   const tablet = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua));
