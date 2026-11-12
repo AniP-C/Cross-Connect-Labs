@@ -514,7 +514,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
 <script>
   import '../scripts/booking';
   import { CONTACT_EVENT, bindContactButtons, type ContactPrefill } from '../scripts/contact-bus';
-  import { clickArea, trackAction } from '../scripts/track';
+  import { clickArea, trackAction, trackError } from '../scripts/track';
 
   bindContactButtons();
 
@@ -540,7 +540,18 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
     };
     const radioValue = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? '';
 
+    // For contact-close: how long it was open and how far they got, never what they typed.
+    let openedAt = 0;
+    let wasSent = false;
+    let triedSend = false;
+    let wentToCall = false;
+    let prefilled = '';
+
     function open(prefill: ContactPrefill) {
+      if (!dialog!.open) {
+        openedAt = Date.now();
+        wasSent = triedSend = wentToCall = false;
+      }
       form.hidden = false;
       done.hidden = true;
       note.textContent = defaultNote;
@@ -548,6 +559,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       setRadio('topic', prefill.topic ?? 'Not sure yet');
       if (prefill.budget) setRadio('budget', prefill.budget);
       if (prefill.message !== undefined) messageInput.value = prefill.message;
+      prefilled = messageInput.value.trim();
       if (!dialog!.open) dialog!.showModal();
       // Keep the sheet at the top so the heading and the call line show first, even on a phone.
       nameInput.focus({ preventScroll: true });
@@ -556,7 +568,30 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
     }
 
     // For the visit log: how it was sent and what about, never what was typed.
-    const sent = (via: string) => trackAction('contact-send', `${via} · ${radioValue('topic')} · budget ${radioValue('budget')}`);
+    const sent = (via: string) => {
+      wasSent = true;
+      trackAction('contact-send', `${via} · ${radioValue('topic')} · budget ${radioValue('budget')}`);
+    };
+
+    dialog.addEventListener('close', () => {
+      if (wasSent || !openedAt) return;
+      const message = messageInput.value.trim();
+      const filled = [nameInput.value.trim(), contactInput.value.trim(), message !== prefilled ? message : ''].filter(Boolean).length;
+      trackAction(
+        'contact-close',
+        [
+          `${Math.round((Date.now() - openedAt) / 1000)}s open`,
+          radioValue('topic'),
+          `budget ${radioValue('budget')}`,
+          `${filled} of 3 filled`,
+          triedSend && 'pressed send',
+          wentToCall && 'went to the call dialog',
+        ]
+          .filter(Boolean)
+          .join(' · '),
+      );
+      openedAt = 0;
+    });
 
     function finish(text: string, copy?: string) {
       form.hidden = true;
@@ -576,6 +611,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
       const note = document.querySelector<HTMLTextAreaElement>('[data-book-form] textarea[name="note"]');
       const said = [radioValue('topic'), messageInput.value.trim()].filter((t) => t && t !== 'Not sure yet').join('. ');
       if (note && !note.value.trim() && said) note.value = said;
+      wentToCall = true;
       dialog.close();
     };
     dialog.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', toCall));
@@ -589,6 +625,7 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      triedSend = true;
       const name = nameInput.value.trim();
       const reach = contactInput.value.trim();
       nameInput.setAttribute('aria-invalid', String(!name));
@@ -627,7 +664,8 @@ const callEmail = contact.email ? `mailto:${contact.email}?subject=${encodeURICo
           sent('form');
           finish(`Thanks, ${name}. We’ll look at your idea and reply on ${reach} within ${reply} with the cost.`);
           form.reset();
-        } catch {
+        } catch (err) {
+          trackError(`contact form did not send: ${(err as Error).message}`);
           fail('That did not send. Please try again, or message us on WhatsApp.');
         } finally {
           send.disabled = false;
