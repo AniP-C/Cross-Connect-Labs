@@ -10,6 +10,7 @@ Visitors who don't know what they need can book a free call. They pick a day and
 | Part | File | What it does |
 | --- | --- | --- |
 | Buttons | `Hero.astro`, `ContactSection.astro` | Any button with `data-book` opens the dialog |
+| Shared link | `src/scripts/booking.ts` | Any page address ending in `#book` opens the dialog on load, for links in emails and messages: `https://crossconnectlabs.com/?utm_source=email&utm_campaign=outreach#book` |
 | Dialog | `ContactDialog.astro` (second `<dialog>`) and `src/scripts/booking.ts` | Shows free times in the visitor's own time zone and sends the booking |
 | API | `worker/index.ts` | `GET /api/slots` reads your free/busy times. `POST /api/book` checks the slot is still free, then creates the event. |
 | Settings | `booking` in `src/data/site.ts` | Time zone, working days and hours, call length, how far ahead people can book, shortest notice |

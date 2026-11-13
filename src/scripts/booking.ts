@@ -113,7 +113,7 @@ if (dialog) {
     }
   }
 
-  function open() {
+  function open(from = clickArea()) {
     if (!dialog!.open) {
       openedAt = Date.now();
       booked = false;
@@ -121,7 +121,7 @@ if (dialog) {
       chosen = undefined;
       dialog!.showModal();
     }
-    trackAction('book-open', clickArea() && `from ${clickArea()}`);
+    trackAction('book-open', from && `from ${from}`);
     load();
   }
 
@@ -131,7 +131,16 @@ if (dialog) {
     open();
   });
 
+  // A shared link ending in #book (an email, a WhatsApp message) opens the dialog straight away.
+  const fromLink = () => {
+    if (location.hash === '#book') open('a #book link');
+  };
+  fromLink();
+  window.addEventListener('hashchange', fromLink);
+
   dialog.addEventListener('close', () => {
+    // Drop #book so a refresh or the back button doesn't open the dialog again.
+    if (location.hash === '#book') history.replaceState(null, '', location.pathname + location.search);
     if (booked || !openedAt) return;
     const step = !fallback.hidden
       ? 'saw WhatsApp and email instead'
